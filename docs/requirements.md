@@ -1,5 +1,7 @@
 # Tài liệu Yêu cầu Sản phẩm (Product Requirements Document - PRD)
 ## Dự án: WordMate - Ứng dụng học từ vựng thông minh
+<!-- Version 1.0 -->
+<!-- Status: Approved -->
 
 ---
 

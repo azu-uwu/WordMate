@@ -9,7 +9,8 @@
 **Character Set:** utf8mb4
 
 **Collation:** utf8mb4_unicode_ci
-
+<!-- Version 1.0 -->
+<!-- Status: Approved -->
 ---
 
 # 1. Mục đích

@@ -102,14 +102,14 @@ Tài liệu bao gồm:
 
 ### 2.2. Mô tả luồng tổng quát
 
-1. **User** tương tác với **Frontend** (HTML/CSS/JS thuần) qua trình duyệt.
+1. **User** tương tác với **Frontend** (Multi Page Application với HTML/CSS/JS thuần) qua trình duyệt.
 2. **Frontend** gửi HTTP request (JSON) đến **Backend** qua REST API.
 3. **Backend** (Node.js + Express) xử lý request qua các tầng:
    - **Routes**: Định tuyến request đến Controller phù hợp.
    - **Middleware**: Kiểm tra xác thực, phân quyền, validate.
-   - **Controllers**: Xử lý logic nghiệp vụ, gọi Model/Service.
-   - **Models**: Tương tác với MySQL qua Prepared Statements.
-   - **Services**: Xử lý logic đặc thù (ví dụ: gọi Gemini API).
+   - **Controllers**: Xử lý request, gọi Service (nếu có business logic) hoặc Model trực tiếp.
+   - **Services**: Chứa business logic phức tạp (ví dụ: gọi Gemini API, tính toán SRS).
+   - **Models**: Tương tác với MySQL qua Prepared Statements, không chứa business logic.
 4. **Backend** trả về JSON response cho **Frontend**.
 5. **Frontend** render kết quả cho người dùng.
 
@@ -244,12 +244,12 @@ frontend/
 │   │       └── validator.js
 │   │
 │   ├── components/
-│   │   ├── navbar.html
-│   │   ├── modal.html
-│   │   ├── loading.html
+│   │   ├── header.html
+│   │   ├── bottom-nav.html
+│   │   ├── ai-chat.html
 │   │   ├── toast.html
-│   │   ├── vocabulary-card.html
-│   │   └── chatbot.html
+│   │   ├── loading.html
+│   │   └── modal.html
 │   │
 │   └── services/
 │       ├── api.js
@@ -269,9 +269,8 @@ frontend/
 | `src/pages/` | File HTML cho từng trang, mỗi trang một thư mục riêng |
 | `src/css/` | Stylesheet: TailwindCSS cho user, Bootstrap cho admin |
 | `src/js/` | JavaScript: logic trang, component, validation |
-| `src/components/` | HTML snippet tái sử dụng (modal, loading, toast, card) |
+| `src/components/` | HTML snippet tái sử dụng (header, bottom-nav, ai-chat, toast, loading, modal) |
 | `src/services/` | Module gọi API, quản lý token, localStorage |
-| `index.html` | File chính, load các page component động |
 
 ### 3.4. Database
 
@@ -310,11 +309,11 @@ Routes          → Định tuyến endpoint
 Middleware      → Xác thực, phân quyền, validate
   │
   ▼
-Controllers     → Xử lý request, điều phối logic
+Controllers     → Xử lý request, điều phối logic (không chứa business logic, không chứa SQL)
   │
-  ├──► Services  → Logic nghiệp vụ đặc thù (AI, SRS)
+  ├──► Services  → Business logic phức tạp (chỉ khi module có business logic)
   │
-  └──► Models    → Tương tác database (Prepared Statements)
+  └──► Models    → Tương tác database (Prepared Statements) — chỉ truy vấn, không business logic
         │
         ▼
       MySQL
@@ -393,13 +392,15 @@ Request → authMiddleware (verify JWT) → adminMiddleware (check role) → Con
 **Trách nhiệm:**
 
 - Chứa logic nghiệp vụ phức tạp, không thuộc phạm vi Controller hay Model.
-- **aiService.js**: Gọi Gemini API, quản lý context, xử lý prompt.
+- Service chỉ xuất hiện khi module có business logic hoặc workflow phức tạp.
+- Các module CRUD đơn giản có thể bỏ qua Service — Controller gọi Model trực tiếp.
 
 **Nguyên tắc:**
 
 - Service có thể gọi Model để lấy dữ liệu.
 - Service không gọi trực tiếp database.
 - Service trả về kết quả đã xử lý cho Controller.
+- Không bắt buộc mọi module phải có Service. Ví dụ: Roadmap, Topic, Notebook (nếu chỉ truy vấn đơn giản) có thể không cần Service.
 
 ### 4.7. Utils
 
@@ -421,17 +422,22 @@ Request → authMiddleware (verify JWT) → adminMiddleware (check role) → Con
 
 ### 5.1. Tổng quan
 
-Frontend là ứng dụng HTML/CSS/JS thuần (không SPA framework), tổ chức theo mô hình:
+Frontend sử dụng kiến trúc **Multi Page Application (MPA)** với HTML, CSS và JavaScript thuần (không SPA framework).
 
-```
-index.html
-  │
-  ├──► Pages (HTML)       → Cấu trúc giao diện từng trang
-  ├──► Components (HTML)  → Snippet tái sử dụng
-  ├──► CSS                → Stylesheet (TailwindCSS + Bootstrap)
-  ├──► JS                 → Logic xử lý
-  └──► Services           → Gọi API Backend
-```
+Mỗi chức năng chính là một trang HTML riêng, được điều hướng bằng chuyển trang thông thường (không load động vào index.html).
+
+Các trang chính:
+
+- `dashboard.html`
+- `learn.html`
+- `quiz.html`
+- `notebook.html`
+- `profile.html`
+- `auth/login.html`
+- `auth/register.html`
+- `admin/`
+
+Các thành phần giao diện dùng chung được tái sử dụng giữa các trang để đảm bảo giao diện thống nhất và giảm trùng lặp mã nguồn.
 
 ### 5.2. Pages
 
@@ -439,40 +445,79 @@ index.html
 
 - Mỗi trang là một file HTML riêng trong thư mục `src/pages/`.
 - Trang chứa cấu trúc HTML hoàn chỉnh cho giao diện đó.
-- Các trang được load động vào `index.html` thông qua JavaScript.
+- Các trang được điều hướng bằng chuyển trang thông thường (link `<a>` hoặc `window.location`).
 
 **Danh sách trang:**
 
-| Trang | Thư mục | Mô tả |
-|-------|---------|-------|
+| Trang | File | Mô tả |
+|-------|------|-------|
 | Đăng nhập | `pages/auth/login.html` | Form đăng nhập |
 | Đăng ký | `pages/auth/register.html` | Form đăng ký |
-| Trang chủ | `pages/home/` | Dashboard, danh sách chủ đề, streak |
-| Học Flashcard | `pages/flashcard/` | Flashcard + luyện viết |
-| Quiz | `pages/quiz/` | Quiz ôn tập |
-| Sổ tay | `pages/notebook/` | Danh sách từ vựng cá nhân |
-| Profile | `pages/profile/` | Cài đặt, đổi mật khẩu, đổi lộ trình |
+| Dashboard | `pages/dashboard/dashboard.html` | Trang chủ, danh sách chủ đề, streak |
+| Học | `pages/learn/learn.html` | Flashcard + luyện viết |
+| Quiz | `pages/quiz/quiz.html` | Quiz ôn tập |
+| Sổ tay | `pages/notebook/notebook.html` | Danh sách từ vựng cá nhân |
+| Profile | `pages/profile/profile.html` | Cài đặt, đổi mật khẩu, đổi lộ trình |
 | Admin | `pages/admin/` | Admin Dashboard (CRUD) |
 
 ### 5.3. Components
 
 **Trách nhiệm:**
 
-- Các HTML snippet tái sử dụng được (modal, loading spinner, toast notification, navbar, flashcard, chatbot message).
-- Được load vào trang khi cần thông qua JavaScript.
+Các thành phần giao diện dùng chung, được tái sử dụng trên nhiều trang.
 
 **Danh sách component:**
 
 | Component | File | Mô tả |
 |-----------|------|-------|
+| Header | `components/header.html` | Thanh header chứa Logo, Avatar, Streak |
+| Bottom Navigation | `components/bottom-nav.html` | Thanh điều hướng dưới cùng |
+| AI Chat Widget | `components/ai-chat.html` | Widget chat AI Assistant |
+| Toast Notification | `components/toast.html` | Toast notification (tự động ẩn 3s) |
+| Loading Spinner | `components/loading.html` | Skeleton loading / Spinner |
 | Modal | `components/modal.html` | Popup modal chung |
-| Loading | `components/loading.html` | Skeleton loading / Spinner |
-| Toast | `components/toast.html` | Toast notification (tự động ẩn 3s) |
-| Navbar | `components/navbar.html` | Thanh điều hướng |
-| Vocabulary Card | `components/vocabulary-card.html` | Card hiển thị từ vựng |
-| Chatbot Message | `components/chatbot-message.html` | Tin nhắn AI chat |
 
-### 5.4. CSS
+### 5.4. Layout từng trang
+
+Mỗi trang sử dụng một số component dùng chung để tạo layout thống nhất.
+
+**dashboard.html**
+
+- Header
+- Topic List
+- Bottom Navigation
+- AI Chat
+
+**learn.html**
+
+- Header
+- Flashcard
+- Writing Exercise
+- AI Chat
+
+**quiz.html**
+
+- Header
+- Review Statistics (Bar Chart)
+- Quiz Button
+- Bottom Navigation
+- AI Chat
+
+**notebook.html**
+
+- Header
+- Vocabulary List
+- Bottom Navigation
+- AI Chat
+
+**profile.html**
+
+- Header
+- Account Settings
+- Learning Roadmap
+- Bottom Navigation
+
+### 5.5. CSS
 
 **Trách nhiệm:**
 
@@ -487,7 +532,7 @@ index.html
 - Font: Inter / Roboto / system-ui, hỗ trợ IPA.
 - Màu trạng thái: Success = Emerald-500, Warning = Amber-500, Danger = Rose-500.
 
-### 5.5. JavaScript
+### 5.6. JavaScript
 
 **Trách nhiệm:**
 
@@ -502,7 +547,7 @@ index.html
 - Xử lý JWT token: lưu trong localStorage, gửi qua header `Authorization`.
 - Hiển thị Toast Notification thay vì `alert()`.
 
-### 5.6. Services
+### 5.7. Services
 
 **Trách nhiệm:**
 
@@ -510,7 +555,7 @@ index.html
 - **auth.js**: Xử lý đăng nhập, đăng xuất, lưu/lấy token từ localStorage.
 - **storage.js**: Helper cho localStorage (set, get, remove).
 
-### 5.7. Assets
+### 5.8. Assets
 
 **Trách nhiệm:**
 
@@ -543,14 +588,15 @@ index.html
 | Thành phần | Mô tả |
 |------------|-------|
 | **Mục đích** | Quản lý thông tin cá nhân, hồ sơ người dùng |
-| **Dữ liệu** | `users` (fullname, avatar, roadmap_id) |
+| **Dữ liệu** | `users` (fullname, roadmap_id) |
 | **Controller** | `userController.js` |
 | **Route** | `userRoutes.js` |
 | **Model** | `userModel.js` |
 
 **Chức năng:**
 - Xem thông tin cá nhân.
-- Cập nhật hồ sơ (fullname, avatar).
+- Đổi tên.
+- Đổi mật khẩu.
 - Chọn/đổi lộ trình học tập (cập nhật `roadmap_id`).
 
 ### 6.3. Roadmap Module
@@ -1417,7 +1463,7 @@ Tất cả API response sử dụng định dạng JSON thống nhất:
 
 ### 14.1. Image
 
-- **Mục đích**: Upload hình ảnh cho từ vựng (Admin), avatar người dùng.
+- **Mục đích**: Upload hình ảnh cho từ vựng (Admin).
 - **Định dạng**: JPG, PNG.
 - **Kích thước tối đa**: 5MB.
 - **Lưu trữ**: `frontend/public/uploads/images/`.
@@ -1452,14 +1498,17 @@ Tất cả API response sử dụng định dạng JSON thống nhất:
 
 API được tổ chức theo module, mỗi module có:
 
-1. **Controller**: Xử lý logic nghiệp vụ.
+1. **Controller**: Xử lý request, gọi Service (nếu có) hoặc Model trực tiếp.
 2. **Route**: Định nghĩa endpoint, gắn middleware, gọi controller.
-3. **Model** (nếu cần): Tương tác database.
+3. **Service** (nếu có business logic): Chứa logic nghiệp vụ phức tạp.
+4. **Model** (nếu cần): Tương tác database.
+
+Service chỉ xuất hiện khi module có business logic hoặc workflow phức tạp. Các module CRUD đơn giản có thể bỏ qua Service — Controller gọi Model trực tiếp.
 
 ### 15.2. Cấu trúc module
 
 ```
-Authentication Module
+Authentication Module (có business logic)
     │
     ▼
 authController.js
@@ -1468,11 +1517,14 @@ authController.js
 authRoutes.js
     │
     ▼
+AuthService (xử lý logic xác thực, hash password, JWT)
+    │
+    ▼
 userModel.js
 
 ---
 
-User Module
+User Module (CRUD đơn giản)
     │
     ▼
 userController.js
@@ -1485,7 +1537,7 @@ userModel.js
 
 ---
 
-Roadmap Module
+Roadmap Module (CRUD đơn giản)
     │
     ▼
 roadmapController.js
@@ -1495,7 +1547,7 @@ roadmapRoutes.js
 
 ---
 
-Topic Module
+Topic Module (CRUD đơn giản)
     │
     ▼
 topicController.js
@@ -1508,7 +1560,7 @@ topicModel.js
 
 ---
 
-Vocabulary Module
+Vocabulary Module (CRUD đơn giản)
     │
     ▼
 vocabularyController.js
@@ -1521,7 +1573,7 @@ vocabularyModel.js
 
 ---
 
-Notebook Module
+Notebook Module (chỉ truy vấn)
     │
     ▼
 notebookController.js
@@ -1534,17 +1586,23 @@ notebookModel.js
 
 ---
 
-Quiz Module
+Quiz Module (có business logic)
     │
     ▼
 quizController.js
     │
     ▼
 quizRoutes.js
+    │
+    ▼
+QuizService (xử lý SRS, quiz generation rules)
+    │
+    ▼
+QuizModel / vocabularyModel.js
 
 ---
 
-Streak Module
+Streak Module (CRUD đơn giản)
     │
     ▼
 streakController.js
@@ -1557,7 +1615,7 @@ userModel.js
 
 ---
 
-AI Assistant Module
+AI Assistant Module (có business logic)
     │
     ▼
 aiController.js
@@ -1566,11 +1624,11 @@ aiController.js
 aiRoutes.js
     │
     ▼
-aiService.js (gọi Gemini API)
+aiService.js (gọi Gemini API, quản lý context, prompt)
 
 ---
 
-Admin Module
+Admin Module (CRUD đơn giản)
     │
     ▼
 adminController.js
@@ -1588,9 +1646,10 @@ authMiddleware.js + adminMiddleware.js
 ### 15.3. Nguyên tắc
 
 - Route không chứa logic, chỉ định tuyến.
-- Controller không chứa query SQL.
-- Model không chứa logic nghiệp vụ phức tạp.
-- Service chứa logic đặc thù (AI, SRS).
+- Controller không chứa query SQL, không chứa business logic.
+- Model chỉ thực hiện truy vấn database, không chứa business logic.
+- Service chứa business logic (chỉ khi module có business logic phức tạp).
+- Các module CRUD đơn giản có thể bỏ qua Service — Controller gọi Model trực tiếp.
 - Middleware tách biệt, có thể tái sử dụng.
 
 ---
