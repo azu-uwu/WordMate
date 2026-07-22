@@ -258,8 +258,7 @@ frontend/
 │       ├── quizService.js
 │       ├── notebookService.js
 │       └── profileService.js
-│
-└── index.html
+
 ```
 
 **Vai trò từng thư mục Frontend:**
