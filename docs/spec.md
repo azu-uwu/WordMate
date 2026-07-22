@@ -1,515 +1,598 @@
-# Feature Specification: WordMate - Ứng dụng học từ vựng thông minh
+# Software Specification: WordMate - Ứng dụng học từ vựng thông minh
 
-**Feature Branch**: `[001-wordmate-vocabulary-app]`
-
+**Version**: 1.0
 **Created**: 2026-07-08
-
-**Status**: Ready for Planning
-
-**Input**: User description: "Tạo ra một nền tảng học từ vựng cá nhân hóa, giúp người dùng học từ mới theo lộ trình bài bản, ôn tập dựa trên các từ chưa thuộc, lưu trữ sổ tay từ vựng riêng và có sự hỗ trợ liên tục từ Trợ lý AI."
-
-## Assumptions
-
-- MVP không bao gồm Admin Panel.
-- Dữ liệu Roadmap, Topic và Vocabulary được seed sẵn.
-- Hệ thống yêu cầu kết nối Internet để sử dụng AI Assistant.
-- Một Vocabulary chỉ thuộc một Topic trong phạm vi MVP.
-
-## User Scenarios & Testing *(mandatory)*
-
-### User Story 1 - Đăng ký/Đăng nhập & Onboarding (Priority: P1)
-
-**Mô tả**: Người dùng mới đăng ký tài khoản, đăng nhập và trải qua quy trình onboarding chọn lộ trình học tập và chủ đề.
-
-**Why this priority**: Đây là bước đầu tiên bắt buộc để người dùng truy cập vào hệ thống. Không có tài khoản thì không thể lưu trữ tiến độ học tập, sổ tay từ vựng, streak, v.v.
-
-**Independent Test**: Có thể test độc lập bằng cách đăng ký tài khoản mới, đăng nhập, chọn lộ trình (Cơ bản/TOEIC/Phrasal verb & Idiom), chọn chủ đề và vào được trang chủ.
-
-**Acceptance Scenarios**:
-1. **Given** người dùng chưa có tài khoản, **When** họ đăng ký với email/password hợp lệ, **Then** tài khoản được tạo thành công và chuyển đến trang chọn lộ trình
-2. **Given** người dùng đã có tài khoản, **When** họ đăng nhập đúng thông tin, **Then** được chuyển đến trang chủ (nếu đã onboarding) hoặc trang chọn lộ trình (nếu lần đầu)
-3. **Given** người dùng mới đăng nhập lần đầu, **When** họ chọn lộ trình "TOEIC" và chủ đề "Part 1 - Photographs", **Then** hệ thống lưu lựa chọn và chuyển đến trang chủ với danh sách chủ đề TOEIC
-4. **Given** người dùng đã onboarding xong, **When** họ đăng nhập lần sau, **Then** trực tiếp vào trang chủ với lộ trình bày lộ trình đã chọn
+**Last Updated**: 2026-07-22
+**Status**: Approved
 
 ---
 
-### User Story 2 - Học từ mới (Flashcard + Bài tập viết) (Priority: P1)
+## 1. Tổng quan (Overview)
 
-**Mô tả**: Người dùng chọn một chủ đề, học từ vựng qua flashcard (lật mặt trước/mặt sau), chọn "Mình đã thuộc từ này" để bỏ qua hoặc "Tiếp tục" để làm bài tập viết từ.
-
-**Why this priority**: Đây là tính năng cốt lõi (core learning loop) của ứng dụng. Người dùng học từ mới, hệ thống ghi nhận mức độ thuộc/không thuộc để đưa vào ôn tập sau.
-
-**Independent Test**: Có thể test độc lập bằng cách vào một chủ đề bất kỳ, lật flashcard, bấm "Mình đã thuộc từ này" (từ bị bỏ qua, không vào sổ tay), bấm "Tiếp tục" (làm bài viết, sau đó từ tự động lưu vào sổ tay).
-
-**Acceptance Scenarios**:
-1. **Given** người dùng ở trang chủ, **When** bấm vào chủ đề "TOEIC Part 1", **Then** hiển thị flashcard từ đầu tiên (mặt trước: từ tiếng Anh)
-2. **Given** đang xem flashcard mặt trước, **When** bấm lật thẻ, **Then** hiển thị mặt sau (nghĩa tiếng Việt, phát âm, ví dụ)
-3. **Given** đang xem mặt sau flashcard, **When** bấm "Mình đã thuộc từ này", **Then** từ được đánh dấu "mastered", không lưu vào sổ tay, chuyển sang từ tiếp theo
-4. **Given** đang xem mặt sau flashcard, **When** bấm "Tiếp tục", **Then** hiển thị bài tập viết lại từ (gợi ý nghĩa/phát âm, người dùng gõ từ)
-5. **Given** hoàn thành bài tập viết, **When** bấm nộp, **Then** từ tự động lưu vào "Sổ tay từ vựng" với trạng thái "đang ôn tập", chuyển từ tiếp theo
-6. **Given** học hết từ trong chủ đề, **When** hoàn thành từ cuối, **Then** hiển thị màn hình tổng kết (số từ đã học, số từ đã thuộc, số từ đã lưu sổ tay)
+WordMate là nền tảng học từ vựng tiếng Anh cá nhân hóa, giúp người dùng học từ mới theo lộ trình bài bản, ôn tập theo phương pháp lặp lại ngắt quãng (Spaced Repetition), lưu trữ sổ tay từ vựng riêng, có sự hỗ trợ liên tục từ Trợ lý AI và hệ thống Quản trị viên tinh gọn.
 
 ---
 
-### User Story 3 - Ôn tập (Quiz thông minh từ chưa thuộc) (Priority: P1)
+## 2. User Roles & Permissions
 
-**Mô tả**: Hệ thống tự động lọc các từ vựng mà người dùng chưa thuộc (đã làm bài tập viết nhưng chưa master) và tạo bài quiz trắc nghiệm để ôn tập.
+### 2.1. Học viên (`role = 'user'`)
 
-**Why this priority**: Tính năng cốt lõi thứ 2 - spaced repetition/ôn tập thông minh dựa trên từ chưa thuộc. Giúp người dùng ghi nhớ lâu dài.
+Người học tiếng Anh ở mọi cấp độ (Cơ bản, luyện thi TOEIC, Phrasal Verb & Idiom).
 
-**Independent Test**: Có thể test độc lập bằng cách vào tab "Ôn tập", hệ thống tự tạo quiz từ các từ đang ở trạng thái "đang ôn tập" trong sổ tay, làm quiz, kiểm tra kết quả cập nhật trạng thái từ.
+**Quyền:**
+- Đăng ký / Đăng nhập tài khoản
+- Quản lý thông tin cá nhân (hồ sơ, mật khẩu)
+- Chọn / Đổi lộ trình học tập
+- Chọn chủ đề và học từ vựng qua Flashcard + Bài tập viết
+- Làm bài Quiz ôn tập từ vựng
+- Quản lý Sổ tay từ vựng cá nhân (xem, tìm kiếm, ôn lại từ)
+- Xem chuỗi ngày học liên tiếp (Streak)
+- Sử dụng Trợ lý AI trên mọi trang
+- Đăng xuất tài khoản
 
-**Acceptance Scenarios**:
-1. **Given** người dùng có 10 từ trong sổ tay trạng thái "đang ôn tập", **When** vào tab "Ôn tập", **Then** hệ thống tạo bài quiz 10 câu (mỗi từ 1 câu)
-2. **Given** đang làm quiz, **When** trả lời đúng, **Then** từ đó tăng cấp độ nhớ (spaced repetition), có thể chuyển sang "mastered" nếu đủ điều kiện
-3. **Given** đang làm quiz, **When** trả lời sai, **Then** từ giữ nguyên hoặc giảm cấp độ nhớ, hiển thị đáp án đúng và giải thích
-4. **Given** hoàn thành quiz, **When** xem kết quả, **Then** hiển thị điểm số, số từ đã master, số từ cần ôn lại, cập nhật sổ tay
+### 2.2. Quản trị viên (`role = 'admin'`)
+Quản trị viên chịu trách nhiệm quản lý dữ liệu và vận hành hệ thống.
 
-**Quiz Generation Rules**
+**Quyền:**
+- Đăng nhập hệ thống quản trị.
+- Quản lý Roadmaps (CRUD).
+- Quản lý Topics (CRUD).
+- Quản lý Vocabularies (CRUD).
+- Quản lý trạng thái hiển thị (`is_active`).
+- Quản lý thứ tự hiển thị (`sort_order`).
+- Truy cập Admin Dashboard.
+
+**Không thuộc phạm vi của Admin:**
+- Không sử dụng giao diện học Flashcard.
+- Không làm Quiz.
+- Không sử dụng Sổ tay từ vựng.
+- Không sử dụng AI Assistant dưới vai trò người học.
+
+---
+
+## 3. Functional Requirements (FR)
+
+### 3.1. Authentication & Account Management
+
+| Mã | Mô tả | Mức độ |
+|----|-------|--------|
+| FR-001 | Hệ thống PHẢI cho phép người dùng đăng ký tài khoản mới bằng email và mật khẩu. Tài khoản mới được khởi tạo với `role = 'user'` mặc định và `streak = 0`. | MUST |
+| FR-002 | Hệ thống PHẢI cho phép người dùng đăng nhập bằng email và mật khẩu đã đăng ký. | MUST |
+| FR-003 | Hệ thống PHẢI xác thực người dùng qua JWT (JSON Web Token) cho mọi API yêu cầu xác thực. | MUST |
+| FR-004 | Hệ thống PHẢI phân quyền truy cập dựa trên `role` (user/admin). API quản trị chỉ cho phép `role = 'admin'`. | MUST |
+| FR-005 | Hệ thống PHẢI cho phép người dùng đổi mật khẩu. | MUST |
+| FR-006 | Hệ thống PHẢI cho phép người dùng đăng xuất. | MUST |
+| FR-007 | Hệ thống PHẢI kiểm tra validation đầu vào: email đúng định dạng, password tối thiểu 8 ký tự, không cho phép trùng email. | MUST |
+
+### 3.2. Onboarding (Chọn lộ trình & Chủ đề)
+
+| Mã | Mô tả | Mức độ |
+|----|-------|--------|
+| FR-008 | Hệ thống PHẢI bắt buộc người dùng mới chọn Lộ trình học tập (Cơ bản, TOEIC, Phrasal Verb & Idiom) tại lần đăng nhập đầu tiên. | MUST |
+| FR-009 | Hệ thống PHẢI hiển thị danh sách Chủ đề (Topics) thuộc Lộ trình đã chọn để người dùng chọn học. | MUST |
+| FR-010 | Hệ thống PHẢI cho phép người dùng đổi Lộ trình học tập bất kỳ lúc nào trong trang Profile/Cài đặt. | MUST |
+| FR-011 | Hệ thống PHẢI tự động cập nhật danh sách Chủ đề trên trang chủ khi người dùng đổi Lộ trình. | MUST |
+| FR-012 | Hệ thống PHẢI giữ nguyên từ vựng trong Sổ tay khi người dùng đổi Lộ trình (chỉ thay đổi danh sách Chủ đề hiển thị). | MUST |
+
+### 3.3. Học từ vựng (Flashcard + Luyện viết)
+
+| Mã | Mô tả | Mức độ |
+|----|-------|--------|
+| FR-013 | Hệ thống PHẢI hiển thị Flashcard với mặt trước: `word`, `pronunciation`, `audio`, `image`; mặt sau: `part_of_speech`, `meaning`, `example`, `example_meaning`. | MUST |
+| FR-014 | Hệ thống PHẢI hỗ trợ hiệu ứng lật thẻ (flip animation) khi người dùng bấm vào Flashcard hoặc phím `Space`. | MUST |
+| FR-015 | Hệ thống PHẢI cung cấp 2 lựa chọn sau khi xem mặt sau Flashcard: "Đã thuộc" (mastered) và "Tiếp tục" (chuyển sang luyện viết). | MUST |
+| FR-016 | Khi người dùng bấm "Đã thuộc", hệ thống PHẢI tạo/cập nhật bản ghi `user_vocabularies` với `status = 'mastered'`, tăng `review_count` và chuyển sang từ tiếp theo. | MUST |
+| FR-017 | Khi người dùng bấm "Tiếp tục", hệ thống PHẢI chuyển sang bài tập luyện viết: người dùng nhập từ dựa vào gợi ý nghĩa/ví dụ. | MUST |
+| FR-018 | Khi hoàn thành bài tập luyện viết, hệ thống PHẢI lưu/cập nhật `user_vocabularies` với `status = 'learning'`, tính toán `next_review_at`, cập nhật `last_study_date` và tăng `streak`. | MUST |
+| FR-019 | Hệ thống PHẢI hiển thị màn hình tổng kết khi học hết từ trong Chủ đề (số từ đã học, số từ đã thuộc, số từ đã lưu Sổ tay). | MUST |
+| FR-020 | Hệ thống PHẢI hỗ trợ phím tắt: `Space` (lật thẻ), `ArrowRight` (Đã thuộc), `ArrowLeft` (Tiếp tục/Chưa thuộc). | SHOULD |
+
+### 3.4. Quiz Ôn tập
+
+| Mã | Mô tả | Mức độ |
+|----|-------|--------|
+| FR-021 | Hệ thống PHẢI tự động lọc từ vựng từ `user_vocabularies` có `status IN ('new', 'learning')` hoặc `next_review_at <= NOW()` để tạo bài Quiz. | MUST |
+| FR-022 | Hệ thống PHẢI tạo bài Quiz trắc nghiệm (multiple choice, điền từ, v.v.) từ danh sách từ đã lọc. | MUST |
+| FR-023 | Hệ thống PHẢI lưu chi tiết lượt làm Quiz vào bảng `quiz_attempts` và chi tiết từng câu trả lời vào `quiz_answers`. | MUST |
+| FR-024 | Khi trả lời đúng, hệ thống PHẢI cập nhật thông tin ôn tập của từ vựng theo thuật toán Spaced Repetition bằng cách cập nhật `review_count`, `last_reviewed_at` và tính toán lại `next_review_at`. | MUST |
+| FR-025 | Khi trả lời sai, hệ thống PHẢI hiển thị đáp án đúng và giải thích, đồng thời cập nhật lại `review_count` và `next_review_at` theo quy tắc Spaced Repetition. | MUST |
+| FR-026 | Hệ thống PHẢI hiển thị màn hình kết quả sau khi hoàn thành Quiz: điểm số, số từ đã master, số từ cần ôn lại. | MUST |
+| FR-027 | Hệ thống PHẢI cho phép người dùng tiếp tục Quiz từ câu chưa làm nếu thoát giữa chừng. | SHOULD |
+
+### 3.5. Sổ tay từ vựng (Vocabulary Notebook)
+
+| Mã | Mô tả | Mức độ |
+|----|-------|--------|
+| FR-028 | Hệ thống PHẢI hiển thị Sổ tay từ vựng cá nhân với danh sách từ được phân loại theo `status`: `new` → `learning` → `mastered`. | MUST |
+| FR-029 | Hệ thống PHẢI hiển thị tổng số từ đang ôn tập. | MUST |
+| FR-030 | Hệ thống PHẢI cung cấp thanh tìm kiếm nhanh (search bar) lọc danh sách theo từ gốc (`word`). | MUST |
+| FR-031 | Hệ thống PHẢI hiển thị chi tiết từ vựng khi bấm vào một từ: `word`, `meaning`, `pronunciation`, `part_of_speech`, `example`, `example_meaning`, `status`, `review_count`, lịch sử ôn tập. | MUST |
+| FR-032 | Hệ thống PHẢI cho phép người dùng bấm "Ôn lại" để chuyển từ `mastered` về `learning` và đưa vào hàng đợi Quiz. | MUST |
+
+### 3.6. Streak (Chuỗi ngày học)
+
+| Mã | Mô tả | Mức độ |
+|----|-------|--------|
+| FR-033 | Hệ thống PHẢI hiển thị chuỗi ngày học liên tiếp (Streak) trên trang chủ. | MUST |
+| FR-034 | Hệ thống PHẢI tăng Streak khi người dùng hoàn thành ít nhất một hoạt động học tập trong ngày (học từ mới hoặc làm Quiz). | MUST |
+| FR-035 | Hệ thống PHẢI reset Streak về 0 nếu người dùng bỏ lỡ một ngày liên tiếp. | MUST |
+| FR-036 | Hệ thống PHẢI đảm bảo mỗi ngày chỉ được tính một lần vào Streak. | MUST |
+
+### 3.7. Trợ lý AI (AI Assistant)
+
+| Mã | Mô tả | Mức độ |
+|----|-------|--------|
+| FR-037 | Hệ thống PHẢI hiển thị popup chat AI cố định góc dưới màn hình trên TẤT CẢ các trang giao diện người học. | MUST |
+| FR-038 | Hệ thống PHẢI cho phép người dùng gửi tin nhắn và nhận phản hồi từ AI. | MUST |
+| FR-039 | Hệ thống PHẢI lưu lịch sử trò chuyện theo từng phiên (`ai_conversations`) và từng tin nhắn (`ai_messages`) với `role = 'user'` hoặc `role = 'assistant'`. | MUST |
+| FR-040 | Hệ thống PHẢI cho phép người dùng chọn hoặc tạo hội thoại mới. | MUST |
+| FR-041 | Hệ thống PHẢI gọi API LLM thông qua Backend (không gọi trực tiếp từ Frontend). | MUST |
+| FR-042 | Hệ thống PHẢI hiển thị thông báo lỗi thân thiện khi AI bị lỗi API hoặc timeout. | MUST |
+
+### 3.8. Admin Dashboard
+
+| Mã | Mô tả | Mức độ |
+|----|-------|--------|
+| FR-043 | Hệ thống PHẢI cung cấp giao diện Admin Dashboard riêng biệt, tách biệt với giao diện học viên. | MUST |
+| FR-044 | Hệ thống PHẢI chặn truy cập Admin Dashboard nếu `role != 'admin'` (trả về 403 Forbidden). | MUST |
+| FR-045 | Hệ thống PHẢI cho phép Admin CRUD (Thêm, Xem, Sửa, Xóa) Lộ trình (Roadmaps) với các trường: `name`, `description`, `is_active`, `sort_order`. | MUST |
+| FR-046 | Hệ thống PHẢI cho phép Admin CRUD Chủ đề (Topics) thuộc một Lộ trình với các trường: `name`, `description`, `is_active`, `sort_order`. | MUST |
+| FR-047 | Hệ thống PHẢI cho phép Admin CRUD Từ vựng (Vocabularies) với đầy đủ trường: `word`, `pronunciation`, `part_of_speech`, `meaning`, `example`, `example_meaning`, `audio`, `image`, gắn với `topic_id`. | MUST |
+| FR-048 | Hệ thống PHẢI cho phép Admin bật/tắt hiển thị (is_active) của Lộ trình và Chủ đề. | MUST |
+| FR-049 | Hệ thống PHẢI cho phép Admin sắp xếp thứ tự (sort_order) của Lộ trình và Chủ đề. | MUST |
+
+### 3.9. UI/UX
+
+| Mã | Mô tả | Mức độ |
+|----|-------|--------|
+| FR-050 | Hệ thống PHẢI hiển thị hiệu ứng Skeleton Loading hoặc Spinner cho mọi thao tác chờ API. | MUST |
+| FR-051 | Hệ thống PHẢI hiển thị Toast Notification cho phản hồi thao tác, tự động ẩn sau 3 giây, không dùng `alert()`. | MUST |
+| FR-052 | Hệ thống PHẢI hiển thị icon Avatar/Trang cá nhân cố định góc trên bên trái trên các trang chính. | MUST |
+| FR-053 | Hệ thống PHẢI cung cấp menu Trang cá nhân gồm: Cài đặt tài khoản (đổi mật khẩu, đăng xuất), Lộ trình học tập (xem/đổi lộ trình). | MUST |
+
+---
+
+## 4. Non-functional Requirements (NFR)
+
+| Mã | Mô tả | Mức độ |
+|----|-------|--------|
+| NFR-001 | Hệ thống PHẢI sử dụng màu chủ đạo Indigo-600 (#4F46E5) cho giao diện học viên (Tailwind CSS). | MUST |
+| NFR-002 | Hệ thống PHẢI sử dụng tông màu tối trung tính (Slate/Dark) cho giao diện Admin (Bootstrap). | MUST |
+| NFR-003 | Mã màu trạng thái: Success = Emerald-500 (#10B981), Warning = Amber-500 (#F59E0B), Danger = Rose-500 (#F43F5E). | MUST |
+| NFR-004 | Font chữ chủ đạo: Inter / Roboto / system-ui, đảm bảo hiển thị chuẩn ký tự phiên âm IPA. | MUST |
+| NFR-005 | Thời gian phản hồi AI Assistant KHÔNG ĐƯỢC vượt quá 3 giây cho 95% requests. | MUST |
+| NFR-006 | Thời gian tải trang (cold start) KHÔNG ĐƯỢC vượt quá 3 giây trên thiết bị trung bình. | MUST |
+| NFR-007 | Password PHẢI được hash bằng bcrypt trước khi lưu vào database. | MUST |
+| NFR-008 | JWT Access Token có thời hạn tối đa 24 giờ. | MUST |
+| NFR-009 | API AI chỉ được gọi thông qua Backend (không exposed API key ra Frontend). | MUST |
+| NFR-010 | Người dùng chỉ được truy cập dữ liệu thuộc tài khoản của mình. | MUST |
+| NFR-011 | Hệ thống PHẢI sử dụng Prepared Statements để chống SQL Injection. | MUST |
+| NFR-012 | Hệ thống PHẢI hỗ trợ Chrome, Firefox, Safari, Edge phiên bản mới nhất 2 năm. | MUST |
+| NFR-013 | Giao diện PHẢI bằng tiếng Việt, nội dung từ vựng Anh-Việt. | MUST |
+| NFR-014 | Hệ thống PHẢI sử dụng định dạng JSON thống nhất cho mọi API response. | MUST |
+| NFR-015 | Hệ thống PHẢI trả về HTTP Status Code chính xác: 200 (thành công), 201 (tạo mới), 400 (sai dữ liệu), 401 (chưa đăng nhập), 403 (không quyền), 404 (không tìm thấy), 409 (trùng dữ liệu), 500 (lỗi máy chủ). | MUST |
+
+---
+
+## 5. User Stories & Acceptance Criteria
+
+### 5.1. Priority P0 (Must-have - Core Learning Loop)
+
+#### US-01: Đăng ký tài khoản
+**Vai trò**: Học viên
+**Mô tả**: Người dùng mới muốn đăng ký tài khoản để sử dụng ứng dụng.
+
+**Acceptance Criteria:**
+1. **Given** người dùng chưa có tài khoản và truy cập trang đăng ký, **When** họ nhập email hợp lệ, password >= 8 ký tự và xác nhận password, **Then** hệ thống tạo tài khoản thành công với `role = 'user'`, `streak = 0` và chuyển đến trang chọn Lộ trình.
+2. **Given** người dùng nhập email đã tồn tại, **When** họ bấm đăng ký, **Then** hệ thống trả về lỗi 409 và thông báo email đã được sử dụng.
+3. **Given** người dùng nhập password < 8 ký tự, **When** họ bấm đăng ký, **Then** hệ thống trả về lỗi 400 và thông báo password phải tối thiểu 8 ký tự.
+4. **Given** người dùng nhập email không đúng định dạng, **When** họ bấm đăng ký, **Then** hệ thống trả về lỗi 400 và thông báo email không hợp lệ.
+
+#### US-02: Đăng nhập
+**Vai trò**: Học viên
+**Mô tả**: Người dùng đã có tài khoản muốn đăng nhập vào hệ thống.
+
+**Acceptance Criteria:**
+1. **Given** người dùng đã có tài khoản, **When** họ nhập đúng email và password, **Then** hệ thống xác thực thành công, trả về JWT token và chuyển đến trang chủ (nếu đã chọn Lộ trình) hoặc trang chọn Lộ trình (nếu lần đầu).
+2. **Given** người dùng nhập sai email hoặc password, **When** họ bấm đăng nhập, **Then** hệ thống trả về lỗi 401 và thông báo "Email hoặc mật khẩu không đúng".
+3. **Given** người dùng chưa đăng nhập, **When** họ truy cập API yêu cầu xác thực, **Then** hệ thống trả về lỗi 401.
+
+#### US-03: Học từ vựng qua Flashcard
+**Vai trò**: Học viên
+**Mô tả**: Người dùng chọn một Chủ đề để học từ vựng qua Flashcard và bài tập luyện viết.
+
+**Acceptance Criteria:**
+1. **Given** người dùng ở trang chủ, **When** họ bấm vào một Chủ đề, **Then** hiển thị Flashcard từ đầu tiên với mặt trước (word, pronunciation, audio, image).
+2. **Given** đang xem mặt trước Flashcard, **When** bấm vào thẻ hoặc phím `Space`, **Then** thẻ lật sang mặt sau (part_of_speech, meaning, example, example_meaning).
+3. **Given** đang xem mặt sau Flashcard, **When** bấm "Đã thuộc", **Then** hệ thống tạo/cập nhật `user_vocabularies` với `status = 'mastered'`, tăng `review_count`, chuyển sang từ tiếp theo.
+4. **Given** đang xem mặt sau Flashcard, **When** bấm "Tiếp tục", **Then** chuyển sang bài tập luyện viết: hiển thị gợi ý (nghĩa/ví dụ), người dùng gõ từ.
+5. **Given** hoàn thành bài tập luyện viết, **When** bấm nộp bài, **Then** hệ thống lưu `user_vocabularies` với `status = 'learning'`, cập nhật `last_study_date`, tăng `streak`, chuyển sang từ tiếp theo.
+6. **Given** học hết từ trong Chủ đề, **When** hoàn thành từ cuối, **Then** hiển thị màn hình tổng kết (số từ đã học, số từ đã thuộc, số từ đã lưu Sổ tay).
+
+#### US-04: Làm Quiz ôn tập
+**Vai trò**: Học viên
+**Mô tả**: Người dùng làm bài Quiz trắc nghiệm để ôn tập các từ chưa thuộc.
+
+**Acceptance Criteria:**
+1. **Given** người dùng có từ trong `user_vocabularies` với `status IN ('new', 'learning')` hoặc `next_review_at <= NOW()`, **When** vào tab "Ôn tập", **Then** hệ thống tự động tạo bài Quiz từ danh sách các từ này.
+2. **Given** đang làm Quiz, **When** trả lời đúng, **Then** hệ thống cập nhật SRS: tăng `review_count`, cập nhật `last_reviewed_at` và `next_review_at`.
+3. **Given** đang làm Quiz, **When** trả lời sai, **Then** hệ thống hiển thị đáp án đúng và giải thích, reset `review_count` về 0 và cập nhật `next_review_at` về ngày hiện tại.
+4. **Given** hoàn thành Quiz, **When** xem kết quả, **Then** hiển thị điểm số, số từ đã master, số từ cần ôn lại, lưu dữ liệu vào `quiz_attempts` và `quiz_answers`.
+5. **Given** người dùng thoát Quiz giữa chừng, **When** vào lại "Ôn tập", **Then** Quiz tiếp tục từ câu chưa làm.
+
+### 5.2. Priority P1 (Important)
+
+#### US-05: Quản lý Sổ tay từ vựng
+**Vai trò**: Học viên
+**Mô tả**: Người dùng xem, tìm kiếm và quản lý từ vựng cá nhân trong Sổ tay.
+
+**Acceptance Criteria:**
+1. **Given** người dùng có từ trong Sổ tay, **When** vào tab "Sổ tay từ vựng", **Then** hiển thị tổng số từ đang ôn tập và danh sách chi tiết (word, meaning, status, review_count) được phân loại theo `status`.
+2. **Given** đang xem danh sách Sổ tay, **When** gõ từ khóa vào thanh tìm kiếm, **Then** lọc danh sách real-time theo `word`.
+3. **Given** bấm vào một từ trong Sổ tay, **When** xem chi tiết, **Then** hiển thị đầy đủ: word, meaning, pronunciation, part_of_speech, example, example_meaning, status, review_count, lịch sử ôn tập.
+4. **Given** từ ở trạng thái `mastered`, **When** bấm "Ôn lại", **Then** từ chuyển về `learning` và đưa vào hàng đợi Quiz.
+
+#### US-06: Trợ lý AI
+**Vai trò**: Học viên
+**Mô tả**: Người dùng sử dụng Trợ lý AI để hỏi về ngữ pháp, ngữ cảnh, ví dụ từ vựng.
+
+**Acceptance Criteria:**
+1. **Given** người dùng ở bất kỳ trang nào, **When** bấm icon AI góc màn hình, **Then** popup chat mở ra.
+2. **Given** popup chat AI mở, **When** người dùng nhập câu hỏi và gửi, **Then** AI trả lời phản hồi, lưu vào `ai_conversations` và `ai_messages`.
+3. **Given** người dùng muốn tạo cuộc hội thoại mới, **When** bấm "Hội thoại mới", **Then** hệ thống tạo phiên chat mới.
+4. **Given** popup AI mở, **When** bấm đóng, **Then** popup thu nhỏ về icon, lịch sử chat session hiện tại được lưu.
+5. **Given** AI bị lỗi API hoặc timeout, **When** người dùng gửi câu hỏi, **Then** hiển thị thông báo lỗi thân thiện, gợi ý thử lại sau.
+
+#### US-07: Admin CRUD Lộ trình & Chủ đề
+**Vai trò**: Quản trị viên
+**Mô tả**: Admin quản lý danh sách Lộ trình và Chủ đề học tập.
+
+**Acceptance Criteria:**
+1. **Given** admin đăng nhập và vào Admin Dashboard, **When** vào mục "Roadmaps", **Then** hiển thị danh sách Lộ trình với các trường: name, description, is_active, sort_order.
+2. **Given** admin ở mục "Roadmaps", **When** bấm "Thêm mới" và nhập đầy đủ thông tin, **Then** Lộ trình mới được tạo và hiển thị trong danh sách.
+3. **Given** admin ở mục "Roadmaps", **When** bấm "Sửa" trên một Lộ trình và cập nhật thông tin, **Then** Lộ trình được cập nhật.
+4. **Given** admin ở mục "Roadmaps", **When** bấm "Xóa" trên một Lộ trình, **Then** Lộ trình bị xóa (hoặc ẩn nếu có ràng buộc dữ liệu).
+5. **Given** admin ở mục "Topics", **When** thêm Chủ đề mới, **Then** Chủ đề phải được gắn với một Lộ trình cụ thể.
+6. **Given** người dùng có `role != 'admin'`, **When** truy cập route Admin, **Then** nhận lỗi 403 Forbidden.
+
+#### US-08: Admin CRUD Từ vựng
+**Vai trò**: Quản trị viên
+**Mô tả**: Admin quản lý kho từ vựng toàn hệ thống.
+
+**Acceptance Criteria:**
+1. **Given** admin vào mục "Vocabularies", **When** xem danh sách, **Then** hiển thị danh sách từ vựng kèm Chủ đề và Lộ trình tương ứng.
+2. **Given** admin bấm "Thêm mới", **When** nhập đầy đủ: word, pronunciation, part_of_speech, meaning, example, example_meaning, audio, image và chọn topic_id, **Then** từ vựng mới được tạo.
+3. **Given** admin bấm "Sửa" trên một từ, **When** cập nhật thông tin, **Then** từ vựng được cập nhật.
+4. **Given** admin bấm "Xóa" trên một từ, **When** xác nhận xóa, **Then** từ vựng bị xóa khỏi hệ thống.
+
+### 5.3. Priority P2 (Nice-to-have)
+
+#### US-09: Xem & Đổi Lộ trình
+**Vai trò**: Học viên
+**Mô tả**: Người dùng xem thông tin cá nhân và đổi Lộ trình học tập.
+
+**Acceptance Criteria:**
+1. **Given** người dùng ở trang chủ, **When** bấm avatar góc trên trái, **Then** hiển thị menu: Cài đặt tài khoản, Lộ trình học tập.
+2. **Given** vào "Lộ trình học tập", **When** chọn Lộ trình khác, **Then** hệ thống cập nhật `roadmap_id` của user, trang chủ load danh sách Chủ đề mới.
+3. **Given** vào "Cài đặt tài khoản", **When** đổi mật khẩu thành công, **Then** hiển thị thông báo thành công.
+4. **Given** vào "Cài đặt tài khoản", **When** bấm "Đăng xuất", **Then** chuyển về trang đăng nhập, xóa JWT token.
+
+#### US-10: Streak (Chuỗi ngày học)
+**Vai trò**: Học viên
+**Mô tả**: Người dùng xem chuỗi ngày học liên tiếp để duy trì động lực.
+
+**Acceptance Criteria:**
+1. **Given** người dùng học hôm nay (hoàn thành học từ mới hoặc Quiz), **When** vào trang chủ, **Then** streak hiển thị tăng 1 so với hôm qua.
+2. **Given** người dùng không học hôm qua, **When** học hôm nay, **Then** streak reset về 1.
+3. **Given** streak > 0, **When** hiển thị trang chủ, **Then** hiển thị số ngày streak và icon khuyến khích.
+
+---
+
+## 6. Business Rules
+
+### 6.1. Spaced Repetition (SRS) Rules
+
+- Một từ chuyển sang trạng thái `mastered` khi:
+  - `review_count >= 5` hoặc
+- Khi ở trạng thái `mastered`, từ không tự động xuất hiện trong Quiz thông thường.
+- Người dùng có thể đưa từ từ `mastered` về `learning` bằng chức năng "Ôn lại".
+
+### 6.2. Quiz Generation Rules
 
 - Mỗi phiên Quiz tối đa 20 câu hỏi.
 - Nếu số lượng từ cần ôn tập nhỏ hơn 20 thì lấy toàn bộ.
 - Nếu lớn hơn 20 thì ưu tiên:
-  1. Các từ đã đến hạn ôn tập (next_review_date).
-  2. Các từ có SRS level thấp hơn.
+  1. Các từ đã đến hạn ôn tập (`next_review_at <= NOW()`).
+  2. Các từ có `review_count` thấp hơn.
 - Một từ chỉ xuất hiện tối đa một lần trong một phiên Quiz.
 
----
+### 6.3. Streak Rules
 
-### User Story 4 - Sổ tay từ vựng cá nhân (Priority: P1)
-
-**Mô tả**: Nơi lưu trữ toàn bộ từ vựng cá nhân, hiển thị tổng số từ đang ôn tập, danh sách chi tiết, có thanh tìm kiếm.
-
-**Why this priority**: Nơi trung tâm quản lý từ vựng cá nhân, người dùng cần xem lại, tìm kiếm, quản lý từ vựng của mình.
-
-**Independent Test**: Có thể test độc lập bằng cách vào tab "Sổ tay", kiểm tra hiển thị tổng số từ, danh sách từ, tìm kiếm từ khóa, xem chi tiết từ.
-
-**Acceptance Scenarios**:
-1. **Given** người dùng có từ trong sổ tay, **When** vào tab "Sổ tay từ vựng", **Then** hiển thị tổng số từ đang ôn tập và danh sách chi tiết (từ, nghĩa, trạng thái, cấp độ nhớ)
-2. **Given** đang xem danh sách sổ tay, **When** gõ từ khóa vào thanh tìm kiếm, **Then** lọc danh sách real-time theo từ/nghĩa
-3. **Given** bấm vào một từ trong sổ tay, **When** xem chi tiết, **Then** hiển thị đầy đủ: từ, nghĩa, phát âm, ví dụ, trạng thái (mastered/learning), lịch sử ôn tập, cấp độ SRS
-4. **Given** từ ở trạng thái "mastered", **When** người dùng muốn ôn lại, **When** bấm nút "Ôn lại", **Then** từ chuyển về "learning" và đưa vào hàng đợi quiz
-
----
-
-### User Story 5 - Tính năng Streak (Chuỗi ngày học) (Priority: P2)
-
-**Mô tả**: Hiển thị trên trang chủ chuỗi số ngày học liên tiếp, thúc đẩy động lực học hàng ngày.
-
-**Why this priority**: Tính năng gamification quan trọng để retain user, nhưng không phải core learning loop.
-
-**Independent Test**: Có thể test độc lập bằng cách mock date, kiểm tra streak tăng khi học liên tiếp, reset khi bỏ lỡ ngày.
-
-**Acceptance Scenarios**:
-1. **Given** người dùng học hôm nay (hoàn thành ít nhất 1 từ), **When** vào trang chủ, **Then** streak hiển thị tăng 1 so với hôm qua
-2. **Given** người dùng không học hôm qua, **When** học hôm nay, **Then** streak reset về 1
-3. **Given** streak > 0, **When** hiển thị trang chủ, **Then** hiển thị số ngày streak và icon lửa/khuyến khích
-
-**Streak Rules**
 - Một ngày được tính là "đã học" khi người dùng hoàn thành ít nhất một trong các hoạt động:
-  - Hoàn thành học một từ mới.
+  - Hoàn thành học một từ mới (bài tập luyện viết).
   - Hoàn thành ít nhất một câu hỏi Quiz.
 - Streak tăng thêm 1 nếu người dùng học ở ngày kế tiếp.
-- Nếu bỏ lỡ một ngày liên tiếp, streak reset về 1 khi quay lại học.
+- Nếu bỏ lỡ một ngày liên tiếp, streak reset về 0 khi quay lại học.
 - Mỗi ngày chỉ được tính một lần vào streak.
 
----
+### 6.4. AI Assistant Rules
 
-### User Story 6 - Trợ lý AI (Universal AI Assistant) (Priority: P1)
+- AI Assistant chỉ được gọi thông qua Backend (API key lưu ở Backend).
+- Backend ghi nhớ tối đa 10 tin nhắn gần nhất trong một phiên chat để duy trì ngữ cảnh.
+- Nếu người dùng đang học một từ hoặc một Chủ đề cụ thể, hệ thống tự động truyền ngữ cảnh đó cho AI.
+- Lịch sử chat được lưu lại để xem nhưng không bắt buộc nạp lại toàn bộ vào lần chat tiếp theo.
 
-**Mô tả**: Popup chat AI cố định góc màn hình, xuất hiện trên mọi trang, hỗ trợ giải đáp ngữ pháp, ngữ cảnh, ví dụ từ vựng.
+### 6.5. Admin Access Rules
 
-**Why this priority**: Tính năng độc đáo (USP) của sản phẩm - AI assistant hỗ trợ xuyên suốt hành trình học tập.
+- Tất cả route `/api/admin/*` đều phải kiểm tra `req.user.role === 'admin'`.
+- Nếu không phải admin, trả về 403 Forbidden.
+- Admin Dashboard giao diện riêng biệt, không lẫn với giao diện học viên.
 
-**Independent Test**: Có thể test độc lập bằng cách bấm icon AI ở bất kỳ trang nào, nhập câu hỏi, nhận phản hồi AI.
+### 6.6. Data Integrity Rules
 
-**Acceptance Scenarios**:
-1. **Given** người dùng ở bất kỳ trang nào (Trang chủ, Học bài, Sổ tay, Ôn tập), **When** bấm icon AI góc màn hình, **Then** popup chat mở ra
-2. **Given** popup chat AI mở, **When** người dùng hỏi "Phân biệt 'make' vs 'do'", **Then** AI trả lời giải thích ngữ pháp, ví dụ
-3. **Given** đang học từ "decision", **When** hỏi AI "Cho ví dụ dùng 'decision'", **Then** AI trả lời có ngữ cảnh từ đang học (context-aware)
-4. **Given** popup AI mở, **When** bấm đóng, **Then** popup thu nhỏ về icon, giữ lịch sử chat session hiện tại
-
----
-
-### User Story 7 - Menu Trang cá nhân & Đổi lộ trình (Priority: P2)
-
-**Mô tả**: Icon avatar góc trên trái, bấm vào hiện menu: Cài đặt tài khoản, Lộ trình học tập (cho phép đổi lộ trình bất kỳ lúc nào).
-
-**Why this priority**: Cần thiết cho quản lý tài khoản và linh hoạt đổi lộ trình, nhưng không phải core learning loop.
-
-**Independent Test**: Có thể test độc lập bằng cách bấm avatar, vào cài đặt đổi mật khẩu, vào lộ trình đổi từ TOEIC sang Phrasal verb, kiểm tra trang chủ cập nhật danh sách chủ đề.
-
-**Acceptance Scenarios**:
-1. **Given** người dùng ở trang chủ, **When** bấm avatar góc trên trái, **Then** hiển thị menu: Cài đặt tài khoản, Lộ trình học tập
-2. **Given** vào "Lộ trình học tập", **When** chọn "Phrasal verb & Idiom", **Then** hệ thống cập nhật lộ trình, trang chủ load danh sách chủ đề Phrasal verb
-3. **Given** vào "Cài đặt tài khoản", **When** đổi mật khẩu/đăng xuất, **Then** cập nhật thành công/chuyển về trang đăng nhập
+- Username/Email không được để trống.
+- Email đúng định dạng.
+- Password tối thiểu 8 ký tự.
+- Các khóa ngoại (`roadmap_id`, `topic_id`, `vocabulary_id`) phải tồn tại trong cơ sở dữ liệu.
+- Không cho phép tạo dữ liệu trùng với các trường có ràng buộc UNIQUE.
+- Các thao tác cập nhật nhiều bảng phải sử dụng Transaction.
 
 ---
 
-### Edge Cases
+## 7. Input/Output Data Specifications
 
-- **Given** người dùng học từ mới nhưng đóng app giữa chừng (chưa bấm "Tiếp tục" hay "Mình đã thuộc"), **When** mở lại app, **Then** từ đó vẫn ở trạng thái "đang học", tiếp tục từ chỗ dừng
-- **Given** người dùng làm quiz ôn tập nhưng thoát giữa chừng, **When** vào lại ôn tập, **Then** quiz tiếp tục từ câu chưa làm hoặc tạo mới tùy logic SRS
-- **Given** người dùng đổi lộ trình khi đang có từ vựng trong sổ tay của lộ trình cũ, **When** đổi lộ trình, **Then** sổ tay giữ nguyên từ vựng cũ, chỉ danh sách chủ đề trang chủ thay đổi
-- **Given** AI Assistant bị lỗi API/timeout, **When** người dùng hỏi, **Then** hiển thị thông báo lỗi thân thiện, gợi ý thử lại sau
-- **Given** streak bị reset do lỗi hệ thống/đổi múi giờ, **When** phát hiện, **Then** có cơ chế khôi phục streak (manual review hoặc auto-recover dựa trên log học tập)
+### 7.1. Đăng ký
 
----
+| Thành phần | Chi tiết |
+|------------|----------|
+| **Input** | `email` (string, email format), `password` (string, min 8 chars), `confirm_password` (string) |
+| **Output (success)** | `{ success: true, message: "Đăng ký thành công", data: { user_id, email } }` |
+| **Output (error)** | `{ success: false, message: "Email đã tồn tại" }` (409) hoặc `{ success: false, message: "Validation failed" }` (400) |
 
-## Requirements *(mandatory)*
+### 7.2. Đăng nhập
 
-### Functional Requirements
+| Thành phần | Chi tiết |
+|------------|----------|
+| **Input** | `email` (string), `password` (string) |
+| **Output (success)** | `{ success: true, data: { token, user: { id, email, role, roadmap_id, streak } } }` |
+| **Output (error)** | `{ success: false, message: "Email hoặc mật khẩu không đúng" }` (401) |
 
-- **FR-001**: Hệ thống PHẢI cho phép người dùng đăng ký tài khoản mới bằng email/mật khẩu
-- **FR-002**: Hệ thống PHẢI cho phép người dùng đăng nhập bằng email/mật khẩu đã đăng ký
-- **FR-003**: Hệ thống PHẢI bắt buộc người dùng mới chọn lộ trình học tập (Cơ bản, TOEIC, Phrasal verb & Idiom) tại lần đăng nhập đầu tiên
-- **FR-004**: Hệ thống PHẢI cho phép người dùng chọn chủ đề học tập trong lộ trình đã chọn
-- **FR-005**: Hệ thống PHẢI hiển thị flashcard từ vựng (mặt trước: từ gốc, mặt sau: nghĩa/phát âm/ ví dụ) khi học bài
-- **FR-006**: Hệ thống PHẢI cung cấp 2 lựa chọn sau flashcard: "Mình đã thuộc từ này" (bỏ qua, đánh dấu mastered) và "Tiếp tục" (chuyển sang bài tập viết)
-- **FR-007**: Hệ thống PHẢI cung cấp bài tập viết lại từ dựa trên gợi ý nghĩa/phát âm khi người dùng chọn "Tiếp tục"
-- **FR-008**: Hệ thống PHẢI tự động lưu từ vựng vào Sổ tay từ vựng cá nhân với trạng thái "đang ôn tập" sau khi hoàn thành bài tập viết
-- **FR-009**: Hệ thống PHẢI tự động lọc các từ vựng trạng thái "đang ôn tập" để tạo bài Quiz ôn tập
-- **FR-010**: Hệ thống PHẢI tạo bài Quiz trắc nghiệm thông minh (multiple choice, điền từ, v.v.) cho các từ cần ôn tập
-- **FR-011**: Hệ thống PHẢI cập nhật trạng thái từ vựng (mastered/learning) dựa trên kết quả Quiz theo thuật toán Spaced Repetition (SRS)
-Một từ được chuyển sang trạng thái "mastered" khi:
+### 7.3. Chọn/Đổi Lộ trình
 
-SRS Level >= 5
-hoặc
-Khoảng cách ôn tập (interval_days) >= 30 ngày.
+| Thành phần | Chi tiết |
+|------------|----------|
+| **Input** | `roadmap_id` (integer) |
+| **Output (success)** | `{ success: true, data: { user_id, roadmap_id } }` |
+| **Output (error)** | `{ success: false, message: "Roadmap không tồn tại" }` (404) |
 
-Khi ở trạng thái mastered, từ sẽ không xuất hiện trong Quiz thông thường.
-Người dùng vẫn có thể đưa từ trở lại trạng thái learning bằng chức năng "Ôn lại".
-- **FR-012**: Hệ thống PHẢI hiển thị Sổ tay từ vựng với: tổng số từ đang ôn tập, danh sách chi tiết (từ, nghĩa, trạng thái, cấp độ SRS)
-- **FR-013**: Hệ thống PHẢI cung cấp thanh tìm kiếm (search bar) lọc real-time từ vựng trong Sổ tay theo từ/nghĩa
-- **FR-014**: Hệ thống PHẢI hiển thị chi tiết từ vựng khi bấm vào từ trong Sổ tay (nghĩa, phát âm, ví dụ, trạng thái, lịch sử SRS)
-- **FR-015**: Hệ thống PHẢI cho phép người dùng bấm "Ôn lại" để chuyển từ "mastered" về "learning" và đưa vào hàng đợi quiz
-- **FR-016**: Hệ thống PHẢI hiển thị Streak (chuỗi ngày học liên tiếp) trên trang chủ, tăng khi học hàng ngày, reset khi bỏ lỡ
-- **FR-017**: Hệ thống PHẢI hiển thị icon Trợ lý AI (popup chat) cố định góc màn hình trên TẤT CẢ các trang
-- **FR-018**: Hệ thống PHẢI cho phép người dùng chat với AI để hỏi ngữ pháp, ngữ cảnh, ví dụ từ vựng, có context-aware (nhận biết từ đang học)
-AI Assistant ghi nhớ tối đa 10 tin nhắn gần nhất trong một phiên chat.
-Nếu người dùng đang học một từ hoặc một chủ đề cụ thể, hệ thống sẽ tự động truyền ngữ cảnh đó cho AI.
-Khi người dùng đóng trình duyệt hoặc kết thúc phiên đăng nhập, ngữ cảnh chat được lưu lại để xem lịch sử nhưng không bắt buộc nạp lại toàn bộ vào lần chat tiếp theo.
-- **FR-019**: Hệ thống PHẢI hiển thị icon Avatar/Trang cá nhân cố định góc trên bên trái trên các trang chính
-- **FR-020**: Hệ thống PHẢI cung cấp menu Trang cá nhân gồm: Cài đặt tài khoản (thông tin, mật khẩu, đăng xuất), Lộ trình học tập (xem/đổi lộ trình)
-- **FR-021**: Hệ thống PHẢI tự động cập nhật danh sách chủ đề trang chủ khi người dùng đổi lộ trình
+### 7.4. Học Flashcard
 
-### Key Entities
+| Thành phần | Chi tiết |
+|------------|----------|
+| **Input (bắt đầu)** | `topic_id` (integer) |
+| **Output** | `{ success: true, data: { session_id, vocabulary: [{ id, word, pronunciation, audio_url, image_url, part_of_speech, meaning, example, example_meaning }] } }` |
+| **Input (đã thuộc)** | `vocabulary_id` (integer), `session_id` (integer) |
+| **Output (đã thuộc)** | `{ success: true, data: { status: "mastered", next_vocabulary } }` |
+| **Input (tiếp tục)** | `vocabulary_id` (integer), `session_id` (integer) |
+| **Output (tiếp tục)** | `{ success: true, data: { prompt: { meaning, example }, vocabulary_id } }` |
 
-- **User**: Người dùng hệ thống. Thuộc tính: id, email, password_hash, current_roadmap (basic/toeic/phrasal), streak_count, last_study_date, created_at, updated_at
-- **Roadmap**: Lộ trình học tập. Thuộc tính: id, code (basic/toeic/phrasal), name, description, order
-- **Topic**: Chủ đề/Đề tài học tập thuộc một lộ trình. Thuộc tính: id, roadmap_id, name, description, order, word_count
-- **Vocabulary**: Từ vựng thuộc một chủ đề. Thuộc tính: id, topic_id, word, meaning, pronunciation, example, audio_url, image_url, difficulty
-- **UserVocabulary**: Từ vựng cá nhân của user (Sổ tay). Thuộc tính: id, user_id, vocabulary_id, status (learning/mastered), srs_level (0-5), next_review_date, review_count, correct_count, created_at, updated_at
-- **StudySession**: Phiên học tập. Thuộc tính: id, user_id, topic_id, started_at, completed_at, words_studied, words_mastered, words_continued
-- **QuizSession**: Phiên ôn tập. Thuộc tính: id, user_id, started_at, completed_at, total_questions, correct_answers, score
-- **QuizAnswer**: Câu trả lời quiz. Thuộc tính: id, quiz_session_id, user_vocabulary_id, user_answer, correct_answer, is_correct, response_time_ms
-- **AIChatSession**: Phiên chat AI. Thuộc tính: id, user_id, started_at, context_topic_id (nullable), context_vocabulary_id (nullable)
-- **AIChatMessage**: Tin nhắn chat AI. Thuộc tính: id, session_id, role (user/assistant), content, tokens_used, created_at
-- **UserSettings**: Cài đặt người dùng. Thuộc tính: user_id, notifications_enabled, sound_enabled, theme (light/dark), auto_play_audio
+### 7.5. Luyện viết
 
----
-## Security Requirements
+| Thành phần | Chi tiết |
+|------------|----------|
+| **Input** | `vocabulary_id` (integer), `session_id` (integer), `user_input` (string) |
+| **Output (success)** | `{ success: true, data: { is_correct, status: "learning", next_vocabulary, streak_updated } }` |
+| **Output (error)** | `{ success: false, message: "Từ không đúng" }` |
 
-- Password phải được hash bằng bcrypt.
-- JWT Access Token có thời hạn tối đa 24 giờ.
-- API AI chỉ được gọi thông qua Backend.
-- Người dùng chỉ được truy cập dữ liệu thuộc tài khoản của mình.
+### 7.6. Quiz
 
-## Success Criteria *(mandatory)*
+| Thành phần | Chi tiết |
+|------------|----------|
+| **Input (bắt đầu)** | Không có input (hệ thống tự lọc từ) |
+| **Output (bắt đầu)** | `{ success: true, data: { quiz_id, questions: [{ id, vocabulary_id, word, meaning, options[], correct_answer }] } }` |
+| **Input (trả lời)** | `quiz_id` (integer), `question_id` (integer), `user_answer` (string) |
+| **Output (trả lời)** | `{ success: true, data: { is_correct, correct_answer, explanation, review_count_updated } }` |
+| **Input (hoàn thành)** | `quiz_id` (integer) |
+| **Output (hoàn thành)** | `{ success: true, data: { score, total_questions, correct_answers, words_mastered, words_to_review } }` |
 
-### Measurable Outcomes
+### 7.7. Sổ tay từ vựng
 
-- **SC-001**: Người dùng mới hoàn thành onboarding (đăng ký → chọn lộ trình → chọn chủ đề) trong **dưới 2 phút**
-- **SC-002**: Người dùng học được **ít nhất 10 từ/phiên** trung bình (session completion rate > 70%)
-- **SC-003**: Tỷ lệ từ vựng chuyển từ "learning" sang "mastered" sau 3 lần ôn tập (SRS) **> 80%**
-- **SC-004**: Streak retention: **> 40%** người dùng duy trì streak ≥ 7 ngày
-- **SC-005**: AI Assistant response time **< 3 giây** cho 95% requests
-- **SC-006**: App load time (cold start) **< 3 giây** trên thiết bị trung bình
-- **SC-007**: User satisfaction (NPS) **> 40** sau 1 tháng sử dụng
-- **SC-008**: Daily Active Users (DAU) / Monthly Active Users (MAU) ratio **> 20%**
+| Thành phần | Chi tiết |
+|------------|----------|
+| **Input** | `search` (string, optional), `status` (string, optional), `page` (integer, optional) |
+| **Output** | `{ success: true, data: { total, items: [{ id, word, meaning, pronunciation, part_of_speech, example, example_meaning, status, review_count, next_review_at }] } }` |
 
----
+### 7.8. AI Assistant
 
-## Assumptions
+| Thành phần | Chi tiết |
+|------------|----------|
+| **Input** | `message` (string), `conversation_id` (integer, optional), `context` (object, optional: { topic_id, vocabulary_id }) |
+| **Output** | `{ success: true, data: { conversation_id, reply: "string", role: "assistant" } }` |
 
-- **Target users**: Người học tiếng Anh mọi cấp độ (cơ bản, TOEIC, phrasal verb/idiom), chủ yếu dùng mobile/web
-- **Tech stack**: Frontend: HTML + JavaScript + Bootstrap + Tailwind CSS; Backend: Node.js; Database: SQLite (local-first, sync later)
-- **AI Integration**: Sử dụng API LLM (OpenAI/Anthropic/Gemini) cho AI Assistant, API key lưu ở backend
-- **Authentication**: Email/password với JWT token, password hash bằng bcrypt
-- **Data storage**: SQLite local-first (IndexedDB/WebSQL cho web, SQLite native cho mobile), sync lên server khi online
-- **SRS Algorithm**: Sử dụng thuật toán SM-2 (SuperMemo 2) đơn giản hóa cho spaced repetition
-- **Deployment**: Frontend deploy static (Netlify/Vercel), Backend deploy Node.js (Railway/Render/VPS), SQLite file-based
-- **Scope**: MVP chỉ bao gồm 3 lộ trình: Cơ bản, TOEIC, Phrasal verb & Idiom. Không có leaderboard, không có social features
-- **Browser support**: Chrome, Firefox, Safari, Edge phiên bản mới nhất 2 năm
-- **Language**: Giao diện tiếng Việt, nội dung từ vựng Anh-Việt
-- **Data seeding**: Dữ liệu từ vựng (vocabulary, topics, roadmaps) được seed sẵn trong SQLite khi init app
-- - **Administration**: MVP không bao gồm giao diện quản trị (Admin Panel). Dữ liệu Roadmap, Topic và Vocabulary được seed sẵn trong cơ sở dữ liệu. Việc quản lý dữ liệu được thực hiện trực tiếp bởi nhóm phát triển trong giai đoạn MVP.
+### 7.9. Admin - CRUD Roadmaps
+
+| Thành phần | Chi tiết |
+|------------|----------|
+| **Input (create)** | `name` (string), `description` (string), `is_active` (boolean), `sort_order` (integer) |
+| **Input (update)** | `name` (string, optional), `description` (string, optional), `is_active` (boolean, optional), `sort_order` (integer, optional) |
+| **Output** | `{ success: true, data: { id, name, description, is_active, sort_order } }` |
+
+### 7.10. Admin - CRUD Topics
+
+| Thành phần | Chi tiết |
+|------------|----------|
+| **Input (create)** | `roadmap_id` (integer), `name` (string), `description` (string), `is_active` (boolean), `sort_order` (integer) |
+| **Output** | `{ success: true, data: { id, roadmap_id, name, description, is_active, sort_order } }` |
+
+### 7.11. Admin - CRUD Vocabularies
+
+| Thành phần | Chi tiết |
+|------------|----------|
+| **Input (create)** | `topic_id` (integer), `word` (string), `pronunciation` (string), `part_of_speech` (string), `meaning` (string), `example` (string), `example_meaning` (string), `audio` (file/url), `image` (file/url) |
+| **Output** | `{ success: true, data: { id, topic_id, word, pronunciation, part_of_speech, meaning, example, example_meaning, audio_url, image_url } }` |
 
 ---
 
-## Technical Architecture Overview
+## 8. Business Flows
 
-### Frontend Architecture
-- **Framework**: Vanilla JavaScript (ES6+) với Module pattern
-- **UI Library**: Bootstrap 5 + Tailwind CSS (utility-first)
-- **State Management**: Custom lightweight store (Pub/Sub pattern) + LocalStorage/IndexedDB cache
-- **Routing**: Hash-based router (SPA) hoặc native navigation
-- **Offline Support**: Service Worker + IndexedDB cache cho vocabulary data, flashcards, quiz questions
-- **AI Chat**: WebSocket hoặc polling đến backend proxy cho LLM API
+### 8.1. Luồng Đăng ký / Đăng nhập
 
-### Backend Architecture
-- **Runtime**: Node.js (Express.js hoặc Fastify)
-- **Database**: SQLite (better-sqlite3 hoặc Prisma ORM)
-- **Auth**: JWT (access token + refresh token), bcrypt password hashing
-- **API**: RESTful API cho CRUD, WebSocket cho AI chat streaming
-- **Sync**: Endpoint đồng bộ dữ liệu offline (batch upsert UserVocabulary, StudySession, QuizSession)
-- **AI Proxy**: Backend proxy request đến LLM API (ẩn API key, rate limiting, context injection)
-
-### Database Schema (SQLite)
-
-```sql
--- Users
-CREATE TABLE users (
-  id INTEGER PRIMARY KEY AUTOINCREMENT,
-  email TEXT UNIQUE NOT NULL,
-  password_hash TEXT NOT NULL,
-  current_roadmap_id INTEGER DEFAULT 1,
-  streak_count INTEGER DEFAULT 0,
-  last_study_date DATE,
-  created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-  updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
-);
-
--- Roadmaps
-CREATE TABLE roadmaps (
-  id INTEGER PRIMARY KEY AUTOINCREMENT,
-  code TEXT UNIQUE NOT NULL, -- 'basic', 'toeic', 'phrasal'
-  name TEXT NOT NULL,
-  description TEXT,
-  display_order INTEGER DEFAULT 0
-);
-
--- Topics
-CREATE TABLE topics (
-  id INTEGER PRIMARY KEY AUTOINCREMENT,
-  roadmap_id INTEGER NOT NULL REFERENCES roadmaps(id),
-  name TEXT NOT NULL,
-  description TEXT,
-  display_order INTEGER DEFAULT 0,
-  word_count INTEGER DEFAULT 0
-);
-
--- Vocabulary (master data)
-CREATE TABLE vocabulary (
-  id INTEGER PRIMARY KEY AUTOINCREMENT,
-  topic_id INTEGER NOT NULL REFERENCES topics(id),
-  word TEXT NOT NULL,
-  meaning TEXT NOT NULL,
-  pronunciation TEXT,
-  example TEXT,
-  audio_url TEXT,
-  image_url TEXT,
-  difficulty INTEGER DEFAULT 1, -- 1-5
-  created_at DATETIME DEFAULT CURRENT_TIMESTAMP
-);
-
--- User Vocabulary (Sổ tay cá nhân + SRS)
-CREATE TABLE user_vocabulary (
-  id INTEGER PRIMARY KEY AUTOINCREMENT,
-  user_id INTEGER NOT NULL REFERENCES users(id),
-  vocabulary_id INTEGER NOT NULL REFERENCES vocabulary(id),
-  status TEXT DEFAULT 'learning', -- 'learning', 'mastered'
-  srs_level INTEGER DEFAULT 0, -- 0-5 (SM-2)
-  ease_factor REAL DEFAULT 2.5,
-  interval_days INTEGER DEFAULT 0,
-  next_review_date DATE,
-  review_count INTEGER DEFAULT 0,
-  correct_count INTEGER DEFAULT 0,
-  last_reviewed_at DATETIME,
-  created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-  updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-  UNIQUE(user_id, vocabulary_id)
-);
-
--- Study Sessions
-CREATE TABLE study_sessions (
-  id INTEGER PRIMARY KEY AUTOINCREMENT,
-  user_id INTEGER NOT NULL REFERENCES users(id),
-  topic_id INTEGER NOT NULL REFERENCES topics(id),
-  started_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-  completed_at DATETIME,
-  words_studied INTEGER DEFAULT 0,
-  words_mastered INTEGER DEFAULT 0,
-  words_continued INTEGER DEFAULT 0
-);
-
--- Quiz Sessions
-CREATE TABLE quiz_sessions (
-  id INTEGER PRIMARY KEY AUTOINCREMENT,
-  user_id INTEGER NOT NULL REFERENCES users(id),
-  started_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-  completed_at DATETIME,
-  total_questions INTEGER DEFAULT 0,
-  correct_answers INTEGER DEFAULT 0,
-  score REAL DEFAULT 0
-);
-
--- Quiz Answers
-CREATE TABLE quiz_answers (
-  id INTEGER PRIMARY KEY AUTOINCREMENT,
-  quiz_session_id INTEGER NOT NULL REFERENCES quiz_sessions(id),
-  user_vocabulary_id INTEGER NOT NULL REFERENCES user_vocabulary(id),
-  user_answer TEXT,
-  correct_answer TEXT,
-  is_correct BOOLEAN DEFAULT 0,
-  response_time_ms INTEGER,
-  created_at DATETIME DEFAULT CURRENT_TIMESTAMP
-);
-
--- AI Chat Sessions
-CREATE TABLE ai_chat_sessions (
-  id INTEGER PRIMARY KEY AUTOINCREMENT,
-  user_id INTEGER NOT NULL REFERENCES users(id),
-  context_topic_id INTEGER REFERENCES topics(id),
-  context_vocabulary_id INTEGER REFERENCES vocabulary(id),
-  started_at DATETIME DEFAULT CURRENT_TIMESTAMP
-);
-
--- AI Chat Messages
-CREATE TABLE ai_chat_messages (
-  id INTEGER PRIMARY KEY AUTOINCREMENT,
-  session_id INTEGER NOT NULL REFERENCES ai_chat_sessions(id),
-  role TEXT NOT NULL, -- 'user', 'assistant'
-  content TEXT NOT NULL,
-  tokens_used INTEGER DEFAULT 0,
-  created_at DATETIME DEFAULT CURRENT_TIMESTAMP
-);
-
--- User Settings
-CREATE TABLE user_settings (
-  user_id INTEGER PRIMARY KEY REFERENCES users(id),
-  notifications_enabled BOOLEAN DEFAULT 1,
-  sound_enabled BOOLEAN DEFAULT 1,
-  theme TEXT DEFAULT 'light', -- 'light', 'dark', 'system'
-  auto_play_audio BOOLEAN DEFAULT 0,
-  updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
-);
-
--- Indexes for performance
-CREATE INDEX idx_user_vocab_user_status ON user_vocabulary(user_id, status);
-CREATE INDEX idx_user_vocab_next_review ON user_vocabulary(user_id, next_review_date);
-CREATE INDEX idx_vocab_topic ON vocabulary(topic_id);
-CREATE INDEX idx_topics_roadmap ON topics(roadmap_id);
-CREATE INDEX idx_study_sessions_user ON study_sessions(user_id, started_at);
-CREATE INDEX idx_quiz_sessions_user ON quiz_sessions(user_id, started_at);
-CREATE INDEX idx_ai_chat_sessions_user ON ai_chat_sessions(user_id, started_at);
+```
+1. Người dùng truy cập trang Đăng ký / Đăng nhập
+2. [Đăng ký]:
+   a. Nhập email, password, confirm password
+   b. Hệ thống validate dữ liệu đầu vào (email format, password >= 8 chars, confirm match)
+   c. Hệ thống kiểm tra email đã tồn tại chưa
+   d. Nếu chưa tồn tại: hash password bằng bcrypt, tạo user với role='user', streak=0
+   e. Trả về JWT token, chuyển đến trang chọn Lộ trình (Onboarding)
+3. [Đăng nhập]:
+   a. Nhập email, password
+   b. Hệ thống kiểm tra email có tồn tại không
+   c. So sánh password với password_hash (bcrypt)
+   d. Nếu đúng: tạo JWT token, kiểm tra roadmap_id của user
+      - Nếu roadmap_id = null: chuyển đến trang chọn Lộ trình
+      - Nếu roadmap_id != null: chuyển đến trang chủ
+4. [Đăng xuất]:
+   a. Xóa JWT token (Frontend)
+   b. Chuyển về trang đăng nhập
 ```
 
-### API Endpoints
+### 8.2. Luồng Chọn Roadmap (Onboarding & Đổi Lộ trình)
 
-#### Auth
-- `POST /api/auth/register` - Đăng ký
-- `POST /api/auth/login` - Đăng nhập
-- `POST /api/auth/refresh` - Refresh access token
-- `POST /api/auth/logout` - Đăng xuất (revoke refresh token)
+```
+1. Hệ thống hiển thị danh sách Lộ trình có sẵn (Cơ bản, TOEIC, Phrasal Verb & Idiom)
+2. Người dùng chọn một Lộ trình
+3. Hệ thống cập nhật roadmap_id trong bảng users
+4. Hệ thống load danh sách Chủ đề thuộc Lộ trình đã chọn
+5. Chuyển đến trang chủ với danh sách Chủ đề tương ứng
+```
 
-#### User & Profile
-- `GET /api/user/profile` - Lấy profile user
-- `PUT /api/user/profile` - Cập nhật profile
-- `PUT /api/user/password` - Đổi mật khẩu
-- `GET /api/user/streak` - Lấy streak info
-- `PUT /api/user/roadmap` - Đổi lộ trình học tập
+### 8.3. Luồng Chọn Topic & Học Flashcard
 
-#### Roadmaps & Topics
-- `GET /api/roadmaps` - Danh sách lộ trình
-- `GET /api/roadmaps/:id/topics` - Danh sách chủ đề theo lộ trình
-- `GET /api/topics/:id` - Chi tiết chủ đề
-- `GET /api/topics/:id/vocabulary` - Danh sách từ vựng trong chủ đề
+```
+1. Trang chủ hiển thị danh sách Chủ đề thuộc Lộ trình hiện tại
+2. Người dùng bấm vào một Chủ đề
+3. Hệ thống tạo StudySession mới
+4. Hiển thị Flashcard từ đầu tiên:
+   - Mặt trước: word, pronunciation, audio, image
+   - Người dùng bấm/lật thẻ (Space) → mặt sau: part_of_speech, meaning, example, example_meaning
+5. Người dùng chọn:
+   a. "Đã thuộc" (ArrowRight):
+      - Tạo/cập nhật user_vocabularies: status = 'mastered', tăng review_count
+      - Chuyển sang từ tiếp theo
+   b. "Tiếp tục" (ArrowLeft):
+      - Chuyển sang bài tập luyện viết
+6. Bài tập luyện viết:
+   - Hiển thị gợi ý (nghĩa, ví dụ)
+   - Người dùng gõ từ cần học
+   - Hệ thống kiểm tra kết quả
+   - Lưu user_vocabularies: status = 'learning', tính next_review_at
+   - Cập nhật last_study_date, tăng streak
+   - Chuyển sang từ tiếp theo
+7. Khi hết từ: hiển thị màn hình tổng kết
+```
 
-#### Learning (Học từ mới)
-- `POST /api/learning/session/start` - Bắt đầu phiên học (topic_id)
-- `POST /api/learning/session/complete` - Hoàn thành phiên học
-- `POST /api/learning/word/mastered` - Đánh dấu từ đã thuộc (bỏ qua)
-- `POST /api/learning/word/continue` - Chuyển sang bài tập viết (lưu vào sổ tay)
+### 8.4. Luồng Quiz Ôn tập
 
-#### Vocabulary Notebook (Sổ tay)
-- `GET /api/vocabulary/notebook` - Danh sách từ vựng cá nhân (có filter, search, pagination)
-- `GET /api/vocabulary/notebook/:id` - Chi tiết từ vựng
-- `POST /api/vocabulary/notebook/:id/relearn` - Ôn lại từ (mastered → learning)
+```
+1. Người dùng vào tab "Ôn tập"
+2. Hệ thống truy vấn user_vocabularies:
+   - status IN ('new', 'learning')
+   - hoặc next_review_at <= NOW()
+3. Hệ thống tạo QuizSession mới
+4. Áp dụng Quiz Generation Rules (tối đa 20 câu, ưu tiên `review_count` thấp)
+5. Hiển thị từng câu hỏi trắc nghiệm:
+   - Người dùng chọn đáp án
+   - Hệ thống kiểm tra và phản hồi ngay:
+     * Đúng: cập nhật SRS (tăng `review_count`, cập nhật `last_reviewed_at`, tính toán `next_review_at`)
+     * Sai: hiển thị đáp án đúng, reset `review_count` về 0, cập nhật `next_review_at` về ngày hiện tại
+6. Lưu chi tiết vào quiz_answers
+7. Khi hoàn thành:
+   - Cập nhật QuizSession (total_questions, correct_answers, score)
+   - Hiển thị kết quả: điểm số, từ đã master, từ cần ôn lại
+```
 
-#### Quiz/Review (Ôn tập)
-- `POST /api/quiz/session/start` - Bắt đầu quiz (tự động lấy từ cần ôn)
-- `POST /api/quiz/answer` - Gửi câu trả lời
-- `POST /api/quiz/session/complete` - Hoàn thành quiz, cập nhật SRS
+### 8.5. Luồng Sổ tay từ vựng (Vocabulary Notebook)
 
-#### AI Assistant
-- `POST /api/ai/chat` - Gửi tin nhắn, nhận phản hồi (streaming hoặc non-streaming)
-- `GET /api/ai/history` - Lịch sử chat
-- `DELETE /api/ai/session/:id` - Xóa phiên chat
+```
+1. Người dùng vào tab "Sổ tay từ vựng"
+2. Hệ thống truy vấn user_vocabularies của user hiện tại
+3. Hiển thị:
+   - Tổng số từ đang ôn tập
+   - Danh sách từ phân loại theo status (new/learning/mastered)
+   - Mỗi từ: word, meaning, status, review_count
+4. Người dùng có thể:
+   a. Tìm kiếm: gõ từ khóa → lọc real-time theo word
+   b. Bấm vào từ → xem chi tiết (word, meaning, pronunciation, part_of_speech, example, example_meaning, status, review_count, next_review_at)
+   c. Bấm "Ôn lại" trên từ mastered → chuyển về learning, đưa vào hàng đợi Quiz
+```
 
-### SRS Algorithm (SM-2 Simplified)
+### 8.6. Luồng AI Assistant
 
-## MVP Scope
+```
+1. Icon AI cố định góc dưới màn hình trên mọi trang
+2. Người dùng bấm icon → popup chat mở ra
+3. Hệ thống kiểm tra phiên chat hiện tại (ai_conversations)
+   - Nếu chưa có: tạo phiên mới
+   - Nếu có: load lịch sử tin nhắn
+4. Người dùng nhập câu hỏi → gửi lên Backend
+5. Backend:
+   - Lấy context (từ/Chủ đề đang học nếu có)
+   - Ghép vào prompt
+   - Gọi LLM API
+   - Lưu tin nhắn user + assistant vào ai_messages
+   - Trả về phản hồi cho Frontend
+6. Frontend hiển thị phản hồi trong popup chat
+7. Người dùng đóng popup → thu nhỏ về icon, lưu lịch sử
+```
 
-### Bắt buộc hoàn thành
+### 8.7. Luồng Admin Dashboard
 
-- Đăng ký / Đăng nhập
-- Chọn lộ trình
-- Chọn chủ đề
-- Flashcard
-- Bài tập viết từ
-- Quiz ôn tập
-- Sổ tay từ vựng
-- Streak
-- AI Assistant
-- Đổi lộ trình
+```
+1. Admin đăng nhập với tài khoản có role = 'admin'
+2. Hệ thống kiểm tra role, cho phép truy cập route Admin
+3. Admin Dashboard hiển thị với các menu:
+   a. Quản lý Roadmaps
+   b. Quản lý Topics
+   c. Quản lý Vocabularies
+4. [Roadmaps]:
+   - Danh sách: tên, mô tả, trạng thái, thứ tự
+   - CRUD: Thêm, Sửa, Xóa, Bật/tắt is_active, Sắp xếp sort_order
+5. [Topics]:
+   - Danh sách thuộc Roadmap: tên, mô tả, trạng thái, thứ tự
+   - CRUD: Thêm (gắn roadmap_id), Sửa, Xóa, Bật/tắt is_active, Sắp xếp sort_order
+6. [Vocabularies]:
+   - Danh sách: từ, phát âm, loại từ, nghĩa, Chủ đề, Lộ trình
+   - CRUD: Thêm (đầy đủ trường, gắn topic_id), Sửa, Xóa
+   - Upload file: audio (mp3), image (jpg/png) → lưu vào /uploads/
+7. Người dùng không phải admin → 403 Forbidden
+```
 
-### Không thuộc MVP
+---
 
-- Leaderboard
-- Social Features
-- Push Notification
-- Multi-device Sync
-- Community Sharing
+## 9. Edge Cases
 
-```javascript
-// Khi user trả lời quiz cho một từ
-function updateSRS(userVocab, isCorrect, responseTimeMs) {
-  if (isCorrect) {
-    userVocab.correct_count++;
-    userVocab.review_count++;
-    
-    if (userVocab.srs_level === 0) {
-      userVocab.interval_days = 1;
-      userVocab.srs_level = 1;
-    } else if (userVocab.srs_level === 1) {
-      userVocab.interval_days = 6;
-      userVocab.srs_level = 2;
-    } else {
-      // SM-2 formula simplified
-      userVocab.ease_factor = Math.max(1.3, userVocab.ease_factor + 0.1);
-      userVocab.interval_days = Math.round(userVocab.interval_days * userVocab.ease_factor);
-      userVocab.srs_level = Math.min(5, userVocab.srs_level + 1);
-    }
-    
-    // Check if mastered (level 5 hoặc interval > 30 days)
-    if (userVocab.srs_level >= 5 || userVocab.interval_days >= 30) {
-      userVocab.status = 'mastered';
-    }
-  } else {
-    // Sai: reset về srs_level nhưng giữ nguyên ease_factor hoặc giảm nhẹ
-    userVocab.srs_level = 0;
-    userVocab.interval_days = 0; // Ôn tập lại ngay trong ngày hoặc phiên tiếp theo
-    userVocab.ease_factor = Math.max(1.3, userVocab.ease_factor - 0.2);
-    userVocab.status = 'learning';
-  }
-  
-  // Tính toán ngày tiếp theo cần ôn tập
-  let nextDate = new Date();
-  nextDate.setDate(nextDate.getDate() + userVocab.interval_days);
-  userVocab.next_review_date = nextDate.toISOString().split('T')[0];
-  userVocab.last_reviewed_at = new Date().toISOString();
-  userVocab.updated_at = new Date().toISOString();
-  
-  return userVocab;
-}
+| Tình huống | Cách xử lý |
+|------------|------------|
+| Người dùng học từ mới nhưng đóng app giữa chừng (chưa bấm "Đã thuộc" hay "Tiếp tục") | Từ đó vẫn ở trạng thái "đang học", tiếp tục từ chỗ dừng khi mở lại |
+| Người dùng làm Quiz nhưng thoát giữa chừng | Quiz tiếp tục từ câu chưa làm khi vào lại |
+| Người dùng đổi Lộ trình khi đang có từ vựng trong Sổ tay của Lộ trình cũ | Sổ tay giữ nguyên từ vựng cũ, chỉ danh sách Chủ đề trang chủ thay đổi |
+| AI Assistant bị lỗi API/timeout | Hiển thị thông báo lỗi thân thiện, gợi ý thử lại sau |
+| Streak bị reset do lỗi hệ thống/đổi múi giờ | Có cơ chế khôi phục streak (manual hoặc auto-recover dựa trên log học tập) |
+| Người dùng chưa có từ nào để ôn tập | Hiển thị thông báo "Chưa có từ cần ôn tập, hãy học từ mới!" |
+| Upload file ảnh/âm thanh thất bại | Hiển thị lỗi, cho phép thử lại, không làm mất dữ liệu các trường khác |
+
+---
+
+## 10. Assumptions
+
+| STT | Giả định |
+|-----|----------|
+| 1 | Người dùng mục tiêu: Người học tiếng Anh mọi cấp độ (cơ bản, TOEIC, phrasal verb/idiom), chủ yếu dùng mobile/web |
+| 2 | Dữ liệu Roadmap, Topic và Vocabulary được seed sẵn trong cơ sở dữ liệu khi khởi tạo ứng dụng |
+| 3 | Hệ thống yêu cầu kết nối Internet để sử dụng AI Assistant |
+| 4 | Một Vocabulary chỉ thuộc một Topic trong phạm vi MVP |
+| 5 | MVP bao gồm 3 lộ trình: Cơ bản, TOEIC, Phrasal verb & Idiom |
+| 6 | Giao diện bằng tiếng Việt, nội dung từ vựng Anh-Việt |
+| 7 | AI Integration sử dụng API LLM (Gemini) thông qua Backend |
+| 8 | SRS Algorithm sử dụng thuật toán SM-2 (SuperMemo 2) đơn giản hóa |
