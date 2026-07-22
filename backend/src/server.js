@@ -13,7 +13,12 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
+// public folder fe/public
+app.use(express.static("../frontend/public"));
+// app.use(express.static(path.join(__dirname, "../../frontend/public")));
+
 // Trang chủ
+// Routes
 app.get("/", (req, res) => {
     res.send("WordMate Backend Running");
 });
