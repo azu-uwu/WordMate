@@ -521,7 +521,7 @@ Mỗi trang sử dụng một số component dùng chung để tạo layout th�
 
 **Trách nhiệm:**
 
-- **main.css**: Style chính sử dụng TailwindCSS cho giao diện người học. Màu chủ đạo Indigo-600 (#4F46E5).
+- **main.css**: Style chính sử dụng TailwindCSS cho giao diện người học. Màu chủ đạo (##FFC300).
 - **admin.css**: Style cho Admin Dashboard sử dụng Bootstrap, tông màu tối trung tính (Slate/Dark).
 - **components/**: CSS riêng cho từng component nếu cần.
 

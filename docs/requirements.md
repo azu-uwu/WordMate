@@ -94,7 +94,7 @@
 #### 5.1. Design Tokens (Hệ màu & Typography)
 * **Font chữ chủ đạo:** Inter / Roboto / system-ui (Đảm bảo hiển thị chuẩn ký tự phiên âm IPA không lỗi font).
 * **Hệ màu Tailwind (Client - Học viên):**
-  * **Primary:** `Indigo-600` (`#4F46E5`) - Màu chủ đạo ứng dụng.
+  * **Primary:** (`##FFC300`) - Màu chủ đạo ứng dụng.
   * **Success:** `Emerald-500` (`#10B981`) - Trạng thái `mastered` / Trả lời đúng.
   * **Warning:** `Amber-500` (`#F59E0B`) - Trạng thái `learning` / Nút "Tiếp tục".
   * **Danger:** `Rose-500` (`#F43F5E`) - Trả lời sai / Nút xóa.

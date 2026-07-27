@@ -1,0 +1,582 @@
+/* ============================================================
+   register.css — WordMate Registration Page Styles
+   Design System: #FFC300 primary, Inter font
+   ============================================================ */
+
+/* ============================================================
+   TABLE OF CONTENTS
+   1. Imports / Font
+   2. CSS Variables (Design Tokens)
+   3. Layout — register-page
+   4. Card — register-card
+   5. Logo — register-logo
+   6. Typography — register-title, register-desc
+   7. Form — register-field
+   8. Inputs — .form-control overrides
+   9. Button — register-btn
+  10. Message — register-message
+  11. Footer — register-footer, register-link
+  12. Responsive — Breakpoints
+   ============================================================ */
+
+/* ============================================================
+   1. CSS VARIABLES (DESIGN TOKENS)
+   NOTE: Font Inter được nhúng trực tiếp trong register.html
+   ============================================================ */
+
+/* ============================================================
+   2. CSS VARIABLES (DESIGN TOKENS)
+   ============================================================ */
+
+:root {
+    /* Primary palette — Warm Gold */
+    --wm-primary: #FFC300;
+    --wm-primary-dark: #E6B000;
+    --wm-primary-light: #FFD633;
+    --wm-primary-bg: #FFF8E1;
+
+    /* Semantic colors */
+    --wm-success: #10B981;
+    --wm-error: #F43F5E;
+
+    /* Neutral palette — Light & bright */
+    --wm-text-primary: #1E293B;
+    --wm-text-secondary: #64748B;
+    --wm-text-muted: #94A3B8;
+    --wm-bg-page: #F8FAFC;
+    --wm-bg-card: #FFFFFF;
+    --wm-border: #E2E8F0;
+    --wm-border-focus: #FFC300;
+
+    /* Typography */
+    --wm-font-family: 'Inter', 'Roboto', system-ui, -apple-system, sans-serif;
+
+    /* Spacing */
+    --wm-radius-sm: 8px;
+    --wm-radius-md: 12px;
+    --wm-radius-lg: 20px;
+    --wm-radius-card: 24px;
+    --wm-shadow-card: 0 4px 24px rgba(0, 0, 0, 0.06), 0 1px 4px rgba(0, 0, 0, 0.04);
+    --wm-shadow-card-hover: 0 8px 40px rgba(0, 0, 0, 0.10), 0 2px 8px rgba(0, 0, 0, 0.06);
+
+    /* Transitions */
+    --wm-transition-fast: 150ms ease;
+    --wm-transition-base: 200ms ease;
+    --wm-transition-slow: 300ms ease;
+}
+
+/* ============================================================
+   3. LAYOUT — register-page
+   ============================================================ */
+
+.register-page {
+    min-height: 100vh;
+    padding: 1.5rem;
+    background: #F8FAFC;
+    background-attachment: fixed;
+    font-family: var(--wm-font-family);
+}
+
+/* Subtle warm accent overlay */
+.register-page::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image:
+        radial-gradient(circle at 20% 50%, rgba(255, 195, 0, 0.05) 0%, transparent 50%),
+        radial-gradient(circle at 80% 20%, rgba(255, 195, 0, 0.03) 0%, transparent 50%);
+    pointer-events: none;
+    z-index: 0;
+}
+
+.register-page > * {
+    position: relative;
+    z-index: 1;
+}
+
+/* ============================================================
+   4. CARD — register-card
+   ============================================================ */
+
+.register-card {
+    width: 100%;
+    max-width: 460px;
+    padding: 2.5rem 2rem;
+    background: var(--wm-bg-card);
+    border-radius: var(--wm-radius-card);
+    box-shadow: var(--wm-shadow-card);
+    border: 1px solid rgba(226, 232, 240, 0.6);
+    transition: box-shadow var(--wm-transition-slow), transform var(--wm-transition-slow);
+}
+
+.register-card:hover {
+    box-shadow: var(--wm-shadow-card-hover);
+    transform: translateY(-2px);
+}
+
+/* ============================================================
+   5. LOGO — register-logo
+   ============================================================ */
+
+.register-logo {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0.75rem;
+    margin-bottom: 1.75rem;
+}
+
+/* Placeholder icon — will be replaced with actual logo image */
+.register-logo .logo-placeholder {
+    width: 64px;
+    height: 64px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--wm-primary-bg);
+    border-radius: 16px;
+    transition: transform var(--wm-transition-base);
+}
+
+.register-logo .logo-placeholder i {
+    font-size: 2rem;
+    color: var(--wm-primary);
+}
+
+.register-logo:hover .logo-placeholder {
+    transform: scale(1.05);
+}
+
+/* Actual logo image (hidden by default, show when src is set) */
+.register-logo .logo-image {
+    display: none;
+    max-width: 180px;
+    height: auto;
+}
+
+.register-logo .logo-image[src]:not([src=""]) {
+    display: block;
+}
+
+.register-logo .logo-image[src]:not([src=""]) ~ .logo-placeholder {
+    display: none;
+}
+
+.register-logo span {
+    font-size: 1.5rem;
+    font-weight: 800;
+    color: var(--wm-text-primary);
+    letter-spacing: -0.02em;
+}
+
+/* ============================================================
+   6. TYPOGRAPHY — register-title, register-desc
+   ============================================================ */
+
+.register-title {
+    font-size: 1.75rem;
+    font-weight: 700;
+    color: var(--wm-text-primary);
+    text-align: center;
+    margin-bottom: 0.375rem;
+    letter-spacing: -0.02em;
+}
+
+.register-desc {
+    font-size: 0.9375rem;
+    font-weight: 400;
+    color: var(--wm-text-secondary);
+    text-align: center;
+    margin-bottom: 2rem;
+    line-height: 1.5;
+}
+
+/* ============================================================
+   7. FORM — register-field
+   ============================================================ */
+
+.register-field {
+    margin-bottom: 1.25rem;
+}
+
+.register-field .form-label {
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--wm-text-primary);
+    margin-bottom: 0.375rem;
+}
+
+/* ============================================================
+   8. INPUTS — .form-control overrides
+   ============================================================ */
+
+.register-field .form-control {
+    font-family: var(--wm-font-family);
+    font-size: 0.9375rem;
+    padding: 0.625rem 0.875rem;
+    border: 1.5px solid var(--wm-border);
+    border-radius: var(--wm-radius-sm);
+    color: var(--wm-text-primary);
+    background: var(--wm-bg-card);
+    transition: border-color var(--wm-transition-base), box-shadow var(--wm-transition-base);
+}
+
+.register-field .form-control:focus {
+    border-color: var(--wm-border-focus);
+    box-shadow: 0 0 0 3px rgba(255, 195, 0, 0.2);
+    outline: none;
+}
+
+.register-field .form-control::placeholder {
+    color: var(--wm-text-muted);
+    font-weight: 400;
+}
+
+/* Input group — icon styling */
+.register-field .input-group-text {
+    font-family: var(--wm-font-family);
+    background: var(--wm-bg-page);
+    border: 1.5px solid var(--wm-border);
+    border-right: none;
+    border-radius: var(--wm-radius-sm) 0 0 var(--wm-radius-sm);
+    color: var(--wm-text-muted);
+    padding: 0.625rem 0.75rem;
+    transition: color var(--wm-transition-base);
+}
+
+/* When input is focused, highlight the icon */
+.register-field .input-group:focus-within .input-group-text {
+    color: var(--wm-primary);
+    border-color: var(--wm-border-focus);
+}
+
+/* Toggle password button styling */
+.register-field .toggle-password {
+    border: 1.5px solid var(--wm-border);
+    border-left: none;
+    border-radius: 0 var(--wm-radius-sm) var(--wm-radius-sm) 0;
+    background: var(--wm-bg-card);
+    color: var(--wm-text-muted);
+    padding: 0.625rem 0.75rem;
+    transition: color var(--wm-transition-base), border-color var(--wm-transition-base);
+}
+
+.register-field .toggle-password:hover {
+    color: var(--wm-text-secondary);
+    background: var(--wm-bg-page);
+}
+
+/* Ensure input-group focus style works with both prepend and append */
+.register-field .input-group:focus-within .form-control {
+    border-color: var(--wm-border-focus);
+}
+
+.register-field .input-group:focus-within .toggle-password {
+    border-color: var(--wm-border-focus);
+}
+
+/* Bootstrap validation overrides */
+.register-field .form-control.is-invalid,
+.was-validated .register-field .form-control:invalid {
+    border-color: var(--wm-error);
+    background-image: none;
+}
+
+.register-field .form-control.is-invalid:focus,
+.was-validated .register-field .form-control:invalid:focus {
+    border-color: var(--wm-error);
+    box-shadow: 0 0 0 3px rgba(244, 63, 94, 0.12);
+}
+
+.register-field .invalid-feedback {
+    font-size: 0.8125rem;
+    color: var(--wm-error);
+    margin-top: 0.25rem;
+}
+
+/* Fix input group icon border when validation error */
+.was-validated .register-field .input-group:has(.form-control:invalid) .input-group-text {
+    border-color: var(--wm-error);
+}
+
+/* ============================================================
+   9. BUTTON — register-btn
+   ============================================================ */
+
+.register-btn {
+    font-family: var(--wm-font-family);
+    font-size: 1rem;
+    font-weight: 700;
+    padding: 0.75rem 1.25rem;
+    border: none;
+    border-radius: var(--wm-radius-sm);
+    background: var(--wm-primary);
+    color: #1E293B;
+    cursor: pointer;
+    transition: background var(--wm-transition-base), transform var(--wm-transition-fast), box-shadow var(--wm-transition-base);
+    margin-top: 0.5rem;
+    letter-spacing: 0.01em;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+}
+
+.register-btn:hover:not(:disabled) {
+    background: var(--wm-primary-dark);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 14px rgba(255, 195, 0, 0.4);
+}
+
+.register-btn:active:not(:disabled) {
+    background: var(--wm-primary-dark);
+    transform: translateY(0);
+    box-shadow: 0 2px 6px rgba(255, 195, 0, 0.3);
+}
+
+.register-btn:disabled {
+    background: #FFE082;
+    cursor: not-allowed;
+    opacity: 0.8;
+    color: #64748B;
+}
+
+.register-btn:focus-visible {
+    outline: 2px solid var(--wm-primary);
+    outline-offset: 2px;
+}
+
+/* ============================================================
+  10. MESSAGE — register-message (success / error)
+   ============================================================ */
+
+.register-message {
+    font-size: 0.875rem;
+    font-weight: 500;
+    padding: 0.625rem 0.875rem;
+    border-radius: var(--wm-radius-sm);
+    margin-bottom: 1rem;
+    text-align: center;
+    min-height: 0;
+    opacity: 0;
+    transform: translateY(-4px);
+    transition: opacity var(--wm-transition-slow), transform var(--wm-transition-slow);
+}
+
+.register-message:not(:empty) {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.register-message--success {
+    color: #065F46;
+    background: #D1FAE5;
+    border: 1px solid #A7F3D0;
+}
+
+.register-message--error {
+    color: #9F1239;
+    background: #FFE4E6;
+    border: 1px solid #FECDD3;
+}
+
+/* ============================================================
+  11. FOOTER — register-footer, register-link
+   ============================================================ */
+
+.register-footer {
+    text-align: center;
+    margin-top: 1.75rem;
+    font-size: 0.9375rem;
+    color: var(--wm-text-secondary);
+}
+
+.register-link {
+    color: var(--wm-primary);
+    font-weight: 600;
+    text-decoration: none;
+    transition: color var(--wm-transition-base);
+}
+
+.register-link:hover {
+    color: var(--wm-primary-dark);
+    text-decoration: underline;
+}
+
+.register-link:focus-visible {
+    outline: 2px solid var(--wm-primary);
+    outline-offset: 2px;
+    border-radius: 2px;
+}
+
+/* ============================================================
+  12. RESPONSIVE — Breakpoints
+   ============================================================ */
+
+/* === Laptop / Small Desktop (≤ 1200px) === */
+@media (max-width: 1200px) {
+    .register-card {
+        max-width: 440px;
+        padding: 2.25rem 1.75rem;
+    }
+}
+
+/* === Tablet (≤ 768px) === */
+@media (max-width: 768px) {
+    .register-page {
+        padding: 1rem;
+    }
+
+    .register-card {
+        max-width: 420px;
+        padding: 2rem 1.5rem;
+        border-radius: 20px;
+    }
+
+    .register-logo .logo-placeholder {
+        width: 56px;
+        height: 56px;
+    }
+
+    .register-logo .logo-placeholder i {
+        font-size: 1.75rem;
+    }
+
+    .register-logo span {
+        font-size: 1.375rem;
+    }
+
+    .register-title {
+        font-size: 1.5rem;
+    }
+
+    .register-desc {
+        font-size: 0.875rem;
+        margin-bottom: 1.5rem;
+    }
+
+    .register-field .form-control {
+        font-size: 0.9375rem;
+        padding: 0.5625rem 0.75rem;
+    }
+
+    .register-btn {
+        font-size: 0.9375rem;
+        padding: 0.6875rem 1rem;
+    }
+}
+
+/* === Mobile (≤ 480px) === */
+@media (max-width: 480px) {
+    .register-page {
+        padding: 0.75rem;
+        align-items: flex-start;
+        padding-top: 2rem;
+    }
+
+    .register-card {
+        max-width: 100%;
+        padding: 1.75rem 1.25rem;
+        border-radius: 18px;
+        box-shadow: 0 2px 16px rgba(0, 0, 0, 0.05), 0 1px 4px rgba(0, 0, 0, 0.03);
+    }
+
+    .register-card:hover {
+        transform: none;
+        box-shadow: 0 2px 16px rgba(0, 0, 0, 0.05), 0 1px 4px rgba(0, 0, 0, 0.03);
+    }
+
+    .register-logo {
+        margin-bottom: 1.25rem;
+    }
+
+    .register-logo .logo-placeholder {
+        width: 48px;
+        height: 48px;
+    }
+
+    .register-logo .logo-placeholder i {
+        font-size: 1.5rem;
+    }
+
+    .register-logo span {
+        font-size: 1.25rem;
+    }
+
+    .register-title {
+        font-size: 1.375rem;
+    }
+
+    .register-desc {
+        font-size: 0.8125rem;
+        margin-bottom: 1.25rem;
+    }
+
+    .register-field {
+        margin-bottom: 1rem;
+    }
+
+    .register-field .form-label {
+        font-size: 0.8125rem;
+    }
+
+    .register-field .form-control {
+        font-size: 0.9375rem;
+        padding: 0.5rem 0.75rem;
+    }
+
+    .register-field .input-group-text,
+    .register-field .toggle-password {
+        padding: 0.5rem 0.625rem;
+    }
+
+    .register-btn {
+        font-size: 0.9375rem;
+        padding: 0.625rem 1rem;
+        margin-top: 0.25rem;
+    }
+
+    .register-footer {
+        font-size: 0.875rem;
+        margin-top: 1.5rem;
+    }
+}
+
+/* === Small Mobile (≤ 360px) === */
+@media (max-width: 360px) {
+    .register-page {
+        padding: 0.5rem;
+        padding-top: 1.5rem;
+    }
+
+    .register-card {
+        padding: 1.5rem 1rem;
+        border-radius: 16px;
+    }
+
+    .register-title {
+        font-size: 1.25rem;
+    }
+
+    .register-desc {
+        font-size: 0.75rem;
+    }
+}
+
+/* ============================================================
+   UTILITIES — Prevent horizontal overflow & smooth scrolling
+   ============================================================ */
+
+html {
+    scroll-behavior: smooth;
+    -webkit-text-size-adjust: 100%;
+}
+
+body {
+    overflow-x: hidden;
+}
+
+/* ============================================================
+   END OF register.css
+   ============================================================ */

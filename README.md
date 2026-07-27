@@ -1,2 +1,2 @@
-# WordMate
-A word learning application
+<!-- # WordMate
+A word learning application -->

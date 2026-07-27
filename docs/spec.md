@@ -156,7 +156,7 @@ Quản trị viên chịu trách nhiệm quản lý dữ liệu và vận hành 
 
 | Mã | Mô tả | Mức độ |
 |----|-------|--------|
-| NFR-001 | Hệ thống PHẢI sử dụng màu chủ đạo Indigo-600 (#4F46E5) cho giao diện học viên (Tailwind CSS). | MUST |
+| NFR-001 | Hệ thống PHẢI sử dụng màu chủ đạo  (##FFC300) cho giao diện học viên (Tailwind CSS). | MUST |
 | NFR-002 | Hệ thống PHẢI sử dụng tông màu tối trung tính (Slate/Dark) cho giao diện Admin (Bootstrap). | MUST |
 | NFR-003 | Mã màu trạng thái: Success = Emerald-500 (#10B981), Warning = Amber-500 (#F59E0B), Danger = Rose-500 (#F43F5E). | MUST |
 | NFR-004 | Font chữ chủ đạo: Inter / Roboto / system-ui, đảm bảo hiển thị chuẩn ký tự phiên âm IPA. | MUST |
