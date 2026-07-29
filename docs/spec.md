@@ -345,9 +345,9 @@ Quản trị viên chịu trách nhiệm quản lý dữ liệu và vận hành 
 
 | Thành phần | Chi tiết |
 |------------|----------|
-| **Input** | `email` (string, email format), `password` (string, min 8 chars), `confirm_password` (string). `username` được tự động tạo từ phần trước dấu `@` của email. |
-| **Output (success)** | `{ success: true, message: "Đăng ký thành công", data: { user_id, email } }` |
-| **Output (error)** | `{ success: false, message: "Email đã tồn tại" }` (409) hoặc `{ success: false, message: "Validation failed" }` (400) |
+| **Input** | `username` (string, bắt buộc), `fullname` (string, bắt buộc), `email` (string, đúng định dạng email), `password` (string, tối thiểu 8 ký tự). `confirmPassword` chỉ dùng để validate phía Frontend, không truyền lên API. |
+| **Output (success)** | `{ success: true, message: "Đăng ký thành công", data: { user_id, username, fullname, email, token } }` |
+| **Output (error)** | `{ success: false, message: "Username đã tồn tại" }` (409), `{ success: false, message: "Email đã tồn tại" }` (409), hoặc `{ success: false, message: "Validation failed" }` (400). |
 
 ### 7.2. Đăng nhập
 
@@ -440,11 +440,13 @@ Quản trị viên chịu trách nhiệm quản lý dữ liệu và vận hành 
 ```
 1. Người dùng truy cập trang Đăng ký / Đăng nhập
 2. [Đăng ký]:
-   a. Nhập email, password, confirm password
-   b. Hệ thống validate dữ liệu đầu vào (email format, password >= 8 chars, confirm match)
-   c. Hệ thống kiểm tra email đã tồn tại chưa
-   d. Nếu chưa tồn tại: hash password bằng bcrypt, tạo user với role='user', streak=0
-   e. Trả về JWT token, chuyển đến trang chọn Lộ trình (Onboarding)
+   a. Nhập username, fullname, email, password, confirmPassword
+   b. Frontend validate: - confirmPassword trùng password - email đúng định dạng - password >= 8 ký tự 
+   c. Backend nhận: - username - fullname - email - password
+   d. Hệ thống kiểm tra username và email đã tồn tại chưa 
+   e. Nếu hợp lệ: hash password bằng bcrypt, tạo user với role='user', streak=0 f. Tạo JWT token 
+   g. Trả về thông tin user và JWT token 
+   h. Frontend lưu token, chuyển đến trang chọn Lộ trình (Onboarding)
 3. [Đăng nhập]:
    a. Nhập email, password
    b. Hệ thống kiểm tra email có tồn tại không
