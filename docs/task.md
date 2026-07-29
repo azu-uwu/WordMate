@@ -68,21 +68,32 @@ Không.
 
 ### Kết quả mong đợi
 
-Backend có thể khởi động với `npm start`, Express server listen trên port đã cấu hình.
+Backend có thể khởi động bằng `npm start`, Express server lắng nghe trên `PORT` được cấu hình trong `.env`; nếu không có `PORT` thì mặc định là `3000`.
 
 ### Acceptance Criteria
 
-1. `npm start` chạy thành công. Server khởi động thành công và lắng nghe trên PORT được cấu hình trong .env; nếu không có PORT thì mặc định là 3000.
-2. `package.json` có đầy đủ dependencies: express, mysql2, dotenv, bcryptjs, jsonwebtoken, multer, cors.
-3. `.env` có đủ biến môi trường.
-4. `.gitignore` loại trừ node_modules, .env, uploads/.
+1. `npm start` chạy thành công, server khởi động và lắng nghe trên `PORT` được cấu hình trong `.env`; nếu không có `PORT` thì mặc định là `3000`.
+2. `package.json` có đầy đủ dependencies:
+   - express
+   - mysql2
+   - dotenv
+   - bcrypt
+   - jsonwebtoken
+   - multer
+   - cors
+3. `.env` có đầy đủ các biến môi trường.
+4. `.gitignore` loại trừ:
+   - node_modules/
+   - .env
+   - uploads/
 
 ### Kiểm thử
 
-- **Kiểm thử chức năng**: Chạy `npm start`, kiểm tra server khởi động, gọi `http://localhost:5000` trả về response (404 là OK vì chưa có route).
-- **Kiểm thử dữ liệu**: Không.
-- **Kiểm thử lỗi**: Kiểm tra khi PORT không cấu hình thì dùng mặc định 3000.
-- **Kết quả mong đợi**: Server khởi động thành công.
+- Chạy `npm start`.
+- Kiểm tra server khởi động thành công.
+- Truy cập `http://localhost:<PORT>` (ví dụ `http://localhost:5000` nếu `PORT=5000`).
+- Nếu chưa có route thì trả về `404 Not Found` là bình thường.
+- Kiểm tra khi không cấu hình `PORT` thì server mặc định chạy trên `3000`.
 
 ### Checklist
 
@@ -490,6 +501,7 @@ Không.
 - **User Story**: US-01, US-02, US-03, US-04, US-05, US-06, US-07, US-08, US-09, US-10
 - **Functional Requirement**: FR-001–FR-053
 - **Module**: Project Setup
+
 - **Priority**: P0
 - **Complexity**: S
 - **Status**: Todo

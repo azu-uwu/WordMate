@@ -42,8 +42,9 @@ app.get("/test-db", async (req, res) => {
 // auth
 app.use("/api/auth", authRoutes);
 
-app.listen(process.env.PORT, () => {
-    console.log(`Server running at http://localhost:${process.env.PORT}`);
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => {
+    console.log(`Server running at http://localhost:${PORT}`);
 });
 
 // // Đăng ký route auth
