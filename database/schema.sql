@@ -23,7 +23,7 @@ CREATE TABLE users (
     fullname        VARCHAR(100)    DEFAULT NULL,
     avatar          VARCHAR(255)    DEFAULT NULL,
     role            ENUM('user', 'admin') NOT NULL DEFAULT 'user',
-    roadmap_id      BIGINT          DEFAULT NULL,
+    roadmap_id      BIGINT UNSIGNED DEFAULT NULL,
     streak          INT             NOT NULL DEFAULT 0,
     last_study_date DATE            DEFAULT NULL,
     created_at      TIMESTAMP       NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -32,7 +32,11 @@ CREATE TABLE users (
     UNIQUE INDEX uk_users_username (username),
     UNIQUE INDEX uk_users_email    (email),
     INDEX idx_users_role           (role),
-    INDEX idx_users_roadmap_id     (roadmap_id)
+    INDEX idx_users_roadmap_id     (roadmap_id),
+
+    CONSTRAINT fk_users_roadmap
+        FOREIGN KEY (roadmap_id) REFERENCES roadmaps (id)
+        ON DELETE RESTRICT ON UPDATE CASCADE
 ) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_unicode_ci;
 
 -- ============================================================
