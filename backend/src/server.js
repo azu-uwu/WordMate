@@ -3,6 +3,7 @@ const cors = require("cors");
 require("dotenv").config();
 
 const db = require("../config/db");
+const { testConnection } = require("../config/db");
 
 // auth
 const authRoutes = require("./routes/authRoutes");
@@ -43,8 +44,9 @@ app.get("/test-db", async (req, res) => {
 app.use("/api/auth", authRoutes);
 
 const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => {
+app.listen(PORT, async () => {
     console.log(`Server running at http://localhost:${PORT}`);
+    await testConnection();
 });
 
 // // Đăng ký route auth
