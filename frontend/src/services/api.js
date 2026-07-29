@@ -1,0 +1,141 @@
+/**
+ * HTTP client wrapper using fetch().
+ * Automatically attaches JWT token from localStorage,
+ * handles HTTP errors, and parses JSON responses.
+ */
+
+const BASE_URL = 'http://localhost:5000/api';
+
+/**
+ * Get the stored JWT token from localStorage.
+ * @returns {string|null}
+ */
+function getToken() {
+  return localStorage.getItem('token');
+}
+
+/**
+ * Set the JWT token into localStorage.
+ * @param {string} token
+ */
+function setToken(token) {
+  localStorage.setItem('token', token);
+}
+
+/**
+ * Remove the JWT token from localStorage.
+ */
+function removeToken() {
+  localStorage.removeItem('token');
+}
+
+/**
+ * Internal request function.
+ * @param {string} endpoint - API endpoint (e.g. '/auth/login')
+ * @param {object} options - Fetch options (method, body, headers, etc.)
+ * @returns {Promise<object>} Parsed JSON response
+ */
+async function request(endpoint, options = {}) {
+  const url = `${BASE_URL}${endpoint}`;
+
+  const headers = {
+    'Content-Type': 'application/json',
+    ...options.headers
+  };
+
+  const token = getToken();
+  if (token) {
+    headers['Authorization'] = `Bearer ${token}`;
+  }
+
+  const config = {
+    ...options,
+    headers
+  };
+
+  const response = await fetch(url, config);
+
+  // Handle 204 No Content
+  if (response.status === 204) {
+    return null;
+  }
+
+  const data = await response.json();
+
+  if (!response.ok) {
+    const error = new Error(data.message || 'Request failed');
+    error.status = response.status;
+    error.data = data;
+    throw error;
+  }
+
+  return data;
+}
+
+/**
+ * HTTP GET request.
+ * @param {string} endpoint - API endpoint
+ * @param {object} options - Additional fetch options
+ * @returns {Promise<object>}
+ */
+function get(endpoint, options = {}) {
+  return request(endpoint, { ...options, method: 'GET' });
+}
+
+/**
+ * HTTP POST request.
+ * @param {string} endpoint - API endpoint
+ * @param {object} body - Request body
+ * @param {object} options - Additional fetch options
+ * @returns {Promise<object>}
+ */
+function post(endpoint, body, options = {}) {
+  return request(endpoint, {
+    ...options,
+    method: 'POST',
+    body: JSON.stringify(body)
+  });
+}
+
+/**
+ * HTTP PUT request.
+ * @param {string} endpoint - API endpoint
+ * @param {object} body - Request body
+ * @param {object} options - Additional fetch options
+ * @returns {Promise<object>}
+ */
+function put(endpoint, body, options = {}) {
+  return request(endpoint, {
+    ...options,
+    method: 'PUT',
+    body: JSON.stringify(body)
+  });
+}
+
+/**
+ * HTTP PATCH request.
+ * @param {string} endpoint - API endpoint
+ * @param {object} body - Request body
+ * @param {object} options - Additional fetch options
+ * @returns {Promise<object>}
+ */
+function patch(endpoint, body, options = {}) {
+  return request(endpoint, {
+    ...options,
+    method: 'PATCH',
+    body: JSON.stringify(body)
+  });
+}
+
+/**
+ * HTTP DELETE request.
+ * @param {string} endpoint - API endpoint
+ * @param {object} options - Additional fetch options
+ * @returns {Promise<object>}
+ */
+function del(endpoint, options = {}) {
+  return request(endpoint, { ...options, method: 'DELETE' });
+}
+
+export { get, post, put, patch, del };
+export default { get, post, put, patch, del };
