@@ -72,14 +72,14 @@ Backend có thể khởi động với `npm start`, Express server listen trên 
 
 ### Acceptance Criteria
 
-1. `npm start` chạy thành công, server listen trên port 3000 (mặc định).
+1. `npm start` chạy thành công. Server khởi động thành công và lắng nghe trên PORT được cấu hình trong .env; nếu không có PORT thì mặc định là 3000.
 2. `package.json` có đầy đủ dependencies: express, mysql2, dotenv, bcryptjs, jsonwebtoken, multer, cors.
 3. `.env` có đủ biến môi trường.
 4. `.gitignore` loại trừ node_modules, .env, uploads/.
 
 ### Kiểm thử
 
-- **Kiểm thử chức năng**: Chạy `npm start`, kiểm tra server khởi động, gọi `http://localhost:3000` trả về response (404 là OK vì chưa có route).
+- **Kiểm thử chức năng**: Chạy `npm start`, kiểm tra server khởi động, gọi `http://localhost:5000` trả về response (404 là OK vì chưa có route).
 - **Kiểm thử dữ liệu**: Không.
 - **Kiểm thử lỗi**: Kiểm tra khi PORT không cấu hình thì dùng mặc định 3000.
 - **Kết quả mong đợi**: Server khởi động thành công.
@@ -502,7 +502,7 @@ Tạo HTTP client wrapper sử dụng fetch(), tự động gắn JWT token, x�
 ### Công việc cần thực hiện
 
 1. Tạo file `frontend/src/services/api.js`.
-2. Định nghĩa BASE_URL (mặc định `http://localhost:3000/api`).
+2. Định nghĩa BASE_URL (mặc định `http://localhost:5000/api`).
 3. Hàm `request(endpoint, options = {})`: lấy token từ localStorage, gắn Authorization header, gọi fetch, parse JSON, xử lý lỗi HTTP.
 4. Các wrapper: `get()`, `post()`, `put()`, `patch()`, `del()`.
 
