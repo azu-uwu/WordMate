@@ -1401,7 +1401,7 @@ Tất cả API response sử dụng định dạng JSON thống nhất:
 ### 12.3. Validation Error
 
 - Xảy ra khi dữ liệu đầu vào không hợp lệ.
-- Backend kiểm tra: email format, password length, confirm password match, required fields.
+- Backend kiểm tra: username không được để trống, fullname không được để trống, email đúng định dạng, password đạt độ dài tối thiểu, các trường bắt buộc không được để trống
 - Trả về 400 với message mô tả lỗi cụ thể.
 
 ### 12.4. Database Error

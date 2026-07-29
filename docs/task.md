@@ -561,7 +561,8 @@ Tạo service quản lý authentication phía Frontend.
 
 1. Tạo file `frontend/src/services/authService.js`.
 2. Hàm `login(email, password)`: gọi api.post('/auth/login', ...), lưu token + user info vào localStorage.
-3. Hàm `register(email, password, confirmPassword)`: gọi api.post('/auth/register', ...), lưu token + user info.
+3. Hàm `register(username, fullname, email, password)`: gọi api.post('/auth/register', ...), lưu token + user info. 
+confirmPassword chỉ dùng để validate trên Frontend, không truyền lên API.
 4. Hàm `logout()`, `getToken()`, `setToken(token)`, `removeToken()`, `isAuthenticated()`, `getCurrentUser()`.
 
 ### File cần tạo
@@ -645,7 +646,21 @@ Tạo route POST /api/auth/register + controller. Validate input, hash password,
 
 1. Tạo file `backend/src/controllers/authController.js`.
 2. Tạo file `backend/src/routes/authRoutes.js`.
-3. Controller.auth.register: validate email format, password >= 8, confirm match. Kiểm tra email tồn tại → 409. Hash password bcrypt. Tạo user (role='user', streak=0). Tạo JWT token. Format response theo spec 7.1.
+3. Controller.auth.register: 
+Validate:
+- username bắt buộc
+- fullname bắt buộc
+- email đúng định dạng
+- password >= 8
+- username chưa tồn tại
+- email chưa tồn tại
+- Hash password bằng bcrypt.
+- Tạo user (username, fullname, email, password, role='user', streak=0).
+- Tạo JWT token.
+- Format response theo spec 7.1.
+Lưu ý:
+confirmPassword không xử lý ở Backend.
+
 4. Route: POST /api/auth/register → authController.register.
 
 ### File cần tạo
@@ -941,12 +956,24 @@ Không.
 
 ### Mục tiêu
 
-Tạo trang đăng ký với form email, password, confirm password, gọi API register, lưu JWT.
+Tạo trang đăng ký với form fullname, username, email, password, confirm password, gọi API register, lưu JWT.
 
 ### Công việc cần thực hiện
 
-1. Tạo file `frontend/src/pages/auth/register.html`: form email, password, confirm password, nút submit, link login, Tailwind CSS.
-2. Tạo file `frontend/src/js/pages/register.js`: validate (email format, password >= 8, confirm match), gọi authService.register, redirect onboarding.
+1. Tạo file frontend/src/pages/auth/register.html:
+   form fullname, username, email, password, confirm password,
+   nút submit, link login, Tailwind CSS.
+
+2. Tạo file frontend/src/js/pages/register.js:
+   validate:
+   - fullname không được để trống
+   - username không được để trống
+   - email đúng định dạng
+   - password >= 8 ký tự
+   - confirm password phải trùng password
+
+   Gọi authService.register(username, fullname, email, password),
+   redirect onboarding.
 
 ### File cần tạo
 
