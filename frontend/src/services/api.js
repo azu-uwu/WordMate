@@ -63,6 +63,15 @@ async function request(endpoint, options = {}) {
   const data = await response.json();
 
   if (!response.ok) {
+    if (response.status === 401) {
+      removeToken();
+      window.location.href = '/login';
+    }
+
+    if (response.status === 403) {
+      alert('You do not have permission to perform this action.');
+    }
+
     const error = new Error(data.message || 'Request failed');
     error.status = response.status;
     error.data = data;
