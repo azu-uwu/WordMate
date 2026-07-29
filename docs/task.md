@@ -419,18 +419,18 @@ Tạo hàm format response chuẩn JSON thống nhất cho toàn bộ API.
 
 ### Công việc cần thực hiện
 
-1. Tạo file `backend/src/utils/response.js`.
+1. Sửa file `backend/src/utils/response.js`.
 2. Hàm `successResponse(res, data, message = 'Success', statusCode = 200)`: Format `{ success: true, message, data }`.
 3. Hàm `errorResponse(res, message = 'Error', statusCode = 500)`: Format `{ success: false, message }`.
 4. Hàm `createdResponse(res, data, message = 'Created')`: Status 201.
 
 ### File cần tạo
 
-- `backend/src/utils/response.js`
+Không.
 
 ### File cần chỉnh sửa
 
-Không.
+- `backend/src/utils/response.js`
 
 ### Checklist
 
