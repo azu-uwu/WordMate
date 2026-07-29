@@ -12,7 +12,25 @@ CREATE DATABASE IF NOT EXISTS wordmate
 USE wordmate;
 
 -- ============================================================
--- 1. users
+-- 1. roadmaps
+-- Lộ trình học tập (Basic, TOEIC, Phrasal Verb, ...).
+-- ============================================================
+CREATE TABLE roadmaps (
+    id              BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    name            VARCHAR(255)    NOT NULL,
+    description     TEXT            DEFAULT NULL,
+    image           VARCHAR(255)    DEFAULT NULL,
+    is_active       TINYINT(1)      NOT NULL DEFAULT 1,
+    sort_order      INT             NOT NULL DEFAULT 0,
+    created_at      TIMESTAMP       NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at      TIMESTAMP       NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+
+    INDEX idx_roadmaps_is_active  (is_active),
+    INDEX idx_roadmaps_sort_order (sort_order)
+) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_unicode_ci;
+
+-- ============================================================
+-- 2. users
 -- Thông tin tài khoản người dùng.
 -- ============================================================
 CREATE TABLE users (
@@ -37,24 +55,6 @@ CREATE TABLE users (
     CONSTRAINT fk_users_roadmap
         FOREIGN KEY (roadmap_id) REFERENCES roadmaps (id)
         ON DELETE RESTRICT ON UPDATE CASCADE
-) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_unicode_ci;
-
--- ============================================================
--- 2. roadmaps
--- Lộ trình học tập (Basic, TOEIC, Phrasal Verb, ...).
--- ============================================================
-CREATE TABLE roadmaps (
-    id              BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-    name            VARCHAR(255)    NOT NULL,
-    description     TEXT            DEFAULT NULL,
-    image           VARCHAR(255)    DEFAULT NULL,
-    is_active       TINYINT(1)      NOT NULL DEFAULT 1,
-    sort_order      INT             NOT NULL DEFAULT 0,
-    created_at      TIMESTAMP       NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    updated_at      TIMESTAMP       NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-
-    INDEX idx_roadmaps_is_active  (is_active),
-    INDEX idx_roadmaps_sort_order (sort_order)
 ) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_unicode_ci;
 
 -- ============================================================
