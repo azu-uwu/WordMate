@@ -115,7 +115,7 @@ Quản trị viên chịu trách nhiệm quản lý dữ liệu và vận hành 
 |----|-------|--------|
 | FR-033 | Hệ thống PHẢI hiển thị chuỗi ngày học liên tiếp (Streak) trên trang chủ. | MUST |
 | FR-034 | Hệ thống PHẢI tăng Streak khi người dùng hoàn thành ít nhất một hoạt động học tập trong ngày (học từ mới hoặc làm Quiz). | MUST |
-| FR-035 | Hệ thống PHẢI reset Streak về 0 nếu người dùng bỏ lỡ một ngày liên tiếp. | MUST |
+| FR-035 | Hệ thống PHẢI reset Streak về 1 nếu người dùng bỏ lỡ một ngày liên tiếp và quay lại học. | MUST |
 | FR-036 | Hệ thống PHẢI đảm bảo mỗi ngày chỉ được tính một lần vào Streak. | MUST |
 
 ### 3.7. Trợ lý AI (AI Assistant)
@@ -312,7 +312,7 @@ Quản trị viên chịu trách nhiệm quản lý dữ liệu và vận hành 
   - Hoàn thành học một từ mới (bài tập luyện viết).
   - Hoàn thành ít nhất một câu hỏi Quiz.
 - Streak tăng thêm 1 nếu người dùng học ở ngày kế tiếp.
-- Nếu bỏ lỡ một ngày liên tiếp, streak reset về 0 khi quay lại học.
+- Nếu bỏ lỡ một ngày liên tiếp, streak reset về 1 khi quay lại học.
 - Mỗi ngày chỉ được tính một lần vào streak.
 
 ### 6.4. AI Assistant Rules
@@ -345,7 +345,7 @@ Quản trị viên chịu trách nhiệm quản lý dữ liệu và vận hành 
 
 | Thành phần | Chi tiết |
 |------------|----------|
-| **Input** | `email` (string, email format), `password` (string, min 8 chars), `confirm_password` (string) |
+| **Input** | `email` (string, email format), `password` (string, min 8 chars), `confirm_password` (string). `username` được tự động tạo từ phần trước dấu `@` của email. |
 | **Output (success)** | `{ success: true, message: "Đăng ký thành công", data: { user_id, email } }` |
 | **Output (error)** | `{ success: false, message: "Email đã tồn tại" }` (409) hoặc `{ success: false, message: "Validation failed" }` (400) |
 

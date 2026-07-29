@@ -292,7 +292,7 @@ Các API được tổ chức theo từng phân hệ của hệ thống.
 | Roadmaps | `/api/roadmaps/*` |
 | Topics | `/api/topics/*` |
 | Vocabularies | `/api/vocabularies/*` |
-| Learning | `/api/user-vocabularies/*` |
+| Learning | `/api/learning/*` |
 | Quiz | `/api/quiz/*` |
 | Notebook | `/api/notebook/*` |
 | AI Assistant | `/api/ai/*` |

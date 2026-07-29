@@ -186,13 +186,17 @@ backend/
 │   │   ├── userModel.js
 │   │   ├── vocabularyModel.js
 │   │   ├── topicModel.js
-│   │   └── notebookModel.js
+│   │   ├── notebookModel.js
+│   │   ├── quizModel.js
+│   │   └── aiModel.js
 │   │
 │   ├── services/          # Logic nghiệp vụ đặc thù
-│   │   └── aiService.js   # Gọi Gemini API
+│   │   ├── aiService.js   # Gọi Gemini API
+│   │   └── srsService.js  # Tính toán SRS
 │   │
 │   ├── utils/             # Tiện ích
-│   │   └── response.js    # Format response chuẩn
+│   │   ├── response.js    # Format response chuẩn
+│   │   └── logger.js      # Logger
 │   │
 │   └── server.js          # Entry point, khởi tạo Express
 │
@@ -285,8 +289,12 @@ database/
 
 ```
 docs/
+├── requirements.md  # Product Requirements Document
 ├── spec.md          # Software specification (yêu cầu chức năng, business rules)
-└── architecture.md  # Architecture document (this file)
+├── architecture.md  # Architecture document (this file)
+├── database.md      # Database design
+├── plan.md          # Implementation plan
+└── task.md          # Chi tiết tasks theo plan
 ```
 
 **Vai trò:** Lưu trữ tài liệu thiết kế và đặc tả kỹ thuật của dự án.
@@ -521,13 +529,13 @@ Mỗi trang sử dụng một số component dùng chung để tạo layout th�
 
 **Trách nhiệm:**
 
-- **main.css**: Style chính sử dụng TailwindCSS cho giao diện người học. Màu chủ đạo (##FFC300).
+- **main.css**: Style chính sử dụng TailwindCSS cho giao diện người học. Màu chủ đạo (#FFC300).
 - **admin.css**: Style cho Admin Dashboard sử dụng Bootstrap, tông màu tối trung tính (Slate/Dark).
 - **components/**: CSS riêng cho từng component nếu cần.
 
 **Nguyên tắc:**
 
-- User interface: TailwindCSS, màu Indigo-600.
+- User interface: TailwindCSS, màu #FFC300.
 - Admin interface: Bootstrap, tông màu tối.
 - Font: Inter / Roboto / system-ui, hỗ trợ IPA.
 - Màu trạng thái: Success = Emerald-500, Warning = Amber-500, Danger = Rose-500.
@@ -1217,7 +1225,7 @@ Admin                   Frontend (Admin)           Backend                   Dat
 | `/api/auth/register` | Không | Public |
 | `/api/auth/login` | Không | Public |
 | `/api/auth/*` (khác) | authMiddleware | Đổi mật khẩu, logout |
-| `/api/user/*` | authMiddleware | Profile, settings |
+| `/api/profile` | authMiddleware | Profile, settings |
 | `/api/roadmaps` | Không (GET) / authMiddleware (khác) | Public list |
 | `/api/topics` | authMiddleware | Theo roadmap của user |
 | `/api/vocabularies/*` | authMiddleware | Học tập |
