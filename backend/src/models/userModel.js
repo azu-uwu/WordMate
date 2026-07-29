@@ -1,45 +1,102 @@
-const db = require("../../config/db");
+const pool = require("../../config/db");
 
-// Tìm user theo email
-const findByEmail = async (email) => {
-    const [rows] = await db.query(
-        "SELECT * FROM users WHERE email = ?",
-        [email]
-    );
-    return rows[0];
+const findByEmail = (email) => {
+    return new Promise((resolve, reject) => {
+        pool.execute(
+            "SELECT * FROM users WHERE email = ?",
+            [email],
+            (err, rows) => {
+                if (err) return reject(err);
+                resolve(rows[0] || null);
+            }
+        );
+    });
 };
 
-// Tìm user theo username
-const findByUsername = async (username) => {
-    const [rows] = await db.query(
-        "SELECT * FROM users WHERE username = ?",
-        [username]
-    );
-    return rows[0];
+const findById = (id) => {
+    return new Promise((resolve, reject) => {
+        pool.execute(
+            "SELECT * FROM users WHERE id = ?",
+            [id],
+            (err, rows) => {
+                if (err) return reject(err);
+                resolve(rows[0] || null);
+            }
+        );
+    });
 };
 
-// Thêm user mới
-const createUser = async (user) => {
-    const sql = `
-        INSERT INTO users
-        (username,email,password,fullname)
-        VALUES(?,?,?,?)
-    `;
+const create = ({ username, email, password, fullname }) => {
+    return new Promise((resolve, reject) => {
+        pool.execute(
+            "INSERT INTO users (username, email, password, fullname) VALUES (?, ?, ?, ?)",
+            [username, email, password, fullname],
+            (err, result) => {
+                if (err) return reject(err);
+                resolve(result);
+            }
+        );
+    });
+};
 
-    const [result] = await db.query(sql, [
-        user.username,
-        user.email,
-        user.password,
-        user.fullname
-    ]);
+const updatePassword = (id, newPasswordHash) => {
+    return new Promise((resolve, reject) => {
+        pool.execute(
+            "UPDATE users SET password = ? WHERE id = ?",
+            [newPasswordHash, id],
+            (err, result) => {
+                if (err) return reject(err);
+                resolve(result);
+            }
+        );
+    });
+};
 
-    return result;
+const updateProfile = (id, { fullname, avatar }) => {
+    return new Promise((resolve, reject) => {
+        pool.execute(
+            "UPDATE users SET fullname = ?, avatar = ? WHERE id = ?",
+            [fullname, avatar, id],
+            (err, result) => {
+                if (err) return reject(err);
+                resolve(result);
+            }
+        );
+    });
+};
+
+const updateRoadmap = (id, roadmapId) => {
+    return new Promise((resolve, reject) => {
+        pool.execute(
+            "UPDATE users SET roadmap_id = ? WHERE id = ?",
+            [roadmapId, id],
+            (err, result) => {
+                if (err) return reject(err);
+                resolve(result);
+            }
+        );
+    });
+};
+
+const updateStreak = (id, streak, lastStudyDate) => {
+    return new Promise((resolve, reject) => {
+        pool.execute(
+            "UPDATE users SET streak = ?, last_study_date = ? WHERE id = ?",
+            [streak, lastStudyDate, id],
+            (err, result) => {
+                if (err) return reject(err);
+                resolve(result);
+            }
+        );
+    });
 };
 
 module.exports = {
     findByEmail,
-    findByUsername,
-    createUser
+    findById,
+    create,
+    updatePassword,
+    updateProfile,
+    updateRoadmap,
+    updateStreak,
 };
-
-// Đăng nhập
