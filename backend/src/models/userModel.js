@@ -8,6 +8,14 @@ const findByEmail = async (email) => {
     return rows[0] || null;
 };
 
+const findByUsername = async (username) => {
+    const [rows] = await pool.execute(
+        "SELECT * FROM users WHERE username = ?",
+        [username]
+    );
+    return rows[0] || null;
+};
+
 const findById = async (id) => {
     const [rows] = await pool.execute(
         "SELECT * FROM users WHERE id = ?",
@@ -58,6 +66,7 @@ const updateStreak = async (id, streak, lastStudyDate) => {
 
 module.exports = {
     findByEmail,
+    findByUsername,
     findById,
     create,
     updatePassword,
