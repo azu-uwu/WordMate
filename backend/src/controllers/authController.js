@@ -105,6 +105,67 @@ const register = async (req, res) => {
     }
 };
 
+const login = async (req, res) => {
+    try {
+        const { email, password } = req.body;
+
+        // Validate required fields
+        if (!email || !password) {
+            return res.status(400).json({
+                success: false,
+                message: "Vui lòng nhập email và mật khẩu"
+            });
+        }
+
+        // Find user by email
+        const user = await User.findByEmail(email);
+        if (!user) {
+            return res.status(401).json({
+                success: false,
+                message: "Email hoặc mật khẩu không đúng"
+            });
+        }
+
+        // Compare password
+        const isPasswordValid = await bcrypt.compare(password, user.password);
+        if (!isPasswordValid) {
+            return res.status(401).json({
+                success: false,
+                message: "Email hoặc mật khẩu không đúng"
+            });
+        }
+
+        // Generate JWT token (HS256, 24h)
+        const token = jwt.sign(
+            { id: user.id, email: user.email, role: user.role },
+            process.env.JWT_SECRET,
+            { expiresIn: "24h" }
+        );
+
+        // Format response per spec 7.2
+        return res.status(200).json({
+            success: true,
+            data: {
+                token,
+                user: {
+                    id: user.id,
+                    email: user.email,
+                    role: user.role,
+                    roadmap_id: user.roadmap_id,
+                    streak: user.streak
+                }
+            }
+        });
+    } catch (err) {
+        console.error(err);
+        return res.status(500).json({
+            success: false,
+            message: "Lỗi máy chủ"
+        });
+    }
+};
+
 module.exports = {
-    register
+    register,
+    login
 };
