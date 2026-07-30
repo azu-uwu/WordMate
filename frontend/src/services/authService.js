@@ -13,17 +13,18 @@ import api from './api.js';
  * @returns {Promise<object>} Response data with token and user
  */
 async function login(email, password) {
-  const data = await api.post('/auth/login', { email, password });
+  const response = await api.post('/auth/login', { email, password });
+  const { token, user } = response.data;
 
-  if (data.token) {
-    setToken(data.token);
+  if (token) {
+    setToken(token);
   }
 
-  if (data.user) {
-    localStorage.setItem('user', JSON.stringify(data.user));
+  if (user) {
+    localStorage.setItem('user', JSON.stringify(user));
   }
 
-  return data;
+  return response.data;
 }
 
 /**
@@ -37,22 +38,27 @@ async function login(email, password) {
  * @returns {Promise<object>} Response data with token and user
  */
 async function register(username, fullname, email, password) {
-  const data = await api.post('/auth/register', {
+  const response = await api.post('/auth/register', {
     username,
     fullname,
     email,
     password
   });
+  const { user_id, username: uname, fullname: fname, email: em, token } = response.data;
 
-  if (data.token) {
-    setToken(data.token);
+  if (token) {
+    setToken(token);
   }
 
-  if (data.user) {
-    localStorage.setItem('user', JSON.stringify(data.user));
-  }
+  const user = {
+    id: user_id,
+    username: uname,
+    fullname: fname,
+    email: em
+  };
+  localStorage.setItem('user', JSON.stringify(user));
 
-  return data;
+  return response.data;
 }
 
 /**
