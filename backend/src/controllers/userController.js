@@ -1,4 +1,5 @@
 const User = require("../models/userModel");
+const Roadmap = require("../models/roadmapModel");
 
 const getProfile = async (req, res) => {
     try {
@@ -75,7 +76,49 @@ const updateProfile = async (req, res) => {
     }
 };
 
+const updateRoadmap = async (req, res) => {
+    try {
+        const { roadmap_id } = req.body;
+        const userId = req.user.id;
+
+        // Validate roadmap_id is an integer and > 0
+        if (!Number.isInteger(roadmap_id) || roadmap_id <= 0) {
+            return res.status(400).json({
+                success: false,
+                message: "Roadmap ID không hợp lệ"
+            });
+        }
+
+        // Check if roadmap exists
+        const roadmap = await Roadmap.findById(roadmap_id);
+        if (!roadmap) {
+            return res.status(404).json({
+                success: false,
+                message: "Roadmap không tồn tại"
+            });
+        }
+
+        // Update user's roadmap
+        await User.updateRoadmap(userId, roadmap_id);
+
+        return res.status(200).json({
+            success: true,
+            data: {
+                user_id: userId,
+                roadmap_id: roadmap_id
+            }
+        });
+    } catch (err) {
+        console.error(err);
+        return res.status(500).json({
+            success: false,
+            message: "Lỗi máy chủ"
+        });
+    }
+};
+
 module.exports = {
     getProfile,
-    updateProfile
+    updateProfile,
+    updateRoadmap
 };
