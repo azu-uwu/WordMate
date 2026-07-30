@@ -7,7 +7,7 @@ const { testConnection } = require("../config/db");
 
 // auth
 const authRoutes = require("./routes/authRoutes");
-console.log("authRoutes =", authRoutes);
+// console.log("authRoutes =", authRoutes);
 
 const app = express();
 

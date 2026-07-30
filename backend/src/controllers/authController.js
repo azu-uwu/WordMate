@@ -3,6 +3,7 @@ const jwt = require("jsonwebtoken");
 const User = require("../models/userModel");
 
 const register = async (req, res) => {
+    console.log(">>> NEW REGISTER CONTROLLER");
     try {
         const { username, email, password, fullname } = req.body;
 
@@ -69,6 +70,19 @@ const register = async (req, res) => {
             process.env.JWT_SECRET,
             { expiresIn: "24h" }
         );
+
+        // log sửa lỗi
+        // console.log({
+        //     success: true,
+        //     message: "Đăng ký thành công",
+        //     data: {
+        //         user_id: user.id,
+        //         username: user.username,
+        //         fullname: user.fullname,
+        //         email: user.email,
+        //         token
+        //     }
+        // });
 
         // Format response per spec 7.1
         return res.status(201).json({

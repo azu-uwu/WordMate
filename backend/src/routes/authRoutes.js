@@ -15,6 +15,7 @@ router.get("/test", (req, res) => {
 
 // POST register
 router.post("/register", authController.register);
+console.log(authController);
 // router.post("/login", authController.login);
 
 module.exports = router;
