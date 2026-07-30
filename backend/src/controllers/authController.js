@@ -165,7 +165,66 @@ const login = async (req, res) => {
     }
 };
 
+const changePassword = async (req, res) => {
+    try {
+        const { oldPassword, newPassword } = req.body;
+        const userId = req.user.id;
+
+        // Validate required fields
+        if (!oldPassword || !newPassword) {
+            return res.status(400).json({
+                success: false,
+                message: "Vui lòng nhập mật khẩu cũ và mật khẩu mới"
+            });
+        }
+
+        // Validate new password length
+        if (newPassword.length < 8) {
+            return res.status(400).json({
+                success: false,
+                message: "Mật khẩu mới phải tối thiểu 8 ký tự"
+            });
+        }
+
+        // Get user from database
+        const user = await User.findById(userId);
+        if (!user) {
+            return res.status(404).json({
+                success: false,
+                message: "Người dùng không tồn tại"
+            });
+        }
+
+        // Compare old password with hashed password
+        const isOldPasswordValid = await bcrypt.compare(oldPassword, user.password);
+        if (!isOldPasswordValid) {
+            return res.status(400).json({
+                success: false,
+                message: "Mật khẩu cũ không đúng"
+            });
+        }
+
+        // Hash new password
+        const hashedNewPassword = await bcrypt.hash(newPassword, 10);
+
+        // Update password in database
+        await User.updatePassword(userId, hashedNewPassword);
+
+        return res.status(200).json({
+            success: true,
+            message: "Đổi mật khẩu thành công"
+        });
+    } catch (err) {
+        console.error(err);
+        return res.status(500).json({
+            success: false,
+            message: "Lỗi máy chủ"
+        });
+    }
+};
+
 module.exports = {
     register,
-    login
+    login,
+    changePassword
 };
