@@ -34,6 +34,48 @@ const getProfile = async (req, res) => {
     }
 };
 
+const updateProfile = async (req, res) => {
+    try {
+        const { fullname } = req.body;
+        const userId = req.user.id;
+
+        // Validate fullname is not empty or whitespace only
+        if (!fullname || fullname.trim().length === 0) {
+            return res.status(400).json({
+                success: false,
+                message: "Họ tên không được để trống"
+            });
+        }
+
+        // Get current user to preserve existing avatar
+        const user = await User.findById(userId);
+        if (!user) {
+            return res.status(404).json({
+                success: false,
+                message: "Người dùng không tồn tại"
+            });
+        }
+
+        // Update profile with new fullname and existing avatar
+        await User.updateProfile(userId, {
+            fullname: fullname.trim(),
+            avatar: user.avatar
+        });
+
+        return res.status(200).json({
+            success: true,
+            message: "Cập nhật thông tin thành công"
+        });
+    } catch (err) {
+        console.error(err);
+        return res.status(500).json({
+            success: false,
+            message: "Lỗi máy chủ"
+        });
+    }
+};
+
 module.exports = {
-    getProfile
+    getProfile,
+    updateProfile
 };
