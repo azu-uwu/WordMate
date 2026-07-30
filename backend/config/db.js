@@ -14,7 +14,7 @@ const pool = mysql.createPool({
 const testConnection = async () => {
     try {
         const connection = await pool.getConnection();
-        console.log("✅ MySQL connected successfully");
+        console.log("Kết nối MySQL thành công!!!");
         connection.release();
     } catch (err) {
         if (err.code === "ECONNREFUSED") {
