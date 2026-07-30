@@ -64,15 +64,19 @@ async function request(endpoint, options = {}) {
 
   if (!response.ok) {
     if (response.status === 401) {
-      removeToken();
-      window.location.href = '/login';
+      // Chỉ redirect nếu KHÔNG phải API Login
+      if (endpoint !== '/auth/login') {
+        removeToken();
+        window.location.href = '../pages/auth/login.html';
+      }
+
     }
 
     if (response.status === 403) {
-      alert('You do not have permission to perform this action.');
+      alert('Bạn không có quyền thực hiện chức năng này.');
     }
 
-    const error = new Error(data.message || 'Request failed');
+    const error = new Error(data.message || 'Yêu cầu thất bại');
     error.status = response.status;
     error.data = data;
     throw error;
