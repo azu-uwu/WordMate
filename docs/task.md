@@ -886,7 +886,7 @@ Tạo route PUT /api/profile + controller (yêu cầu authMiddleware). Cập nh�
 - **Priority**: P0
 - **Complexity**: S
 - **Status**: Todo
-- **Dependencies**: M2-T4, M2-T1, M3-T1
+- **Dependencies**: M2-T4, M2-T1, M3-T0
 
 ### Mục tiêu
 
@@ -1023,6 +1023,55 @@ Không.
 
 # Milestone 3: Roadmap, Topic & Vocabulary
 
+## Task M3-T0 (Backend)
+
+### Thông tin
+
+- **ID**: M3-T0
+- **Tên**: Tạo Roadmap Model
+- **Milestone**: M3
+- **User Story**: US-03, US-09
+- **Functional Requirement**: FR-008, FR-009, FR-010
+- **Module**: Roadmap
+- **Priority**: P0
+- **Complexity**: S
+- **Status**: Todo
+- **Dependencies**: M1-T2
+
+### Mục tiêu
+
+Tạo Roadmap Model với các hàm truy cập dữ liệu Roadmap sử dụng Prepared Statements để phục vụ các API Roadmap và User.
+
+### Công việc cần thực hiện
+
+1. Tạo file `backend/src/models/roadmapModel.js`.
+2. Import pool từ `config/db.js`.
+3. Tạo hàm `findAllActive()`:
+   - Lấy tất cả roadmap có `is_active = 1`.
+   - Sắp xếp theo `sort_order ASC`.
+4. Tạo hàm `findById(id)`:
+   - Tìm roadmap theo `id`.
+   - Trả về `null` nếu không tồn tại.
+5. Tất cả các hàm sử dụng Prepared Statements (`pool.execute`) và trả về Promise.
+
+### File cần tạo
+
+- `backend/src/models/roadmapModel.js`
+
+### File cần chỉnh sửa
+
+Không.
+
+### Checklist
+
+- [ ] Database
+- [ ] Backend
+- [ ] Frontend
+- [ ] API
+- [ ] Validation
+- [ ] Testing
+- [ ] Documentation
+
 ## Task M3-T1 (Backend)
 
 ### Thông tin
@@ -1036,7 +1085,7 @@ Không.
 - **Priority**: P0
 - **Complexity**: S
 - **Status**: Todo
-- **Dependencies**: M1-T2
+- **Dependencies**: M1-T2,  M3-T0
 
 ### Mục tiêu
 
