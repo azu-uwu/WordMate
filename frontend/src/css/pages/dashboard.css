@@ -55,10 +55,6 @@ body {
     background: url("../../../public/image/background.png") center/cover fixed;
 }
 
-.main-content {
-    padding: 2rem 0 6rem;   /* trên 2rem, dưới chừa chỗ cho bottom nav */
-}
-
 .dashboard-container {
     width: 60%;
     max-width: 1400px;

@@ -13,6 +13,7 @@
 
 import api from '../../services/api.js';
 import * as authService from '../../services/authService.js';
+import { loadAllComponents } from '../../js/components/nav.js';
 
 // ============================================================
 // DOM ELEMENTS
@@ -303,11 +304,19 @@ async function initDashboard() {
             return;
         }
 
+        // Load shared components (header, bottom-nav)
+        await loadAllComponents();
+
         // Show loading state
         showLoading();
 
         // Step 2: Load user profile
         currentProfile = await loadProfile();
+
+        // Update dashboard title with actual roadmap name
+        if (dashboardTitle && currentProfile.roadmap_name) {
+            dashboardTitle.textContent = currentProfile.roadmap_name;
+        }
 
         // Update streak display
         if (currentProfile.streak !== undefined) {

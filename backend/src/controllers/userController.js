@@ -13,6 +13,13 @@ const getProfile = async (req, res) => {
             });
         }
 
+        // Fetch roadmap name if user has a roadmap_id
+        let roadmapName = null;
+        if (user.roadmap_id) {
+            const roadmap = await Roadmap.findById(user.roadmap_id);
+            roadmapName = roadmap ? roadmap.name : null;
+        }
+
         return res.status(200).json({
             success: true,
             data: {
@@ -23,6 +30,7 @@ const getProfile = async (req, res) => {
                 avatar: user.avatar,
                 role: user.role,
                 roadmap_id: user.roadmap_id,
+                roadmap_name: roadmapName,
                 streak: user.streak,
                 last_study_date: user.last_study_date
             }
