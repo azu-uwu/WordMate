@@ -1309,8 +1309,8 @@ Tạo trang onboarding cho người dùng mới chọn lộ trình lần đầu.
 
 ### Công việc cần thực hiện
 
-1. Tạo file `frontend/src/pages/dashboard/onboarding.html`: card layout danh sách roadmap, sau khi chọn roadmap → hiển thị danh sách topics.
-2. Tạo file `frontend/src/js/pages/onboarding.js`: gọi GET /api/roadmaps, PUT /api/profile/roadmap, GET /api/topics.
+1. Tạo file   `frontend/src/pages/dashboard/onboarding.html`: hiển thị danh sách Roadmap dưới dạng card. Khi người dùng chọn một Roadmap, lưu lựa chọn và chuyển đến dashboard.html.
+2. Tạo file `frontend/src/js/pages/onboarding.js`: gọi GET /api/roadmaps để lấy danh sách Roadmap, gọi PUT /api/profile/roadmap để lưu Roadmap người dùng đã chọn, sau khi thành công chuyển hướng đến dashboard.html.
 
 ### File cần tạo
 
@@ -1340,17 +1340,27 @@ Không.
 
 ### Mục tiêu
 
-Tạo cấu trúc HTML và CSS cho trang Dashboard.
+Tạo giao diện Dashboard hiển thị danh sách Topic thuộc Roadmap mà người dùng đã chọn.
 
 ### Công việc cần thực hiện
 
-1. Tạo file `frontend/src/pages/dashboard/dashboard.html`: header (avatar, roadmap name, streak), topic list (card/grid), bottom navigation (Trang chủ, Ôn tập, Sổ tay), AI Chat placeholder. Tailwind CSS, #FFC300.
-2. Tạo file `frontend/src/css/main.css`: style Tailwind cơ bản.
+1. Tạo file `frontend/src/pages/dashboard/dashboard.html`: 
+- Chỉ tạo phần main content của Dashboard.
+- Header và Bottom Navigation không viết trực tiếp, sẽ được load từ Components dùng chung.
+- Tạo khu vực hiển thị danh sách Topic dưới dạng card/grid.
+- Mỗi Topic hiển thị: Tên Topic, Mô tả ngắn (nếu có), Ảnh minh họa (nếu có).
+- Khi người dùng click vào một Topic sẽ chuyển đến learn.html (logic sẽ được thực hiện ở task JavaScript tiếp theo).
+- Có placeholder cho AI Chat theo thiết kế của dự án.
+- Sử dụng Tailwind CSS và màu chủ đạo của dự án.
+2. Tạo file `frontend/src/css/pages/dashboard.css`: 
+- Chỉ chứa các style riêng của Dashboard.
+- Không chứa style của Header và Bottom Navigation.
+- Phối hợp với Tailwind CSS.
 
 ### File cần tạo
 
 - `frontend/src/pages/dashboard/dashboard.html`
-- `frontend/src/css/main.css`
+- `frontend/src/css/pages/dashboard.css`
 
 ### File cần chỉnh sửa
 
