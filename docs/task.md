@@ -1190,6 +1190,8 @@ Tạo route GET /api/topics?roadmap_id=x + controller. Yêu cầu auth.
 - `backend/src/controllers/topicController.js`
 - `backend/src/routes/topicRoutes.js`
 
+### Bỏ qua task này vì chưa có trang xem chi tiết topic (tính năng admin - làm sau)
+
 ---
 
 ## Task M3-T5 (Backend)
