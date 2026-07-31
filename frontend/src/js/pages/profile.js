@@ -5,6 +5,7 @@
  */
 import api from '../../services/api.js';
 import * as authService from '../../services/authService.js';
+import { loadAllComponents } from '../../js/components/nav.js';
 
 // ============================================================
 // DOM References
@@ -399,6 +400,9 @@ async function init() {
         window.location.href = '../auth/login.html';
         return;
     }
+
+    // Load shared components (header, bottom-nav)
+    await loadAllComponents();
 
     // Bind UI events
     bindEvents();
