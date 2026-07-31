@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hồ sơ | WordMate</title>
+    <link rel="icon" type="image/svg+xml" href="../../../public/image/wordmate-logo.svg">
+
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Google Fonts: Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:ital,wght@0,400;0,500;0,600;0,700;0,800&display=swap" rel="stylesheet">
+
+    <!-- Font Awesome 6 (Free) -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="../../css/pages/profile.css">
+</head>
+
+<body style="font-family: 'Inter', sans-serif;">
+
+    <!-- ===== MAIN CONTAINER ===== -->
+    <div class="profile-container">
+
+        <!-- ===== LOADING SPINNER ===== -->
+        <div id="loadingSpinner" class="loading-spinner" style="padding-top: 4rem;">
+            <div class="spinner"></div>
+            <p>Đang tải thông tin...</p>
+        </div>
+
+        <!-- ===== PROFILE CONTENT (hidden until loaded) ===== -->
+        <div id="profileContent" style="display: none;">
+
+            <!-- ===== HEADER: Avatar + Name + Email ===== -->
+            <div class="profile-header">
+                <div class="profile-avatar-wrapper">
+                    <img id="avatarImg" class="profile-avatar" src="https://ui-avatars.com/api/?name=User&background=667eea&color=fff&size=100" alt="Avatar" style="display: none;">
+                    <div id="avatarPlaceholder" class="profile-avatar-placeholder">U</div>
+                </div>
+                <h1 id="headerFullname" class="profile-name">—</h1>
+                <p id="headerEmail" class="profile-email">—</p>
+            </div>
+            <!-- ===== END HEADER ===== -->
+
+            <div class="container py-4">
+
+                <!-- ===== SECTION: Personal Info ===== -->
+                <div class="profile-card">
+                    <h2 class="profile-card-title">
+                        <i class="fa-solid fa-user"></i>
+                        Thông tin cá nhân
+                    </h2>
+
+                    <!-- Stats Grid: Level, EXP, Streak -->
+                    <div class="stats-grid">
+                        <div class="stat-item">
+                            <div class="stat-value" id="displayLevel">—</div>
+                            <div class="stat-label">Level</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-value" id="displayExp">—</div>
+                            <div class="stat-label">EXP</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-value" id="displayStreak">0</div>
+                            <div class="stat-label">Streak</div>
+                        </div>
+                    </div>
+
+                    <!-- Info Rows -->
+                    <div class="info-row">
+                        <span class="info-label">Avatar</span>
+                        <span class="info-value">
+                            <img id="infoAvatar" class="rounded-circle" src="https://ui-avatars.com/api/?name=User&background=667eea&color=fff&size=40" alt="Avatar" width="40" height="40" style="object-fit: cover; border: 2px solid #e2e8f0;">
+                        </span>
+                    </div>
+
+                    <div class="info-row">
+                        <span class="info-label">Họ tên</span>
+                        <span class="info-value" id="displayFullname">—</span>
+                        <button class="edit-btn-inline" id="editFullnameBtn" title="Chỉnh sửa họ tên">
+                            <i class="fa-solid fa-pen"></i>
+                        </button>
+                        <!-- Edit form (hidden by default) -->
+                        <div class="edit-form" id="editFullnameForm" style="display: none;">
+                            <input type="text" id="fullnameInput" placeholder="Nhập họ tên mới">
+                            <button class="btn-save" id="saveFullnameBtn">
+                                <i class="fa-solid fa-check"></i>
+                            </button>
+                            <button class="btn-cancel" id="cancelFullnameBtn">
+                                <i class="fa-solid fa-times"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="info-row">
+                        <span class="info-label">Username</span>
+                        <span class="info-value" id="displayUsername">—</span>
+                    </div>
+
+                    <div class="info-row">
+                        <span class="info-label">Email</span>
+                        <span class="info-value" id="displayEmail">—</span>
+                    </div>
+                </div>
+                <!-- ===== END PERSONAL INFO ===== -->
+
+                <!-- ===== SECTION: Change Password ===== -->
+                <div class="profile-card">
+                    <h2 class="profile-card-title">
+                        <i class="fa-solid fa-lock"></i>
+                        Đổi mật khẩu
+                    </h2>
+
+                    <div id="passwordMessage" class="alert-message" role="alert"></div>
+
+                    <form class="password-form" id="passwordForm" novalidate>
+                        <div class="form-group">
+                            <label for="currentPassword">Mật khẩu hiện tại</label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="fa-solid fa-lock"></i></span>
+                                <input type="password" class="form-control" id="currentPassword" placeholder="Nhập mật khẩu hiện tại" required autocomplete="current-password">
+                                <button class="toggle-password" type="button" tabindex="-1">
+                                    <i class="fa-regular fa-eye"></i>
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="newPassword">Mật khẩu mới</label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="fa-solid fa-key"></i></span>
+                                <input type="password" class="form-control" id="newPassword" placeholder="Nhập mật khẩu mới (tối thiểu 8 ký tự)" required minlength="8" autocomplete="new-password">
+                                <button class="toggle-password" type="button" tabindex="-1">
+                                    <i class="fa-regular fa-eye"></i>
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="confirmPassword">Xác nhận mật khẩu mới</label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="fa-solid fa-check-double"></i></span>
+                                <input type="password" class="form-control" id="confirmPassword" placeholder="Xác nhận mật khẩu mới" required autocomplete="new-password">
+                                <button class="toggle-password" type="button" tabindex="-1">
+                                    <i class="fa-regular fa-eye"></i>
+                                </button>
+                            </div>
+                        </div>
+
+                        <button type="submit" class="btn btn-primary w-100 mt-3" id="changePasswordBtn" style="background: #667eea; border-color: #667eea; border-radius: 0.75rem; padding: 0.65rem; font-weight: 600;">
+                            <span class="btn-text">Đổi mật khẩu</span>
+                            <span class="btn-spinner d-none">
+                                <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                                Đang xử lý...
+                            </span>
+                        </button>
+                    </form>
+                </div>
+                <!-- ===== END CHANGE PASSWORD ===== -->
+
+                <!-- ===== SECTION: Learning Roadmap ===== -->
+                <div class="profile-card">
+                    <h2 class="profile-card-title">
+                        <i class="fa-solid fa-road"></i>
+                        Lộ trình học tập
+                    </h2>
+
+                    <div id="roadmapMessage" class="alert-message" role="alert"></div>
+
+                    <div id="roadmapDisplay" class="roadmap-current">
+                        <i class="fa-solid fa-map-signs"></i>
+                        <span class="roadmap-name" id="currentRoadmapText">—</span>
+                    </div>
+
+                    <!-- Roadmap update form (hidden by default) -->
+                    <div id="roadmapUpdateForm" style="display: none; margin-top: 1rem;">
+                        <div class="roadmap-select-group">
+                            <select id="roadmapSelect" class="form-select">
+                                <option value="">Chọn lộ trình...</option>
+                            </select>
+                            <button class="btn-update" id="updateRoadmapBtn">
+                                <i class="fa-solid fa-check"></i> Cập nhật
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                <!-- ===== END ROADMAP ===== -->
+
+                <!-- ===== SECTION: Logout ===== -->
+                <div class="logout-section">
+                    <button class="btn-logout" id="logoutBtn">
+                        <i class="fa-solid fa-right-from-bracket"></i>
+                        Đăng xuất
+                    </button>
+                </div>
+                <!-- ===== END LOGOUT ===== -->
+
+            </div>
+            <!-- ===== END CONTAINER ===== -->
+
+        </div>
+        <!-- ===== END PROFILE CONTENT ===== -->
+
+    </div>
+    <!-- ===== END MAIN CONTAINER ===== -->
+
+    <!-- ===== BOTTOM NAVIGATION ===== -->
+    <nav class="bottom-nav">
+        <a href="../dashboard/dashboard.html" class="bottom-nav-item">
+            <i class="fa-solid fa-chart-pie"></i>
+            <span>Dashboard</span>
+        </a>
+        <a href="../learn/learn.html" class="bottom-nav-item">
+            <i class="fa-solid fa-book-open"></i>
+            <span>Learn</span>
+        </a>
+        <a href="../quiz/quiz.html" class="bottom-nav-item">
+            <i class="fa-solid fa-puzzle-piece"></i>
+            <span>Quiz</span>
+        </a>
+        <a href="../notebook/notebook.html" class="bottom-nav-item">
+            <i class="fa-solid fa-book"></i>
+            <span>Notebook</span>
+        </a>
+        <a href="../profile/profile.html" class="bottom-nav-item active">
+            <i class="fa-solid fa-user"></i>
+            <span>Profile</span>
+        </a>
+    </nav>
+    <!-- ===== END BOTTOM NAVIGATION ===== -->
+
+    <!-- ===== SCRIPTS ===== -->
+
+    <!-- Bootstrap 5 JS Bundle -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js">
+    </script>
+
+    <!-- Toggle Password Visibility -->
+    <script>
+        document.querySelectorAll('.toggle-password').forEach(btn => {
+            btn.addEventListener('click', function() {
+                const input = this.closest('.input-group').querySelector('input');
+                const icon = this.querySelector('i');
+                if (input.type === 'password') {
+                    input.type = 'text';
+                    icon.classList.remove('fa-eye');
+                    icon.classList.add('fa-eye-slash');
+                } else {
+                    input.type = 'password';
+                    icon.classList.remove('fa-eye-slash');
+                    icon.classList.add('fa-eye');
+                }
+            });
+        });
+    </script>
+
+    <!-- Profile Page JS -->
+    <script type="module" src="../../js/pages/profile.js"></script>
+
+</body>
+
+</html>

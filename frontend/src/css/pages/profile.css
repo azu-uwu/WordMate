@@ -1,0 +1,475 @@
+/* ============================================================
+   Profile Page Styles - WordMate
+   ============================================================ */
+
+/* ----- Profile Header ----- */
+.profile-header {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    padding: 3rem 1.5rem 2rem;
+    text-align: center;
+    color: #fff;
+    border-bottom-left-radius: 2rem;
+    border-bottom-right-radius: 2rem;
+    position: relative;
+}
+
+.profile-avatar-wrapper {
+    position: relative;
+    display: inline-block;
+    margin-bottom: 1rem;
+}
+
+.profile-avatar {
+    width: 100px;
+    height: 100px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 4px solid rgba(255, 255, 255, 0.8);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+    background: #e2e8f0;
+}
+
+.profile-avatar-placeholder {
+    width: 100px;
+    height: 100px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2.5rem;
+    font-weight: 700;
+    color: #fff;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border: 4px solid rgba(255, 255, 255, 0.8);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+    margin: 0 auto 1rem;
+}
+
+.profile-name {
+    font-size: 1.5rem;
+    font-weight: 700;
+    margin-bottom: 0.25rem;
+}
+
+.profile-email {
+    font-size: 0.9rem;
+    opacity: 0.9;
+    margin-bottom: 0;
+}
+
+/* ----- Profile Card ----- */
+.profile-card {
+    background: #fff;
+    border-radius: 1rem;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+    padding: 1.5rem;
+    margin-bottom: 1rem;
+}
+
+.profile-card-title {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: #1e293b;
+    margin-bottom: 1.25rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.profile-card-title i {
+    color: #667eea;
+    font-size: 1.2rem;
+}
+
+/* ----- Info Row ----- */
+.info-row {
+    display: flex;
+    align-items: center;
+    padding: 0.75rem 0;
+    border-bottom: 1px solid #f1f5f9;
+}
+
+.info-row:last-child {
+    border-bottom: none;
+}
+
+.info-label {
+    width: 120px;
+    font-size: 0.85rem;
+    color: #64748b;
+    font-weight: 500;
+    flex-shrink: 0;
+}
+
+.info-value {
+    flex: 1;
+    font-size: 0.9rem;
+    color: #1e293b;
+    font-weight: 500;
+}
+
+.info-value .badge {
+    font-size: 0.75rem;
+    font-weight: 500;
+    padding: 0.35rem 0.65rem;
+}
+
+/* ----- Stats Grid ----- */
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 0.75rem;
+    margin-bottom: 1rem;
+}
+
+.stat-item {
+    text-align: center;
+    padding: 1rem 0.5rem;
+    background: #f8fafc;
+    border-radius: 0.75rem;
+    border: 1px solid #e2e8f0;
+}
+
+.stat-value {
+    font-size: 1.5rem;
+    font-weight: 800;
+    color: #1e293b;
+    line-height: 1.2;
+}
+
+.stat-label {
+    font-size: 0.7rem;
+    color: #64748b;
+    margin-top: 0.25rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    font-weight: 600;
+}
+
+/* ----- Edit Form ----- */
+.edit-form {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    flex: 1;
+}
+
+.edit-form input {
+    flex: 1;
+    padding: 0.4rem 0.75rem;
+    border: 2px solid #e2e8f0;
+    border-radius: 0.5rem;
+    font-size: 0.9rem;
+    outline: none;
+    transition: border-color 0.2s;
+}
+
+.edit-form input:focus {
+    border-color: #667eea;
+}
+
+.edit-form .btn-save {
+    padding: 0.4rem 0.75rem;
+    font-size: 0.85rem;
+    border-radius: 0.5rem;
+    background: #667eea;
+    color: #fff;
+    border: none;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.edit-form .btn-save:hover {
+    background: #5a67d8;
+}
+
+.edit-form .btn-cancel {
+    padding: 0.4rem 0.75rem;
+    font-size: 0.85rem;
+    border-radius: 0.5rem;
+    background: #e2e8f0;
+    color: #64748b;
+    border: none;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.edit-form .btn-cancel:hover {
+    background: #cbd5e1;
+}
+
+/* ----- Change Password Form ----- */
+.password-form .form-group {
+    margin-bottom: 1rem;
+}
+
+.password-form label {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: #475569;
+    margin-bottom: 0.35rem;
+    display: block;
+}
+
+.password-form .input-group {
+    display: flex;
+    align-items: stretch;
+}
+
+.password-form .input-group-text {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.5rem 0.75rem;
+    background: #f8fafc;
+    border: 2px solid #e2e8f0;
+    border-right: none;
+    border-radius: 0.5rem 0 0 0.5rem;
+    color: #94a3b8;
+}
+
+.password-form .form-control {
+    flex: 1;
+    padding: 0.5rem 0.75rem;
+    border: 2px solid #e2e8f0;
+    border-radius: 0 0.5rem 0.5rem 0;
+    font-size: 0.9rem;
+    outline: none;
+    transition: border-color 0.2s;
+    width: auto;
+}
+
+.password-form .form-control:focus {
+    border-color: #667eea;
+}
+
+.password-form .toggle-password {
+    padding: 0.5rem 0.75rem;
+    background: #f8fafc;
+    border: 2px solid #e2e8f0;
+    border-left: none;
+    border-radius: 0 0.5rem 0.5rem 0;
+    cursor: pointer;
+    color: #94a3b8;
+    transition: color 0.2s;
+}
+
+.password-form .toggle-password:hover {
+    color: #64748b;
+}
+
+/* ----- Roadmap Section ----- */
+.roadmap-current {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 1rem;
+    background: #f0fdf4;
+    border: 1px solid #bbf7d0;
+    border-radius: 0.75rem;
+}
+
+.roadmap-current i {
+    font-size: 1.5rem;
+    color: #22c55e;
+}
+
+.roadmap-current .roadmap-name {
+    font-weight: 600;
+    color: #166534;
+}
+
+.roadmap-current .roadmap-none {
+    color: #94a3b8;
+    font-style: italic;
+}
+
+/* ----- Logout Button ----- */
+.logout-section {
+    text-align: center;
+    padding: 1.5rem 0;
+}
+
+.btn-logout {
+    padding: 0.75rem 2.5rem;
+    font-size: 1rem;
+    font-weight: 600;
+    border-radius: 0.75rem;
+    border: 2px solid #fca5a5;
+    background: #fff;
+    color: #ef4444;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.btn-logout:hover {
+    background: #fef2f2;
+    border-color: #ef4444;
+}
+
+/* ----- Bottom Navigation ----- */
+.bottom-nav {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: #fff;
+    border-top: 1px solid #e2e8f0;
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    padding: 0.5rem 0;
+    padding-bottom: calc(0.5rem + env(safe-area-inset-bottom));
+    z-index: 1000;
+    box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.05);
+}
+
+.bottom-nav-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-decoration: none;
+    color: #94a3b8;
+    font-size: 0.7rem;
+    font-weight: 500;
+    transition: color 0.2s;
+    padding: 0.25rem 0.5rem;
+    min-width: 60px;
+}
+
+.bottom-nav-item i {
+    font-size: 1.3rem;
+    margin-bottom: 0.15rem;
+}
+
+.bottom-nav-item.active {
+    color: #667eea;
+}
+
+.bottom-nav-item:hover {
+    color: #667eea;
+}
+
+/* ----- Alert Messages ----- */
+.alert-message {
+    padding: 0.75rem 1rem;
+    border-radius: 0.5rem;
+    font-size: 0.85rem;
+    margin-bottom: 1rem;
+    display: none;
+}
+
+.alert-message.alert-success {
+    display: block;
+    background: #f0fdf4;
+    color: #166534;
+    border: 1px solid #bbf7d0;
+}
+
+.alert-message.alert-error {
+    display: block;
+    background: #fef2f2;
+    color: #991b1b;
+    border: 1px solid #fecaca;
+}
+
+/* ----- Loading Spinner ----- */
+.loading-spinner {
+    text-align: center;
+    padding: 2rem;
+    color: #94a3b8;
+}
+
+.loading-spinner .spinner {
+    width: 2rem;
+    height: 2rem;
+    border: 3px solid #e2e8f0;
+    border-top-color: #667eea;
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+    margin: 0 auto 0.5rem;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+/* ----- Responsive ----- */
+@media (max-width: 400px) {
+    .stats-grid {
+        grid-template-columns: repeat(3, 1fr);
+        gap: 0.5rem;
+    }
+    
+    .stat-value {
+        font-size: 1.2rem;
+    }
+    
+    .info-label {
+        width: 90px;
+    }
+}
+
+/* ----- Container spacing ----- */
+.profile-container {
+    padding-bottom: 5rem;
+    min-height: 100vh;
+    background: #f8fafc;
+}
+
+/* ----- Edit button inline ----- */
+.edit-btn-inline {
+    background: none;
+    border: none;
+    color: #667eea;
+    cursor: pointer;
+    padding: 0.25rem 0.5rem;
+    font-size: 0.85rem;
+    border-radius: 0.25rem;
+    transition: background 0.2s;
+}
+
+.edit-btn-inline:hover {
+    background: #eef2ff;
+}
+
+/* ----- Roadmap Select ----- */
+.roadmap-select-group {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    flex: 1;
+}
+
+.roadmap-select-group select {
+    flex: 1;
+    padding: 0.4rem 0.75rem;
+    border: 2px solid #e2e8f0;
+    border-radius: 0.5rem;
+    font-size: 0.9rem;
+    outline: none;
+    transition: border-color 0.2s;
+    background: #fff;
+}
+
+.roadmap-select-group select:focus {
+    border-color: #667eea;
+}
+
+.roadmap-select-group .btn-update {
+    padding: 0.4rem 0.75rem;
+    font-size: 0.85rem;
+    border-radius: 0.5rem;
+    background: #667eea;
+    color: #fff;
+    border: none;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.roadmap-select-group .btn-update:hover {
+    background: #5a67d8;
+}
