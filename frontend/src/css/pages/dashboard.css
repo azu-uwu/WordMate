@@ -47,21 +47,29 @@
 }
 
 /* ============================================================
-   2. LAYOUT — dashboard-main & dashboard-container
-   ============================================================ */
+    2. LAYOUT — Body & Main Content
+    ============================================================ */
 
-.dashboard-main {
-    min-height: 100vh;
-    background: var(--wm-bg-page);
-    font-family: var(--wm-font-family);
-    padding-bottom: 5rem; /* Space for bottom navigation */
+body {
+    margin: 0;
+    background: url("../../../public/image/background.png") center/cover fixed;
+}
+
+.main-content {
+    padding: 2rem 0 6rem;   /* trên 2rem, dưới chừa chỗ cho bottom nav */
 }
 
 .dashboard-container {
-    max-width: 1200px;
-    margin: 0 auto;
-    padding: 2rem 1.5rem;
+    width: 60%;
+    max-width: 1400px;
+    min-width: 500px;
+    margin: 0 auto;         /* chỉ căn giữa theo chiều ngang */
+    padding: 0 1rem;         /* padding ngang cho màn hình nhỏ */
     animation: fadeIn 0.5s ease forwards;
+    padding-bottom: 5rem;
+    min-height: 100vh;
+    background: var(--wm-bg-page);
+    font-family: var(--wm-font-family);
 }
 
 /* ============================================================
@@ -101,56 +109,7 @@
 }
 
 /* ============================================================
-   5. STREAK SECTION — streak-section
-   ============================================================ */
-
-.streak-section {
-    margin-bottom: 2.5rem;
-    animation: fadeInUp 0.6s ease forwards;
-}
-
-.streak-card {
-    display: inline-flex;
-    align-items: center;
-    gap: 1rem;
-    background: linear-gradient(135deg, var(--wm-primary) 0%, var(--wm-primary-dark) 100%);
-    color: var(--wm-text-primary);
-    padding: 1rem 1.5rem;
-    border-radius: var(--wm-radius-card);
-    box-shadow: var(--wm-shadow-streak);
-    transition: transform var(--wm-transition-base), box-shadow var(--wm-transition-base);
-}
-
-.streak-card:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 6px 24px rgba(255, 195, 0, 0.3);
-}
-
-.streak-icon {
-    font-size: 2rem;
-    animation: pulse 2s ease-in-out infinite;
-}
-
-.streak-info {
-    display: flex;
-    flex-direction: column;
-    gap: 0.25rem;
-}
-
-.streak-number {
-    font-size: 1.75rem;
-    font-weight: 800;
-    line-height: 1;
-}
-
-.streak-label {
-    font-size: 0.875rem;
-    font-weight: 500;
-    opacity: 0.9;
-}
-
-/* ============================================================
-   6. TOPIC SECTION — topic-section
+   5. TOPIC SECTION — topic-section
    ============================================================ */
 
 .topic-section {
@@ -182,13 +141,13 @@
 }
 
 /* ============================================================
-   7. TOPIC GRID — topic-grid
+   7. TOPIC GRID — topic-grid (Vertical List)
    ============================================================ */
 
 .topic-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-    gap: 1.5rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
 }
 
 /* ============================================================
@@ -213,6 +172,7 @@
 .topic-card:hover {
     transform: translateY(-4px);
     box-shadow: var(--wm-shadow-card-hover);
+    background: var(--wm-primary-bg);
     border-color: var(--wm-primary);
 }
 
@@ -416,7 +376,6 @@ body {
     }
 
     .topic-grid {
-        grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
         gap: 1.25rem;
     }
 
@@ -468,7 +427,6 @@ body {
     }
 
     .topic-grid {
-        grid-template-columns: 1fr;
         gap: 1rem;
     }
 
