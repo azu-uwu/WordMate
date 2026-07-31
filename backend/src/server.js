@@ -12,6 +12,9 @@ const authRoutes = require("./routes/authRoutes");
 // user
 const userRoutes = require("./routes/userRoutes");
 
+// roadmap
+const roadmapRoutes = require("./routes/roadmapRoutes");
+
 const app = express();
 
 app.use(cors());
@@ -48,6 +51,9 @@ app.use("/api/auth", authRoutes);
 
 // user
 app.use("/api", userRoutes);
+
+// roadmap
+app.use("/api/roadmaps", roadmapRoutes);
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, async () => {

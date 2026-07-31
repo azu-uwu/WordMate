@@ -15,6 +15,7 @@ const findById = async (id) => {
     return rows[0] || null;
 };
 
+
 module.exports = {
     findAllActive,
     findById,
