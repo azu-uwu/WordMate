@@ -1,11 +1,148 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="vi">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+    <title>Dashboard | WordMate</title>
+    <link rel="icon" type="image/svg+xml" href="../../../public/image/wordmate-logo.svg">
+
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Google Fonts: Inter (hỗ trợ tiếng Việt đầy đủ) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:ital,wght@0,400;0,500;0,600;0,700;0,800&display=swap" rel="stylesheet">
+
+    <!-- Font Awesome 6 (Free) -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="../../css/pages/post-login-layout.css">
+    <link rel="stylesheet" href="../../css/pages/dashboard.css">
 </head>
+
 <body>
-    huhu
+    <!-- ===== HEADER COMPONENT PLACEHOLDER ===== -->
+    <!-- Header sẽ được load từ component dùng chung -->
+    <div id="header-placeholder" class="header-placeholder">
+        <!-- Header component sẽ được inject vào đây -->
+    </div>
+
+    <!-- ===== MAIN CONTENT ===== -->
+    <main class="main-content">
+        
+        <!-- ===== DASHBOARD CONTAINER ===== -->
+        <div class="dashboard-container">
+            
+            <!-- ===== DASHBOARD HEADER ===== -->
+            <div class="dashboard-header">
+                <h1 class="dashboard-title">Trang Chủ</h1>
+                <p class="dashboard-subtitle">Chọn chủ đề để bắt đầu học tập</p>
+            </div>
+
+            <!-- ===== STREAK SECTION ===== -->
+            <div class="streak-section">
+                <div class="streak-card">
+                    <div class="streak-icon">
+                        <i class="fa-solid fa-fire"></i>
+                    </div>
+                    <div class="streak-info">
+                        <span class="streak-number">7</span>
+                        <span class="streak-label">ngày liên tiếp</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ===== TOPIC SECTION ===== -->
+            <section class="topic-section">
+                <div class="section-header">
+                    <h2 class="section-title">Chủ Đề Học Tập</h2>
+                    <span class="topic-count">3 chủ đề</span>
+                </div>
+
+                <!-- ===== TOPIC GRID ===== -->
+                <div class="topic-grid">
+                    
+                    <!-- Topic Card 1 -->
+                    <article class="topic-card">
+                        <div class="topic-card-image">
+                            <img src="../../../public/image/topic-placeholder.svg" alt="Chủ đề 1">
+                        </div>
+                        <div class="topic-card-body">
+                            <h3 class="topic-card-title">Từ Vựng Cơ Bản</h3>
+                            <p class="topic-card-desc">
+                                Học các từ vựng tiếng Anh cơ bản hàng ngày với hình ảnh và phát âm chuẩn.
+                            </p>
+                        </div>
+                        <div class="topic-card-footer">
+                            <span class="topic-card-hint">
+                                Bắt đầu học
+                                <i class="fa-solid fa-arrow-right"></i>
+                            </span>
+                        </div>
+                    </article>
+
+                    <!-- Topic Card 2 -->
+                    <article class="topic-card">
+                        <div class="topic-card-image">
+                            <img src="../../../public/image/topic-placeholder.svg" alt="Chủ đề 2">
+                        </div>
+                        <div class="topic-card-body">
+                            <h3 class="topic-card-title">Từ Vựng Giao Tiếp</h3>
+                            <p class="topic-card-desc">
+                                Các cụm từ và câu nói thông dụng trong giao tiếp hàng ngày.
+                            </p>
+                        </div>
+                        <div class="topic-card-footer">
+                            <span class="topic-card-hint">
+                                Bắt đầu học
+                                <i class="fa-solid fa-arrow-right"></i>
+                            </span>
+                        </div>
+                    </article>
+
+                    <!-- Topic Card 3 -->
+                    <article class="topic-card">
+                        <div class="topic-card-image">
+                            <img src="../../../public/image/topic-placeholder.svg" alt="Chủ đề 3">
+                        </div>
+                        <div class="topic-card-body">
+                            <h3 class="topic-card-title">Từ Vựng Công Việc</h3>
+                            <p class="topic-card-desc">
+                                Từ vựng chuyên ngành và thuật ngữ phổ biến trong môi trường công sở.
+                            </p>
+                        </div>
+                        <div class="topic-card-footer">
+                            <span class="topic-card-hint">
+                                Bắt đầu học
+                                <i class="fa-solid fa-arrow-right"></i>
+                            </span>
+                        </div>
+                    </article>
+
+                </div>
+            </section>
+
+        </div>
+        <!-- ===== END DASHBOARD CONTAINER ===== -->
+
+    </main>
+    <!-- ===== END MAIN CONTENT ===== -->
+
+    <!-- ===== AI CHAT PLACEHOLDER ===== -->
+    <!-- AI Chat Component sẽ được load từ component dùng chung -->
+    <div id="ai-chat-placeholder" class="ai-chat-placeholder">
+        <!-- AI Chat component sẽ được inject vào đây -->
+    </div>
+
+    <!-- ===== BOTTOM NAVIGATION PLACEHOLDER ===== -->
+    <!-- Bottom Navigation sẽ được load từ component dùng chung -->
+    <div id="bottom-nav-placeholder" class="bottom-nav-placeholder">
+        <!-- Bottom Navigation component sẽ được inject vào đây -->
+    </div>
+
 </body>
+
 </html>
