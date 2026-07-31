@@ -1270,17 +1270,17 @@ Tạo route GET /api/vocabularies?topic_id=x + controller. Yêu cầu auth.
 
 ### Mục tiêu
 
-Tạo script seed dữ liệu mẫu: 3 roadmaps, 9+ topics, 50+ vocabularies.
+Tạo script seed dữ liệu mẫu: 3 roadmaps, 9 topics, 45 vocabularies.
 
 ### Công việc cần thực hiện
 
-1. Tạo file `database/seed.sql` (hoặc `backend/seed.js`).
-2. INSERT 3 roadmaps: "Basic English", "TOEIC", "Phrasal Verb & Idiom".
-3. INSERT 3+ topics cho mỗi roadmap, 5+ vocabularies cho mỗi topic.
+1. Tạo file `database/seed.sql`.
+2. INSERT 3 roadmaps: "1000 từ cơ bản", "TOEIC", "IELS".
+3. INSERT 3 topics cho mỗi roadmap, 5 vocabularies cho mỗi topic.
 
 ### File cần tạo
 
-- `database/seed.sql` hoặc `backend/seed.js`
+- `database/seed.sql` 
 
 ### File cần chỉnh sửa
 
