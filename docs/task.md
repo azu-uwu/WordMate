@@ -1250,6 +1250,7 @@ Tạo route GET /api/vocabularies?topic_id=x + controller. Yêu cầu auth.
 - `backend/src/controllers/vocabularyController.js`
 - `backend/src/routes/vocabularyRoutes.js`
 
+### Bỏ qua task này vì chưa có trang xem chi tiết vocab
 ---
 
 ## Task M3-T7 (Database/Data)
