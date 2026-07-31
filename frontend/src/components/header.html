@@ -1,0 +1,86 @@
+<!-- ============================================================
+     Header Component - WordMate
+     Contains: Logo, Avatar, Streak
+     ============================================================ -->
+
+     <!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <link rel="icon" type="image/svg+xml" href="../../public/image/wordmate-logo.svg">
+
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Google Fonts: Inter (hỗ trợ tiếng Việt đầy đủ) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:ital,wght@0,400;0,500;0,600;0,700;0,800&display=swap" rel="stylesheet">
+
+    <!-- Font Awesome 6 (Free) -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="../css/components/header.css">
+
+</head>
+<body>
+
+
+<header class="wm-header">
+    <div class="header-container">
+        <!-- Logo -->
+        <div class="header-logo">
+            <a href="dashboard/dashboard.html" class="logo-link">
+                <img class="logo-image" src="../../public/image/logo-name-header.svg" width="200" height="48" alt="Logo header">
+            </a>
+        </div>
+
+        <!-- Right Section: Avatar + Streak -->
+        <div class="header-right">
+            <!-- Streak Display -->
+            <div class="header-streak" id="header-streak">
+                <div class="streak-badge">
+                    <i class="fa-solid fa-fire"></i>
+                    <span class="streak-count">0</span>
+                </div>
+                <span class="streak-label">ngày</span>
+            </div>
+
+            <!-- Avatar Dropdown -->
+            <div class="header-avatar-dropdown">
+                <button class="avatar-button" id="avatar-button" aria-label="Menu người dùng">
+                    <img id="header-avatar-img" src="" alt="Avatar" class="avatar-img">
+                    <i class="fa-solid fa-chevron-down avatar-chevron"></i>
+                </button>
+
+                <!-- Dropdown Menu -->
+                <div class="dropdown-menu" id="avatar-dropdown-menu">
+                    <div class="dropdown-header">
+                        <p class="dropdown-user-name" id="dropdown-user-name">Full name</p>
+                        <p class="dropdown-user-email" id="dropdown-user-email"></p>
+                    </div>
+                    <div class="dropdown-divider"></div>
+                    <a href="profile/profile.html" class="dropdown-item">
+                        <i class="fa-solid fa-user"></i>
+                        <span>Thông tin cá nhân</span>
+                    </a>
+                    <a href="dashboard/onboarding.html" class="dropdown-item">
+                        <i class="fa-solid fa-road"></i>
+                        <span>Lộ trình học tập</span>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</header>
+
+<script src="../js/components/header.js"></script>
+
+</body>
+</html>
