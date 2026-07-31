@@ -1316,6 +1316,8 @@ Tạo trang onboarding cho người dùng mới chọn lộ trình lần đầu.
 
 - `frontend/src/pages/dashboard/onboarding.html`
 - `frontend/src/js/pages/onboarding.js`
+- `frontend/src/css/pages/onboarding.css`
+-
 
 ### File cần chỉnh sửa
 
@@ -1389,7 +1391,7 @@ Tạo JavaScript cho Dashboard: gọi API, hiển thị dữ liệu.
 
 ### Công việc cần thực hiện
 
-1. Tạo file `frontend/src/js/pages/dashboard.js`: kiểm tra auth, gọi GET /api/profile, GET /api/roadmaps, GET /api/topics. Render danh sách topic cards. Bottom navigation highlight tab "Trang chủ".
+1. Tạo file `frontend/src/js/pages/dashboard.js`: kiểm tra auth, gọi GET /api/profile để lấy roadmap_id, gọi GET /api/topics?roadmap_id={id}. Render danh sách topic cards. Bottom navigation highlight tab "Trang chủ".
 2. Handle lỗi: toast notification.
 
 ### File cần tạo

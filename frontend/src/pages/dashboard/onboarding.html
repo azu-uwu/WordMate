@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chọn Lộ Trình | WordMate</title>
+    <link rel="icon" type="image/svg+xml" href="../../../public/image/wordmate-logo.svg">
+
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Google Fonts: Inter (hỗ trợ tiếng Việt đầy đủ) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:ital,wght@0,400;0,500;0,600;0,700;0,800&display=swap" rel="stylesheet">
+
+    <!-- Font Awesome 6 (Free) -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="../../css/pages/onboarding.css">
+</head>
+
+<body>
+    <!-- ===== LAYOUT: Full-page centered container ===== -->
+    <div class="onboarding-page">
+        
+        <!-- ===== HEADER: Logo & Welcome ===== -->
+        <div class="onboarding-header">
+            <!-- Logo -->
+            <div class="onboarding-logo">
+                <img src="../../../public/image/wordmate-name.svg" alt="WordMate Logo" class="logo-image">
+            </div>
+
+            <!-- Welcome Title -->
+            <h1 class="onboarding-title">Chào mừng đến với WordMate!</h1>
+
+            <!-- Description -->
+            <p class="onboarding-desc">
+                Chọn lộ trình học tập phù hợp với mục tiêu của bạn để bắt đầu hành trình chinh phục từ vựng tiếng Anh.
+            </p>
+        </div>
+
+        <!-- ===== MAIN: Roadmap Cards Grid ===== -->
+        <div class="onboarding-content">
+            <div id="roadmapGrid" class="roadmap-grid">
+                <!-- Roadmap cards will be rendered here by JavaScript -->
+            </div>
+
+            <!-- Loading State -->
+            <div id="loadingState" class="loading-state d-none">
+                <div class="spinner-border text-primary" role="status">
+                    <span class="visually-hidden">Đang tải...</span>
+                </div>
+                <p class="loading-text">Đang tải danh sách lộ trình...</p>
+            </div>
+
+            <!-- Error State -->
+            <div id="errorState" class="error-state d-none">
+                <i class="fa-solid fa-circle-exclamation error-icon"></i>
+                <p class="error-message">Không thể tải danh sách lộ trình. Vui lòng thử lại sau.</p>
+                <button id="retryBtn" class="retry-btn">
+                    <i class="fa-solid fa-rotate-right"></i>
+                    Thử lại
+                </button>
+            </div>
+        </div>
+
+    </div>
+    <!-- ===== END LAYOUT ===== -->
+
+    <!-- ===== SCRIPTS ===== -->
+    <script type="module" src="../../js/pages/onboarding.js"></script>
+
+</body>
+
+</html>
