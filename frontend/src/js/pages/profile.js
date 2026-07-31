@@ -21,8 +21,6 @@ const headerFullname = $('headerFullname');
 const headerEmail = $('headerEmail');
 
 // Personal Info
-const displayLevel = $('displayLevel');
-const displayExp = $('displayExp');
 const displayStreak = $('displayStreak');
 const infoAvatar = $('infoAvatar');
 const displayFullname = $('displayFullname');
@@ -108,7 +106,7 @@ function setButtonLoading(btn, loading) {
 // ============================================================
 function buildAvatarUrl(name) {
     const encoded = encodeURIComponent(name || 'User');
-    return `https://ui-avatars.com/api/?name=${encoded}&background=667eea&color=fff&size=100`;
+    return `https://ui-avatars.com/api/?name=${encoded}&background=FFC300&color=1E293B&size=100`;
 }
 
 // ============================================================
@@ -125,20 +123,14 @@ function renderProfile(user) {
     avatarImg.style.display = '';
     avatarPlaceholder.style.display = 'none';
 
-    // --- Stats ---
-    // Level & EXP are not available from backend, show placeholder
-    displayLevel.textContent = '—';
-    displayExp.textContent = '—';
+    // --- Streak ---
     displayStreak.textContent = user.streak != null ? user.streak : 0;
 
     // --- Info rows ---
     infoAvatar.src = avatarUrl;
     displayFullname.textContent = user.fullname || '—';
+    displayUsername.textContent = user.username || '—';
     displayEmail.textContent = user.email || '—';
-
-    // Username: try to get from localStorage first, else show not available
-    const localUser = authService.getCurrentUser();
-    displayUsername.textContent = localUser && localUser.username ? localUser.username : '—';
 
     // --- Roadmap ---
     if (user.roadmap_id) {

@@ -13,7 +13,7 @@
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
 
-    <!-- Google Fonts: Inter -->
+    <!-- Google Fonts: Inter (hỗ trợ tiếng Việt đầy đủ) -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:ital,wght@0,400;0,500;0,600;0,700;0,800&display=swap" rel="stylesheet">
@@ -25,7 +25,7 @@
     <link rel="stylesheet" href="../../css/pages/profile.css">
 </head>
 
-<body style="font-family: 'Inter', sans-serif;">
+<body>
 
     <!-- ===== MAIN CONTAINER ===== -->
     <div class="profile-container">
@@ -42,7 +42,7 @@
             <!-- ===== HEADER: Avatar + Name + Email ===== -->
             <div class="profile-header">
                 <div class="profile-avatar-wrapper">
-                    <img id="avatarImg" class="profile-avatar" src="https://ui-avatars.com/api/?name=User&background=667eea&color=fff&size=100" alt="Avatar" style="display: none;">
+                    <img id="avatarImg" class="profile-avatar" src="https://ui-avatars.com/api/?name=User&background=FFC300&color=1E293B&size=100" alt="Avatar" style="display: none;">
                     <div id="avatarPlaceholder" class="profile-avatar-placeholder">U</div>
                 </div>
                 <h1 id="headerFullname" class="profile-name">—</h1>
@@ -59,19 +59,12 @@
                         Thông tin cá nhân
                     </h2>
 
-                    <!-- Stats Grid: Level, EXP, Streak -->
-                    <div class="stats-grid">
-                        <div class="stat-item">
-                            <div class="stat-value" id="displayLevel">—</div>
-                            <div class="stat-label">Level</div>
-                        </div>
-                        <div class="stat-item">
-                            <div class="stat-value" id="displayExp">—</div>
-                            <div class="stat-label">EXP</div>
-                        </div>
-                        <div class="stat-item">
-                            <div class="stat-value" id="displayStreak">0</div>
-                            <div class="stat-label">Streak</div>
+                    <!-- Streak Display -->
+                    <div class="streak-display">
+                        <i class="fa-solid fa-fire-flame-curved"></i>
+                        <div class="streak-info">
+                            <div class="streak-value" id="displayStreak">0</div>
+                            <div class="streak-label">Streak hiện tại</div>
                         </div>
                     </div>
 
@@ -79,7 +72,7 @@
                     <div class="info-row">
                         <span class="info-label">Avatar</span>
                         <span class="info-value">
-                            <img id="infoAvatar" class="rounded-circle" src="https://ui-avatars.com/api/?name=User&background=667eea&color=fff&size=40" alt="Avatar" width="40" height="40" style="object-fit: cover; border: 2px solid #e2e8f0;">
+                            <img id="infoAvatar" class="rounded-circle" src="https://ui-avatars.com/api/?name=User&background=FFC300&color=1E293B&size=40" alt="Avatar" width="40" height="40" style="object-fit: cover; border: 2px solid #e2e8f0;">
                         </span>
                     </div>
 
@@ -156,7 +149,7 @@
                             </div>
                         </div>
 
-                        <button type="submit" class="btn btn-primary w-100 mt-3" id="changePasswordBtn" style="background: #667eea; border-color: #667eea; border-radius: 0.75rem; padding: 0.65rem; font-weight: 600;">
+                        <button type="submit" class="btn-change-password" id="changePasswordBtn">
                             <span class="btn-text">Đổi mật khẩu</span>
                             <span class="btn-spinner d-none">
                                 <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
