@@ -70,7 +70,10 @@
 .login-page {
     min-height: 100vh;
     padding: 1.5rem;
-    background: #F8FAFC;
+    background-image: url('../../../public/image/background.png');
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
     background-attachment: fixed;
     font-family: var(--wm-font-family);
 }
