@@ -22,11 +22,13 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 
     <!-- Custom CSS -->
-    <!-- <link rel="stylesheet" href="../../css/pages/post-login-layout.css"> -->
+    <link rel="stylesheet" href="../../css/components/header.css">
     <link rel="stylesheet" href="../../css/pages/profile.css">
 </head>
 
 <body>
+    <!-- ===== HEADER ===== -->
+    <div id="header"></div>
 
     <!-- ===== MAIN CONTAINER ===== -->
     <div class="profile-container">
@@ -207,30 +209,10 @@
     </div>
     <!-- ===== END MAIN CONTAINER ===== -->
 
-    <!-- ===== BOTTOM NAVIGATION ===== -->
-    <nav class="bottom-nav">
-        <a href="../dashboard/dashboard.html" class="bottom-nav-item">
-            <i class="fa-solid fa-chart-pie"></i>
-            <span>Dashboard</span>
-        </a>
-        <a href="../learn/learn.html" class="bottom-nav-item">
-            <i class="fa-solid fa-book-open"></i>
-            <span>Learn</span>
-        </a>
-        <a href="../quiz/quiz.html" class="bottom-nav-item">
-            <i class="fa-solid fa-puzzle-piece"></i>
-            <span>Quiz</span>
-        </a>
-        <a href="../notebook/notebook.html" class="bottom-nav-item">
-            <i class="fa-solid fa-book"></i>
-            <span>Notebook</span>
-        </a>
-        <a href="../profile/profile.html" class="bottom-nav-item active">
-            <i class="fa-solid fa-user"></i>
-            <span>Profile</span>
-        </a>
-    </nav>
-    <!-- ===== END BOTTOM NAVIGATION ===== -->
+    <!-- ===== BOTTOM-NAV ===== -->
+    <div id="bottom-nav"></div>
+
+
 
     <!-- ===== SCRIPTS ===== -->
 
@@ -256,6 +238,9 @@
             });
         });
     </script>
+
+    <!-- Component Loader (Nav) -->
+    <script src="../../js/components/nav.js"></script>
 
     <!-- Profile Page JS -->
     <script type="module" src="../../js/pages/profile.js"></script>
