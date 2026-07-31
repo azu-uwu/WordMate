@@ -15,6 +15,9 @@ const userRoutes = require("./routes/userRoutes");
 // roadmap
 const roadmapRoutes = require("./routes/roadmapRoutes");
 
+// topic
+const topicRoutes = require("./routes/topicRoutes");
+
 const app = express();
 
 app.use(cors());
@@ -54,6 +57,9 @@ app.use("/api", userRoutes);
 
 // roadmap
 app.use("/api/roadmaps", roadmapRoutes);
+
+// topic
+app.use("/api/topics", topicRoutes);
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, async () => {
