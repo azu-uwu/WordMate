@@ -1131,6 +1131,7 @@ Tạo route GET /api/roadmaps/:id trả về chi tiết roadmap. Không tìm th�
 - `backend/src/controllers/roadmapController.js`
 - `backend/src/routes/roadmapRoutes.js`
 
+### Bỏ qua task này vì chưa có trang xem chi tiết roadmap (tính năng admin - làm sau)
 ---
 
 ## Task M3-T3 (Backend)
