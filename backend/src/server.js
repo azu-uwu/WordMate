@@ -18,6 +18,9 @@ const roadmapRoutes = require("./routes/roadmapRoutes");
 // topic
 const topicRoutes = require("./routes/topicRoutes");
 
+// vocabulary
+const vocabularyRoutes = require("./routes/vocabularyRoutes");
+
 const app = express();
 
 app.use(cors());
@@ -60,6 +63,9 @@ app.use("/api/roadmaps", roadmapRoutes);
 
 // topic
 app.use("/api/topics", topicRoutes);
+
+// vocabulary
+app.use("/api/vocabularies", vocabularyRoutes);
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, async () => {
