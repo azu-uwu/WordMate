@@ -1,15 +1,95 @@
-const avatarButton = document.getElementById("avatar-button");
-const dropdownMenu = document.getElementById("avatar-dropdown-menu");
+// Get DOM elements
+let avatarButton, dropdownMenu, dropdownUserName, dropdownUserEmail, headerAvatarImg;
 
-avatarButton.addEventListener("click", (e) => {
-    e.stopPropagation();
+function getDOMElements() {
+    avatarButton = document.getElementById("avatar-button");
+    dropdownMenu = document.getElementById("avatar-dropdown-menu");
+    dropdownUserName = document.getElementById("dropdown-user-name");
+    dropdownUserEmail = document.getElementById("dropdown-user-email");
+    headerAvatarImg = document.getElementById("header-avatar-img");
+}
 
-    avatarButton.classList.toggle("active");
-    dropdownMenu.classList.toggle("show");
-});
+// ============================================================
+// LOAD USER DATA
+// ============================================================
 
-// Click ra ngoài thì đóng
-document.addEventListener("click", () => {
-    avatarButton.classList.remove("active");
-    dropdownMenu.classList.remove("show");
-});
+/**
+ * Load and display user information in the header dropdown.
+ * Gets user data from localStorage and updates the UI.
+ */
+function loadUserData() {
+    // Get user data from localStorage
+    const userStr = localStorage.getItem('user');
+    
+    console.log('[Header] Loading user data:', userStr ? 'Found' : 'Not found');
+    
+    if (userStr) {
+        try {
+            const user = JSON.parse(userStr);
+            console.log('[Header] User data:', user);
+            
+            // Update user name in dropdown
+            if (dropdownUserName) {
+                if (user.fullname) {
+                    dropdownUserName.textContent = user.fullname;
+                    console.log('[Header] Updated name to:', user.fullname);
+                } else {
+                    console.warn('[Header] No fullname in user data');
+                }
+            } else {
+                console.warn('[Header] dropdownUserName element not found');
+            }
+            
+            // Update user email in dropdown
+            if (dropdownUserEmail && user.email) {
+                dropdownUserEmail.textContent = user.email;
+            }
+            
+            // Update avatar image if available
+            if (headerAvatarImg && user.avatar) {
+                headerAvatarImg.src = user.avatar;
+            }
+        } catch (error) {
+            console.error('[Header] Error parsing user data:', error);
+        }
+    } else {
+        console.warn('[Header] No user data in localStorage');
+    }
+}
+
+// ============================================================
+// INITIALIZE HEADER
+// ============================================================
+
+function initHeader() {
+    // Get DOM elements
+    getDOMElements();
+    
+    // Load user data
+    loadUserData();
+    
+    // Add dropdown toggle event listener
+    if (avatarButton && dropdownMenu) {
+        avatarButton.addEventListener("click", (e) => {
+            e.stopPropagation();
+            avatarButton.classList.toggle("active");
+            dropdownMenu.classList.toggle("show");
+        });
+    }
+    
+    // Click outside to close dropdown
+    document.addEventListener("click", () => {
+        if (avatarButton && dropdownMenu) {
+            avatarButton.classList.remove("active");
+            dropdownMenu.classList.remove("show");
+        }
+    });
+}
+
+// Wait for DOM to be fully loaded before initializing
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initHeader);
+} else {
+    // DOM is already loaded
+    initHeader();
+}
