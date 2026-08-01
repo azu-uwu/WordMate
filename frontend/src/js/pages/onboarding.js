@@ -21,6 +21,7 @@ const roadmapGrid = document.getElementById('roadmapGrid');
 const loadingState = document.getElementById('loadingState');
 const errorState = document.getElementById('errorState');
 const retryBtn = document.getElementById('retryBtn');
+const userFullnameElement = document.getElementById('user-fullname');
 
 // ============================================================
 // STATE MANAGEMENT
@@ -39,6 +40,15 @@ let roadmaps = [];
 async function fetchRoadmaps() {
     const response = await get('/roadmaps');
     return response.data || [];
+}
+
+/**
+ * Fetch user profile to get fullname.
+ * @returns {Promise<Object>} Profile data
+ */
+async function fetchUserProfile() {
+    const response = await get('/profile');
+    return response.data;
 }
 
 /**
@@ -270,13 +280,28 @@ async function initializePage() {
     try {
         showLoading();
 
-        // Fetch roadmaps from API
-        roadmaps = await fetchRoadmaps();
+        // Fetch user profile and roadmaps concurrently
+        const [profile, roadmapsData] = await Promise.all([
+            fetchUserProfile(),
+            fetchRoadmaps()
+        ]);
 
-        // Render roadmaps
+        // Update user fullname in header
+        if (userFullnameElement && profile.fullname) {
+            userFullnameElement.textContent = profile.fullname;
+        }
+
+        // Store roadmaps and render
+        roadmaps = roadmapsData;
         renderRoadmaps(roadmaps);
     } catch (error) {
-        console.error('Failed to load roadmaps:', error);
+        console.error('Failed to load onboarding page:', error);
+        
+        // Set default text if profile fetch fails
+        if (userFullnameElement) {
+            userFullnameElement.textContent = 'bạn';
+        }
+        
         showError();
     }
 }

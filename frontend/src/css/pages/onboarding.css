@@ -49,25 +49,29 @@
    ============================================================ */
 
 .onboarding-page {
+    width: 60%;
+    max-width: 1400px;
+    min-width: 500px;
+    margin: 0 auto;         /* chỉ căn giữa theo chiều ngang */
+    padding: 0 1rem;         /* padding ngang cho màn hình nhỏ */
+    animation: fadeIn 0.5s ease forwards;
+    padding-bottom: 5rem;
     min-height: 100vh;
-    padding: 2rem 1.5rem;
     background: var(--wm-bg-page);
     font-family: var(--wm-font-family);
-    display: flex;
-    flex-direction: column;
-    align-items: center;
 }
 
 /* Subtle warm accent overlay */
 .onboarding-page::before {
-    content: '';
+    display: none;
+    /* content: '';
     position: fixed;
     inset: 0;
     background-image:
         radial-gradient(circle at 20% 50%, rgba(255, 195, 0, 0.05) 0%, transparent 50%),
         radial-gradient(circle at 80% 20%, rgba(255, 195, 0, 0.03) 0%, transparent 50%);
     pointer-events: none;
-    z-index: 0;
+    z-index: 0; */
 }
 
 .onboarding-page > * {
@@ -82,7 +86,8 @@
 .onboarding-header {
     text-align: center;
     max-width: 700px;
-    margin-bottom: 3rem;
+    margin: 0 auto 3rem auto; /* Center horizontally with auto margins */
+    padding: 0 1rem; /* Add padding for mobile */
     animation: fadeInDown 0.6s ease forwards;
 }
 
@@ -90,6 +95,7 @@
 .onboarding-logo {
     display: flex;
     justify-content: center;
+    align-items: center;
     margin-bottom: 2rem;
 }
 
@@ -97,6 +103,7 @@
     max-width: 180px;
     height: auto;
     transition: transform var(--wm-transition-base);
+    display: block; /* Ensure image is block-level for proper centering */
 }
 
 .onboarding-logo:hover .logo-image {
@@ -105,12 +112,18 @@
 
 /* Title */
 .onboarding-title {
-    font-size: 2.5rem;
+    font-size: 2.25rem;
     font-weight: 800;
-    color: var(--wm-text-primary);
+    color: var(--wm-text-secondary);
     margin-bottom: 1rem;
     letter-spacing: -0.02em;
     line-height: 1.2;
+    text-align: center; /* Ensure title is centered */
+}
+
+.onboarding-title #user-fullname {
+    color: var(--wm-primary-dark);
+    font-weight: 800;
 }
 
 /* Description */
@@ -120,6 +133,7 @@
     color: var(--wm-text-secondary);
     line-height: 1.6;
     margin: 0;
+    text-align: center; /* Ensure description is centered */
 }
 
 /* ============================================================
@@ -370,6 +384,10 @@
 
 /* === Laptop / Small Desktop (≤ 1200px) === */
 @media (max-width: 1200px) {
+    .onboarding-page {
+        padding: 1.75rem 1.25rem;
+    }
+
     .roadmap-grid {
         grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
         gap: 1.25rem;
@@ -387,7 +405,7 @@
     }
 
     .onboarding-header {
-        margin-bottom: 2rem;
+        margin-bottom: 1.5rem;
     }
 
     .onboarding-logo {
@@ -426,6 +444,10 @@
     .roadmap-card-desc {
         font-size: 0.875rem;
     }
+
+    .roadmap-card-footer {
+        padding: 0.875rem 1.25rem;
+    }
 }
 
 /* === Mobile (≤ 480px) === */
@@ -435,7 +457,7 @@
     }
 
     .onboarding-header {
-        margin-bottom: 1.5rem;
+        margin-bottom: 1.25rem;
     }
 
     .onboarding-logo {
@@ -454,6 +476,10 @@
         font-size: 0.9375rem;
     }
 
+    .roadmap-grid {
+        gap: 0.875rem;
+    }
+
     .roadmap-card-image {
         height: 140px;
     }
@@ -464,6 +490,7 @@
 
     .roadmap-card-title {
         font-size: 1.0625rem;
+        margin-bottom: 0.5rem;
     }
 
     .roadmap-card-desc {
@@ -471,7 +498,11 @@
     }
 
     .roadmap-card-footer {
-        padding: 0.875rem 1rem;
+        padding: 0.75rem 1rem;
+    }
+
+    .roadmap-card-hint {
+        font-size: 0.8125rem;
     }
 }
 
@@ -499,6 +530,14 @@
 
     .roadmap-card-title {
         font-size: 1rem;
+    }
+
+    .roadmap-card-footer {
+        padding: 0.625rem 0.875rem;
+    }
+
+    .roadmap-card-hint {
+        font-size: 0.75rem;
     }
 }
 
