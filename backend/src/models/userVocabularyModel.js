@@ -48,6 +48,66 @@ const getByUserAndStatus = async (userId, status) => {
 };
 
 /**
+ * Lấy danh sách từ vựng của người dùng (join với vocabularies)
+ */
+const getByUser = async (userId) => {
+    const [rows] = await pool.execute(
+        `SELECT 
+            uv.id,
+            uv.user_id,
+            uv.vocabulary_id,
+            uv.status,
+            uv.review_count,
+            uv.last_reviewed_at,
+            uv.next_review_at,
+            v.word,
+            v.pronunciation,
+            v.part_of_speech,
+            v.meaning,
+            v.example,
+            v.example_meaning,
+            v.audio,
+            v.image,
+            v.topic_id
+        FROM user_vocabularies uv
+        INNER JOIN vocabularies v ON v.id = uv.vocabulary_id
+        WHERE uv.user_id = ?`,
+        [userId]
+    );
+    return rows;
+};
+
+/**
+ * Lấy danh sách từ vựng của người dùng theo topic_id (join với vocabularies)
+ */
+const getByUserAndTopic = async (userId, topicId) => {
+    const [rows] = await pool.execute(
+        `SELECT 
+            uv.id,
+            uv.user_id,
+            uv.vocabulary_id,
+            uv.status,
+            uv.review_count,
+            uv.last_reviewed_at,
+            uv.next_review_at,
+            v.word,
+            v.pronunciation,
+            v.part_of_speech,
+            v.meaning,
+            v.example,
+            v.example_meaning,
+            v.audio,
+            v.image,
+            v.topic_id
+        FROM user_vocabularies uv
+        INNER JOIN vocabularies v ON v.id = uv.vocabulary_id
+        WHERE uv.user_id = ? AND v.topic_id = ?`,
+        [userId, topicId]
+    );
+    return rows;
+};
+
+/**
  * Cập nhật thông tin học tập (chỉ status, review_count, next_review_at, last_reviewed_at)
  */
 const updateStudySession = async (userId, vocabularyId, data) => {
@@ -71,5 +131,7 @@ module.exports = {
     findByUserAndVocab,
     upsert,
     getByUserAndStatus,
+    getByUserId,
+    getByUserAndTopic,
     updateStudySession,
 };
