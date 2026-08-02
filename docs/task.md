@@ -1457,20 +1457,33 @@ Tạo các component dùng chung: header, bottom-nav.
 - **Priority**: P0
 - **Complexity**: M
 - **Status**: Todo
-- **Dependencies**: M1-T2
+- **Dependencies**: M1-T2, M1-T3
 
 ### Mục tiêu
 
-Tạo model cho user_vocabularies với các hàm CRUD và UPSERT.
+Tạo model thao tác với bảng `user_vocabularies`, cung cấp các hàm truy vấn và cập nhật dữ liệu phục vụ chức năng học tập. Model chỉ chịu trách nhiệm thao tác cơ sở dữ liệu, không chứa business logic.
 
 ### Công việc cần thực hiện
 
-1. Mở rộng `backend/src/models/vocabularyModel.js` (hoặc tạo model riêng).
-2. Hàm `findByUserAndVocab(userId, vocabId)`, `upsert(userId, vocabId, data)`, `getByUserAndStatus(userId, status)`, `updateStudySession(userId, vocabId, { status, reviewCount, nextReviewAt })`.
+1. Tạo file `backend/src/models/userVocabularyModel.js`.
+2. Cài đặt hàm `findByUserAndVocab(userId, vocabularyId)`:
+   - Trả về bản ghi trong bảng `user_vocabularies` theo `user_id` và `vocabulary_id`.
+3. Cài đặt hàm `upsert(userId, vocabularyId, data)`:
+   - Sử dụng `INSERT ... ON DUPLICATE KEY UPDATE` để tạo mới hoặc cập nhật bản ghi.
+4. Cài đặt hàm `getByUserAndStatus(userId, status)`:
+   - Trả về danh sách từ vựng của người dùng theo trạng thái (`new`, `learning`, `mastered`).
+5. Cài đặt hàm `updateStudySession(userId, vocabularyId, data)`:
+   - Cập nhật các trường `status`, `review_count`, `next_review_at`, `last_reviewed_at`.
+6. Sử dụng `mysql2/promise` theo chuẩn của dự án.
+7. Không triển khai business logic (Spaced Repetition, tính `next_review_at`, tăng/reset `review_count`) trong model.
 
-### File cần tạo/chỉnh sửa
+### File cần tạo
 
-- `backend/src/models/vocabularyModel.js`
+- `backend/src/models/userVocabularyModel.js`
+
+### File cần chỉnh sửa
+
+Không.
 
 ---
 
@@ -1479,7 +1492,7 @@ Tạo model cho user_vocabularies với các hàm CRUD và UPSERT.
 ### Thông tin
 
 - **ID**: M4-T2
-- **Tên**: API Bắt đầu phiên học
+- **Tên**: API Khởi tạo phiên học
 - **Milestone**: M4
 - **User Story**: US-03
 - **Functional Requirement**: FR-013
@@ -1491,7 +1504,17 @@ Tạo model cho user_vocabularies với các hàm CRUD và UPSERT.
 
 ### Mục tiêu
 
-Tạo route POST /api/learning/start + controller. Input: topic_id. Trả về session_id + danh sách từ vựng.
+Tạo API `POST /api/learning/start` để khởi tạo dữ liệu cho phiên học. Frontend gửi `topic_id` (lấy từ URL `learn.html?topic_id=...`), backend kiểm tra dữ liệu và trả về danh sách từ vựng của topic để frontend bắt đầu học.
+
+### Công việc cần thực hiện
+
+1. Tạo route `POST /api/learning/start`.
+2. Kiểm tra người dùng đã đăng nhập.
+3. Validate `topic_id`.
+4. Kiểm tra topic có tồn tại và thuộc roadmap hiện tại của người dùng.
+5. Lấy danh sách từ vựng của topic.
+6. Trả về thông tin topic và danh sách từ vựng để frontend hiển thị Flashcard.
+7. Không lưu hoặc tạo `study_session` trong cơ sở dữ liệu.
 
 ### File cần chỉnh sửa
 
