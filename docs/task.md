@@ -1523,6 +1523,50 @@ Tạo API `POST /api/learning/start` để khởi tạo dữ liệu cho phiên h
 
 ---
 
+## Task M4-T6 (Backend)
+
+### Thông tin
+
+- **ID**: M4-T6
+- **Tên**: Service Tính toán SRS
+- **Milestone**: M4
+- **User Story**: US-03
+- **Functional Requirement**: FR-018, FR-024, FR-025
+- **Module**: Study Session
+- **Priority**: P0
+- **Complexity**: M
+- **Status**: Todo
+- **Dependencies**: M4-T1
+
+### Mục tiêu
+
+Tạo service/hàm calculateNextReview (SM-2 đơn giản hóa).
+Tạo `srsService` để xử lý toàn bộ logic Spaced Repetition (SM-2 đơn giản hóa), bao gồm tính thời điểm ôn tập tiếp theo và cập nhật thông tin sau khi người dùng trả lời đúng hoặc sai.
+
+### Công việc cần thực hiện
+
+1. Tạo file `backend/src/services/srsService.js`.
+2. `calculateNextReview(reviewCount)`: 0→1d, 1→3d, 2→7d, 3→14d, 4+→30d.
+3. Cài đặt hàm `handleCorrectAnswer(reviewCount)`:
+   - Tăng `reviewCount`.
+   - Tính `nextReviewAt`.
+   - Trả về:
+     - `reviewCount`
+     - `nextReviewAt`
+4. Cài đặt hàm `handleWrongAnswer()`:
+   - Reset `reviewCount = 0`.
+   - Đặt `nextReviewAt = NOW()`.
+   - Trả về:
+     - `reviewCount`
+     - `nextReviewAt`
+5. Service chỉ xử lý tính toán SRS, không thao tác trực tiếp với cơ sở dữ liệu.
+
+### File cần tạo
+
+- `backend/src/services/srsService.js`
+
+---
+
 ## Task M4-T3 (Backend)
 
 ### Thông tin
@@ -1536,11 +1580,27 @@ Tạo API `POST /api/learning/start` để khởi tạo dữ liệu cho phiên h
 - **Priority**: P0
 - **Complexity**: M
 - **Status**: Todo
-- **Dependencies**: M4-T1, M4-T2
+- **Dependencies**: M4-T1, M4-T2, M4-T6
 
 ### Mục tiêu
+Tạo API `POST /api/learning/mastered` để xử lý khi người dùng đánh dấu một từ vựng là "Đã thuộc". API cập nhật trạng thái học tập thông qua `userVocabularyModel` và `srsService`, sau đó trả kết quả cho frontend.
+<!-- >> Tạo API `POST /api/learning/mastered` để xử lý khi người dùng đánh dấu một từ là "Đã thuộc". API cập nhật trạng thái học tập của từ trong `user_vocabularies`. -->
 
-Tạo route POST /api/learning/mastered + controller. UPSERT user_vocabularies: status='mastered', review_count++.
+### Công việc cần thực hiện
+
+1. Tạo route `POST /api/learning/mastered`.
+2. Kiểm tra người dùng đã đăng nhập.
+3. Validate `vocabulary_id`.
+4. Kiểm tra từ vựng tồn tại.
+5. Lấy trạng thái học tập hiện tại của từ.
+6. Gọi `srsService.handleCorrectAnswer()` để tính `reviewCount` và `nextReviewAt`.
+7. Cập nhật `user_vocabularies`:
+   - `status = 'mastered'`
+   - `review_count`
+   - `next_review_at`
+   - `last_reviewed_at`
+8. Trả kết quả cập nhật cho frontend.
+
 
 ### File cần chỉnh sửa
 
@@ -1566,7 +1626,21 @@ Tạo route POST /api/learning/mastered + controller. UPSERT user_vocabularies: 
 
 ### Mục tiêu
 
-Tạo route POST /api/learning/writing + controller. Trả về prompt: meaning, example.
+Tạo API `POST /api/learning/writing` để chuyển từ Flashcard sang Writing Exercise. API trả về dữ liệu cần thiết để frontend hiển thị bài luyện viết của từ vựng hiện tại.
+
+### Công việc cần thực hiện
+
+1. Tạo route `POST /api/learning/writing`.
+2. Kiểm tra người dùng đã đăng nhập.
+3. Validate `vocabulary_id`.
+4. Kiểm tra từ vựng tồn tại.
+5. Lấy dữ liệu của từ vựng.
+6. Trả về dữ liệu cần thiết cho Writing Exercise:
+   - `word`
+   - `meaning`
+   - `example`
+   - `example_meaning`
+7. Không cập nhật dữ liệu học tập trong `user_vocabularies`.
 
 ### File cần chỉnh sửa
 
@@ -1588,48 +1662,36 @@ Tạo route POST /api/learning/writing + controller. Trả về prompt: meaning,
 - **Priority**: P0
 - **Complexity**: M
 - **Status**: Todo
-- **Dependencies**: M4-T1, M4-T2, M6-T6
+- **Dependencies**: M4-T1, M4-T2, M4-T6
 
 ### Mục tiêu
 
-Tạo route POST /api/learning/writing/submit + controller. UPSERT user_vocabularies: status='learning', tính SRS, cập nhật streak.
+Tạo API `POST /api/learning/writing/submit` để xử lý kết quả bài luyện viết của người dùng. API kiểm tra đáp án, cập nhật trạng thái học tập của từ vựng trong `user_vocabularies`, tính lịch ôn tập tiếp theo theo thuật toán SRS và cập nhật streak của người dùng.
+
+### Công việc cần thực hiện
+
+1. Tạo route `POST /api/learning/writing/submit`.
+2. Kiểm tra người dùng đã đăng nhập.
+3. Validate:
+   - `vocabulary_id`
+   - `answer`
+4. Kiểm tra từ vựng tồn tại.
+5. So sánh đáp án của người dùng với từ vựng gốc để xác định kết quả bài luyện viết.
+6. Gọi `srsService` để tính:
+   - `review_count`
+   - `next_review_at`
+7. UPSERT `user_vocabularies`:
+   - `status = 'learning'`
+   - `review_count`
+   - `next_review_at`
+   - `last_reviewed_at`
+8. Cập nhật streak của người dùng.
+9. Trả kết quả cho frontend.
 
 ### File cần chỉnh sửa
 
 - `backend/src/controllers/vocabularyController.js`
 - `backend/src/routes/vocabularyRoutes.js`
-
----
-
-## Task M4-T6 (Backend)
-
-### Thông tin
-
-- **ID**: M4-T6
-- **Tên**: Service Tính toán SRS
-- **Milestone**: M4
-- **User Story**: US-03
-- **Functional Requirement**: FR-018, FR-024, FR-025
-- **Module**: Study Session
-- **Priority**: P0
-- **Complexity**: M
-- **Status**: Todo
-- **Dependencies**: M4-T1
-
-### Mục tiêu
-
-Tạo service/hàm calculateNextReview (SM-2 đơn giản hóa).
-
-### Công việc cần thực hiện
-
-1. Tạo file `backend/src/services/srsService.js`.
-2. `calculateNextReview(reviewCount)`: 0→1d, 1→3d, 2→7d, 3→14d, 4+→30d.
-3. `handleCorrectAnswer(reviewCount)`: tăng count, tính nextReviewAt.
-4. `handleWrongAnswer()`: reset count=0, nextReviewAt=NOW().
-
-### File cần tạo
-
-- `backend/src/services/srsService.js`
 
 ---
 
@@ -1650,12 +1712,36 @@ Tạo service/hàm calculateNextReview (SM-2 đơn giản hóa).
 
 ### Mục tiêu
 
-Tạo cấu trúc HTML và CSS cho trang học Flashcard với hiệu ứng lật thẻ.
+Tạo giao diện HTML và CSS cho trang học Flashcard, bao gồm cấu trúc hiển thị Flashcard, hiệu ứng lật thẻ và các thành phần giao diện phục vụ phiên học.
 
 ### Công việc cần thực hiện
 
-1. Tạo `frontend/src/pages/learn/learn.html`: header, flashcard container (mặt trước: word, pronunciation, audio, image; mặt sau: part_of_speech, meaning, example, example_meaning), nút "Đã thuộc" (Emerald-500) và "Tiếp tục" (Amber-500), progress bar, writing exercise placeholder, bottom navigation, AI Chat.
-2. Tạo `frontend/src/css/pages/learn.css`: hiệu ứng lật thẻ 3D CSS.
+1. Tạo `frontend/src/pages/learn/learn.html` gồm:
+   - Header.
+   - Flashcard container:
+     - Mặt trước:
+       - `word`
+       - `pronunciation`
+       - `audio`
+       - `image`
+     - Mặt sau:
+       - `part_of_speech`
+       - `meaning`
+       - `example`
+       - `example_meaning`
+   - Nút **"Đã thuộc"** (Emerald-500).
+   - Nút **"Tiếp tục"** (Amber-500).
+   - Progress Bar.
+   - Writing Exercise container (placeholder, mặc định ẩn).
+   - Bottom Navigation.
+   - Tích hợp component AI Chat (Floating Chat Widget).
+
+2. Tạo `frontend/src/css/pages/learn.css`:
+   - Layout responsive.
+   - Hiệu ứng lật thẻ 3D.
+   - Style cho Flashcard.
+   - Style cho Progress Bar.
+   - Style cho Writing Exercise placeholder.
 
 ### File cần tạo
 
@@ -1685,11 +1771,22 @@ Không.
 
 ### Mục tiêu
 
-Tạo JavaScript cho trang học Flashcard.
+Xây dựng logic JavaScript cho trang học Flashcard, bao gồm tải dữ liệu từ vựng theo topic, hiển thị dữ liệu từ vựng, xử lý các thao tác học và điều hướng sang Writing Exercise.
 
 ### Công việc cần thực hiện
 
-1. Tạo `frontend/src/js/pages/learn.js`: lấy topic_id từ URL, gọi POST /api/learning/start, hiển thị flashcard, xử lý click "Đã thuộc" → POST /api/learning/mastered, click "Tiếp tục" → POST /api/learning/writing, xử lý lật thẻ.
+1. Tạo `frontend/src/js/pages/learn.js`.
+2. Lấy `topic_id` để xác định topic cần học.
+3. Gọi `POST /api/learning/start` để lấy danh sách từ vựng của topic.
+4. Hiển thị Flashcard đầu tiên và Progress Bar..
+5. Cập nhật Progress Bar theo tiến độ học.
+6. Xử lý hiệu ứng lật Flashcard.
+7. Xử lý nút **"Đã thuộc"**:
+   - Gọi `POST /api/learning/mastered`.
+   - Chuyển sang từ tiếp theo.
+8. Xử lý nút **"Tiếp tục"**:
+   - Gọi `POST /api/learning/writing`.
+   - Hiển thị Writing Exercise.
 
 ### File cần tạo
 
@@ -1718,11 +1815,29 @@ Không.
 
 ### Mục tiêu
 
-Hoàn thiện writing exercise, màn hình tổng kết và phím tắt.
+Hoàn thiện trải nghiệm học trên trang Flashcard, bao gồm Writing Exercise, màn hình tổng kết sau khi hoàn thành topic và hỗ trợ các phím tắt giúp người dùng thao tác nhanh hơn.
 
 ### Công việc cần thực hiện
 
-1. Trong learn.js: writing exercise (hiển thị gợi ý, input, nút nộp → POST /api/learning/writing/submit), màn hình tổng kết (số từ đã học, đã thuộc), phím tắt (Space→lật, ArrowRight→mastered, ArrowLeft→writing).
+1. Hoàn thiện Writing Exercise:
+   - Hiển thị dữ liệu từ API `POST /api/learning/writing`.
+   - Hiển thị ô nhập đáp án.
+   - Gửi đáp án qua `POST /api/learning/writing/submit`.
+   - Hiển thị kết quả trả về từ backend.
+
+2. Hoàn thiện màn hình tổng kết:
+   - Hiển thị khi người dùng hoàn thành toàn bộ từ vựng của topic.
+   - Hiển thị:
+     - Tổng số từ đã học.
+     - Số từ đã thuộc.
+     - Số từ cần luyện thêm.
+   - Thêm nút quay về Dashboard hoặc học lại topic.
+
+3. Bổ sung phím tắt:
+   - `Space`: Lật Flashcard.
+   - `ArrowRight`: Đã thuộc.
+   - `ArrowLeft`: Tiếp tục.
+   - `Enter`: Gửi đáp án Writing Exercise.
 
 ### File cần chỉnh sửa
 
@@ -1747,12 +1862,25 @@ Hoàn thiện writing exercise, màn hình tổng kết và phím tắt.
 
 ### Mục tiêu
 
-Tạo route GET /api/user-vocabularies + controller. Query params: topic_id (optional).
+Tạo API `GET /api/user-vocabularies` để lấy danh sách từ vựng  và trạng thái học tập của người dùng. API hỗ trợ lọc theo `topic_id` nhằm phục vụ hiển thị tiến độ học và danh sách từ vựng trên frontend.
+
+### Công việc cần thực hiện
+
+1. Tạo route `GET /api/user-vocabularies`.
+2. Kiểm tra người dùng đã đăng nhập.
+3. Đọc `topic_id` từ query (optional).
+4. Bổ sung các hàm truy vấn trong `userVocabularyModel` (nếu chưa có):
+   - Lấy danh sách từ vựng của người dùng.
+   - Lấy danh sách từ vựng của người dùng theo `topic_id`.
+5. Gọi `userVocabularyModel` để lấy danh sách từ vựng của người dùng.
+6. Nếu có `topic_id`, chỉ trả về các từ thuộc topic tương ứng.
+7. Trả danh sách từ vựng và trạng thái học tập cho frontend.
 
 ### File cần chỉnh sửa
 
 - `backend/src/controllers/vocabularyController.js`
 - `backend/src/routes/vocabularyRoutes.js`
+- `backend/src/models/userVocabularyModel.js`
 
 ---
 
