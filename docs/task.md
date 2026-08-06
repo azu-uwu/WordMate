@@ -1492,7 +1492,7 @@ Không.
 ### Thông tin
 
 - **ID**: M4-T2
-- **Tên**: API Khởi tạo phiên học
+- **Tên**: API Khởi tạo dữ liệu học
 - **Milestone**: M4
 - **User Story**: US-03
 - **Functional Requirement**: FR-013
