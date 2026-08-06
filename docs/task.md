@@ -1504,8 +1504,7 @@ Không.
 
 ### Mục tiêu
 
-Tạo API `POST /api/learning/start` để khởi tạo dữ liệu cho phiên học. Frontend gửi `topic_id` (lấy từ URL `learn.html?topic_id=...`), backend kiểm tra dữ liệu và trả về danh sách từ vựng của topic để frontend bắt đầu học.
-
+Tạo API `POST /api/learning/start` để khởi tạo dữ liệu cho phiên học. Backend nhận `topic_id` từ request, kiểm tra người dùng và topic hợp lệ, sau đó trả về thông tin topic cùng danh sách từ vựng để frontend bắt đầu học.
 ### Công việc cần thực hiện
 
 1. Tạo route `POST /api/learning/start`.
