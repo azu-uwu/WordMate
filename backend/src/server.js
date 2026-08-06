@@ -68,8 +68,6 @@ app.use("/api/topics", topicRoutes);
 app.use("/api/vocabularies", vocabularyRoutes);
 
 // learning
-console.log("typeof vocabularyRoutes =", typeof vocabularyRoutes);
-console.log(vocabularyRoutes);
 app.use("/api/learning", vocabularyRoutes);
 
 const PORT = process.env.PORT || 3000;
