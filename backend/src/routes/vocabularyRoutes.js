@@ -13,6 +13,9 @@ router.post("/start", authMiddleware, vocabularyController.startLearning);
 // Đánh dấu từ vựng đã thuộc (yêu cầu đăng nhập)
 router.post("/mastered", authMiddleware, vocabularyController.markAsMastered);
 
+// Lấy dữ liệu luyện viết cho từ vựng hiện tại (yêu cầu đăng nhập)
+router.post("/writing", authMiddleware, vocabularyController.getWritingData);
+
 console.log("vocabularyRoutes.js loaded");
 
 router.get("/test", (req, res) => {

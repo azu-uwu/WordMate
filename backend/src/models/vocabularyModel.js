@@ -23,6 +23,26 @@ const getByTopicId = async (topicId) => {
     return rows;
 };
 
+/**
+ * Lấy Vocabulary theo id
+ * Chỉ lấy các cột cần thiết cho Writing Exercise
+ */
+const findById = async (id) => {
+    const [rows] = await pool.execute(
+        `SELECT 
+            id, 
+            word, 
+            meaning, 
+            example, 
+            example_meaning 
+        FROM vocabularies 
+        WHERE id = ?`,
+        [id]
+    );
+    return rows[0] || null;
+};
+
 module.exports = {
-    getByTopicId
+    getByTopicId,
+    findById
 };

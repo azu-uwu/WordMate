@@ -181,8 +181,63 @@ const markAsMastered = async (req, res) => {
     }
 };
 
+/**
+ * Lấy dữ liệu luyện viết cho từ vựng hiện tại
+ * POST /api/learning/writing
+ * Body: { vocabulary_id: number }
+ * Chỉ SELECT dữ liệu, không cập nhật bất kỳ dữ liệu học tập nào
+ */
+const getWritingData = async (req, res) => {
+    try {
+        const { vocabulary_id } = req.body;
+
+        // Validate required vocabulary_id
+        if (vocabulary_id === undefined || vocabulary_id === null || vocabulary_id === "") {
+            return res.status(400).json({
+                success: false,
+                message: "Thiếu vocabulary_id"
+            });
+        }
+
+        // Validate vocabulary_id is a positive integer
+        if (!Number.isInteger(vocabulary_id) || vocabulary_id <= 0) {
+            return res.status(400).json({
+                success: false,
+                message: "Vocabulary ID không hợp lệ"
+            });
+        }
+
+        // Kiểm tra vocabulary tồn tại và lấy dữ liệu
+        const vocabulary = await Vocabulary.findById(vocabulary_id);
+        if (!vocabulary) {
+            return res.status(404).json({
+                success: false,
+                message: "Từ vựng không tồn tại"
+            });
+        }
+
+        return res.status(200).json({
+            success: true,
+            message: "Lấy dữ liệu luyện viết thành công",
+            data: {
+                word: vocabulary.word,
+                meaning: vocabulary.meaning,
+                example: vocabulary.example,
+                example_meaning: vocabulary.example_meaning
+            }
+        });
+    } catch (err) {
+        console.error(err);
+        return res.status(500).json({
+            success: false,
+            message: "Lỗi máy chủ"
+        });
+    }
+};
+
 module.exports = {
     getByTopic,
     startLearning,
-    markAsMastered
+    markAsMastered,
+    getWritingData
 };
