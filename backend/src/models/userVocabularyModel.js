@@ -131,7 +131,7 @@ module.exports = {
     findByUserAndVocab,
     upsert,
     getByUserAndStatus,
-    getByUserId,
+    getByUser,
     getByUserAndTopic,
     updateStudySession,
 };
