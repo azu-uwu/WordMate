@@ -10,6 +10,9 @@ router.get("/", authMiddleware, vocabularyController.getByTopic);
 // Khởi tạo phiên học Flashcard (yêu cầu đăng nhập)
 router.post("/start", authMiddleware, vocabularyController.startLearning);
 
+// Đánh dấu từ vựng đã thuộc (yêu cầu đăng nhập)
+router.post("/mastered", authMiddleware, vocabularyController.markAsMastered);
+
 console.log("vocabularyRoutes.js loaded");
 
 router.get("/test", (req, res) => {

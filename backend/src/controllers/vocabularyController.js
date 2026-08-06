@@ -1,6 +1,8 @@
 const Vocabulary = require("../models/vocabularyModel");
 const Topic = require("../models/topicModel");
 const User = require("../models/userModel");
+const UserVocabulary = require("../models/userVocabularyModel");
+const srsService = require("../services/srsService");
 
 /**
  * Lấy danh sách Vocabulary theo topic_id
@@ -108,7 +110,79 @@ const startLearning = async (req, res) => {
     }
 };
 
+/**
+ * Đánh dấu từ vựng đã thuộc
+ * POST /api/learning/mastered
+ * Body: { vocabulary_id: number }
+ */
+const markAsMastered = async (req, res) => {
+    try {
+        const userId = req.user.id;
+        const { vocabulary_id } = req.body;
+
+        // Validate required vocabulary_id
+        if (vocabulary_id === undefined || vocabulary_id === null || vocabulary_id === "") {
+            return res.status(400).json({
+                success: false,
+                message: "Thiếu vocabulary_id"
+            });
+        }
+
+        // Validate vocabulary_id is a positive integer
+        if (!Number.isInteger(vocabulary_id) || vocabulary_id <= 0) {
+            return res.status(400).json({
+                success: false,
+                message: "Vocabulary ID không hợp lệ"
+            });
+        }
+
+        // Kiểm tra vocabulary tồn tại
+        const vocabulary = await UserVocabulary.findVocabularyById(vocabulary_id);
+        if (!vocabulary) {
+            return res.status(404).json({
+                success: false,
+                message: "Từ vựng không tồn tại"
+            });
+        }
+
+        // Lấy bản ghi học tập hiện tại (nếu chưa có, coi review_count = 0)
+        const existingRecord = await UserVocabulary.findByUserAndVocab(userId, vocabulary_id);
+        const currentReviewCount = existingRecord ? existingRecord.review_count : 0;
+
+        // Tính toán SRS
+        const srsResult = srsService.handleCorrectAnswer(currentReviewCount);
+
+        // Lưu dữ liệu (upsert: tạo mới nếu chưa có, cập nhật nếu đã có)
+        const now = new Date();
+        await UserVocabulary.upsert(userId, vocabulary_id, {
+            status: "mastered",
+            review_count: srsResult.reviewCount,
+            next_review_at: srsResult.nextReviewAt,
+            last_reviewed_at: now
+        });
+
+        return res.status(200).json({
+            success: true,
+            message: "Đánh dấu từ vựng đã thuộc thành công",
+            data: {
+                vocabulary_id,
+                status: "mastered",
+                review_count: srsResult.reviewCount,
+                next_review_at: srsResult.nextReviewAt,
+                last_reviewed_at: now
+            }
+        });
+    } catch (err) {
+        console.error(err);
+        return res.status(500).json({
+            success: false,
+            message: "Lỗi máy chủ"
+        });
+    }
+};
+
 module.exports = {
     getByTopic,
-    startLearning
+    startLearning,
+    markAsMastered
 };

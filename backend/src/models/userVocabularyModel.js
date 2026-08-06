@@ -12,6 +12,17 @@ const findByUserAndVocab = async (userId, vocabularyId) => {
 };
 
 /**
+ * Kiểm tra vocabulary tồn tại theo id (bảng vocabularies)
+ */
+const findVocabularyById = async (vocabularyId) => {
+    const [rows] = await pool.execute(
+        "SELECT id FROM vocabularies WHERE id = ?",
+        [vocabularyId]
+    );
+    return rows[0] || null;
+};
+
+/**
  * Tạo mới nếu chưa tồn tại, cập nhật nếu đã tồn tại
  * (dựa trên UNIQUE(user_id, vocabulary_id))
  */
@@ -129,6 +140,7 @@ const updateStudySession = async (userId, vocabularyId, data) => {
 
 module.exports = {
     findByUserAndVocab,
+    findVocabularyById,
     upsert,
     getByUserAndStatus,
     getByUser,
