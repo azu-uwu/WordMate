@@ -67,6 +67,11 @@ app.use("/api/topics", topicRoutes);
 // vocabulary
 app.use("/api/vocabularies", vocabularyRoutes);
 
+// learning
+console.log("typeof vocabularyRoutes =", typeof vocabularyRoutes);
+console.log(vocabularyRoutes);
+app.use("/api/learning", vocabularyRoutes);
+
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, async () => {
     console.log(`Server đang chạy tại http://localhost:${PORT}`);
