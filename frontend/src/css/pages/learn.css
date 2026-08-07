@@ -466,6 +466,57 @@ body {
     line-height: 1.6;
 }
 
+.writing-exercise-prompt {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    padding: 1.25rem 1.5rem;
+    background: var(--wm-bg-page);
+    border: 1px solid var(--wm-border);
+    border-radius: var(--wm-radius-md);
+    margin-bottom: 1.5rem;
+}
+
+.writing-exercise-meaning {
+    font-size: 1.125rem;
+    font-weight: 600;
+    color: var(--wm-text-primary);
+    margin: 0;
+    line-height: 1.6;
+}
+
+.writing-exercise-example {
+    font-size: 0.9375rem;
+    font-weight: 400;
+    color: var(--wm-text-secondary);
+    font-style: italic;
+    margin: 0;
+    line-height: 1.5;
+}
+
+.writing-exercise-result {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.75rem 1rem;
+    border-radius: var(--wm-radius-sm);
+    font-size: 0.9375rem;
+    font-weight: 600;
+    margin-bottom: 1rem;
+}
+
+.writing-exercise-result.is-correct {
+    background: rgba(16, 185, 129, 0.1);
+    color: var(--wm-success);
+    border: 1px solid rgba(16, 185, 129, 0.3);
+}
+
+.writing-exercise-result.is-incorrect {
+    background: rgba(244, 63, 94, 0.1);
+    color: var(--wm-error);
+    border: 1px solid rgba(244, 63, 94, 0.3);
+}
+
 .writing-exercise-input-wrapper {
     display: flex;
     flex-direction: column;
@@ -479,17 +530,62 @@ body {
     color: var(--wm-text-secondary);
 }
 
-.writing-exercise-input {
-    width: 100%;
-    padding: 0.875rem 1rem;
+.writing-exercise-input-group {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem;
     border: 1px solid var(--wm-border);
     border-radius: var(--wm-radius-md);
-    font-family: var(--wm-font-family);
-    font-size: 1rem;
-    color: var(--wm-text-primary);
     background: var(--wm-bg-page);
     transition: border-color var(--wm-transition-base),
                 box-shadow var(--wm-transition-base);
+}
+
+.writing-exercise-input-group:focus-within {
+    border-color: var(--wm-border-focus);
+    box-shadow: 0 0 0 3px rgba(255, 195, 0, 0.2);
+    background: var(--wm-bg-card);
+}
+
+.writing-exercise-submit {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    width: 40px;
+    height: 40px;
+    border-radius: var(--wm-radius-sm);
+    font-family: var(--wm-font-family);
+    font-size: 1rem;
+    cursor: pointer;
+    border: none;
+    background: var(--wm-success);
+    color: #FFFFFF;
+    transition: background var(--wm-transition-base),
+                transform var(--wm-transition-base),
+                box-shadow var(--wm-transition-base);
+}
+
+.writing-exercise-submit:hover {
+    background: #0EA371;
+    box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+}
+
+.writing-exercise-submit:active {
+    transform: scale(0.95);
+}
+
+.writing-exercise-input {
+    flex: 1;
+    width: 100%;
+    padding: 0.5rem 0.75rem;
+    border: none;
+    border-radius: var(--wm-radius-sm);
+    font-family: var(--wm-font-family);
+    font-size: 1rem;
+    color: var(--wm-text-primary);
+    background: transparent;
     box-sizing: border-box;
 }
 
@@ -499,9 +595,6 @@ body {
 
 .writing-exercise-input:focus {
     outline: none;
-    border-color: var(--wm-border-focus);
-    box-shadow: 0 0 0 3px rgba(255, 195, 0, 0.2);
-    background: var(--wm-bg-card);
 }
 
 .writing-exercise-status {

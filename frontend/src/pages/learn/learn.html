@@ -110,8 +110,14 @@
                 </div>
                 <div class="writing-exercise-input-wrapper">
                     <label for="writing-input" class="writing-exercise-label">Nhập từ tiếng Anh</label>
-                    <input type="text" id="writing-input" class="writing-exercise-input" placeholder="Nhập từ..." autocomplete="off">
+                    <div class="writing-exercise-input-group">
+                        <input type="text" id="writing-input" class="writing-exercise-input" placeholder="Nhập từ..." autocomplete="off">
+                        <button type="submit" class="writing-exercise-submit" aria-label="Kiểm tra">
+                            <i class="fa-solid fa-check"></i>
+                        </button>
+                    </div>
                 </div>
+                <div class="writing-exercise-result" hidden></div>
                 <div class="writing-exercise-status">
                     <span class="writing-exercise-hint">Viết đúng chính tả từ vựng bạn vừa học</span>
                 </div>
