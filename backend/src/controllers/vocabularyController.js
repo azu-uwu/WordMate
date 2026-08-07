@@ -3,6 +3,7 @@ const Topic = require("../models/topicModel");
 const User = require("../models/userModel");
 const UserVocabulary = require("../models/userVocabularyModel");
 const srsService = require("../services/srsService");
+const { updateStudyStreak } = require("../models/userModel");
 
 /**
  * Lấy danh sách Vocabulary theo topic_id
@@ -182,6 +183,101 @@ const markAsMastered = async (req, res) => {
 };
 
 /**
+ * Nộp bài luyện viết
+ * POST /api/learning/writing/submit
+ * Body: { vocabulary_id: number, answer: string }
+ * Kiểm tra đáp án, cập nhật user_vocabularies (SRS), cập nhật streak
+ */
+const submitWriting = async (req, res) => {
+    try {
+        const userId = req.user.id;
+        const { vocabulary_id, answer } = req.body;
+
+        // Validate required vocabulary_id
+        if (vocabulary_id === undefined || vocabulary_id === null || vocabulary_id === "") {
+            return res.status(400).json({
+                success: false,
+                message: "Thiếu vocabulary_id"
+            });
+        }
+
+        // Validate vocabulary_id is a positive integer
+        if (!Number.isInteger(vocabulary_id) || vocabulary_id <= 0) {
+            return res.status(400).json({
+                success: false,
+                message: "Vocabulary ID không hợp lệ"
+            });
+        }
+
+        // Validate required answer
+        if (answer === undefined || answer === null || answer === "") {
+            return res.status(400).json({
+                success: false,
+                message: "Thiếu answer"
+            });
+        }
+
+        // Validate answer is a string
+        if (typeof answer !== "string") {
+            return res.status(400).json({
+                success: false,
+                message: "Answer phải là chuỗi"
+            });
+        }
+
+        // Kiểm tra vocabulary tồn tại
+        const vocabulary = await Vocabulary.findById(vocabulary_id);
+        if (!vocabulary) {
+            return res.status(404).json({
+                success: false,
+                message: "Từ vựng không tồn tại"
+            });
+        }
+
+        // So sánh đáp án (bỏ khoảng trắng đầu/cuối, không phân biệt hoa thường)
+        const normalizedAnswer = answer.trim().toLowerCase();
+        const normalizedWord = vocabulary.word.trim().toLowerCase();
+        const isCorrect = normalizedAnswer === normalizedWord;
+
+        // Lấy bản ghi học tập hiện tại (nếu chưa có, coi review_count = 0)
+        const existingRecord = await UserVocabulary.findByUserAndVocab(userId, vocabulary_id);
+        const currentReviewCount = existingRecord ? existingRecord.review_count : 0;
+
+        // Tính toán SRS
+        const srsResult = isCorrect
+            ? srsService.handleCorrectAnswer(currentReviewCount)
+            : srsService.handleWrongAnswer();
+
+        // Lưu dữ liệu (upsert: tạo mới nếu chưa có, cập nhật nếu đã có)
+        const now = new Date();
+        await UserVocabulary.upsert(userId, vocabulary_id, {
+            status: "learning",
+            review_count: srsResult.reviewCount,
+            next_review_at: srsResult.nextReviewAt,
+            last_reviewed_at: now
+        });
+
+        // Cập nhật streak (logic nằm trong model, controller chỉ gọi)
+        const newStreak = await updateStudyStreak(userId, now);
+
+        return res.status(200).json({
+            success: true,
+            message: isCorrect ? "Chính xác!" : "Sai rồi, hãy thử lại",
+            isCorrect,
+            review_count: srsResult.reviewCount,
+            next_review_at: srsResult.nextReviewAt,
+            streak: newStreak
+        });
+    } catch (err) {
+        console.error(err);
+        return res.status(500).json({
+            success: false,
+            message: "Lỗi máy chủ"
+        });
+    }
+};
+
+/**
  * Lấy dữ liệu luyện viết cho từ vựng hiện tại
  * POST /api/learning/writing
  * Body: { vocabulary_id: number }
@@ -239,5 +335,6 @@ module.exports = {
     getByTopic,
     startLearning,
     markAsMastered,
-    getWritingData
+    getWritingData,
+    submitWriting
 };
