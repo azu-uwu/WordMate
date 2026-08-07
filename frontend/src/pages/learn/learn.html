@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Học Flashcard | WordMate</title>
+    <link rel="icon" type="image/svg+xml" href="../../../public/image/wordmate-logo.svg">
+
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Google Fonts: Inter (hỗ trợ tiếng Việt đầy đủ) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:ital,wght@0,400;0,500;0,600;0,700;0,800&display=swap" rel="stylesheet">
+
+    <!-- Font Awesome 6 (Free) -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="../../css/components/header.css">
+    <link rel="stylesheet" href="../../css/pages/learn.css">
+</head>
+
+<body>
+    <!-- ===== HEADER COMPONENT PLACEHOLDER ===== -->
+    <!-- Header sẽ được load từ component dùng chung -->
+    <div id="header">
+        <!-- Header component sẽ được inject vào đây -->
+    </div>
+
+    <!-- ===== MAIN CONTENT ===== -->
+    <main class="main-content">
+
+        <!-- ===== LEARN CONTAINER ===== -->
+        <div class="learn-container">
+
+            <!-- ===== LEARN HEADER ===== -->
+            <div class="learn-header">
+                <h1 class="learn-title">Học Flashcard</h1>
+                <p class="learn-subtitle">Nhấn vào thẻ để xem nghĩa của từ</p>
+            </div>
+
+            <!-- ===== PROGRESS BAR ===== -->
+            <section class="progress-section" aria-label="Tiến độ học tập">
+                <div class="progress-info">
+                    <span class="progress-label">Tiến độ</span>
+                    <span class="progress-count">0 / 0</span>
+                </div>
+                <div class="progress-bar-wrapper" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" aria-label="Tiến độ học tập">
+                    <div class="progress-bar-fill" style="width: 0%;"></div>
+                </div>
+            </section>
+
+            <!-- ===== FLASHCARD CONTAINER ===== -->
+            <section class="flashcard-section" aria-label="Flashcard">
+                <div class="flashcard-container">
+                    <div class="flashcard" role="button" tabindex="0" aria-label="Flashcard từ vựng">
+                        <!-- ===== MẶT TRƯỚC ===== -->
+                        <div class="flashcard-face flashcard-front">
+                            <div class="flashcard-image">
+                                <img src="" alt="Hình ảnh minh họa" class="flashcard-image-placeholder">
+                            </div>
+                            <div class="flashcard-body">
+                                <span class="flashcard-pronunciation">pronunciation</span>
+                                <h2 class="flashcard-word">word</h2>
+                                <button type="button" class="flashcard-audio" aria-label="Nghe phát âm">
+                                    <i class="fa-solid fa-volume-high"></i>
+                                </button>
+                            </div>
+                            <div class="flashcard-hint">
+                                Nhấn để xem nghĩa <i class="fa-solid fa-rotate"></i>
+                            </div>
+                        </div>
+
+                        <!-- ===== MẶT SAU ===== -->
+                        <div class="flashcard-face flashcard-back">
+                            <div class="flashcard-body">
+                                <span class="flashcard-part-of-speech">part_of_speech</span>
+                                <h2 class="flashcard-word">word</h2>
+                                <p class="flashcard-meaning">meaning</p>
+                            </div>
+                            <div class="flashcard-example">
+                                <p class="flashcard-example-text">example</p>
+                                <p class="flashcard-example-meaning">example_meaning</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ===== ACTION BUTTONS ===== -->
+            <div class="learn-actions">
+                <button type="button" class="btn-learn btn-learn-complete">
+                    <i class="fa-solid fa-check"></i>
+                    <span>Đã thuộc</span>
+                </button>
+                <button type="button" class="btn-learn btn-learn-continue">
+                    <span>Tiếp tục</span>
+                    <i class="fa-solid fa-arrow-right"></i>
+                </button>
+            </div>
+
+            <!-- ===== WRITING EXERCISE CONTAINER (placeholder, mặc định ẩn) ===== -->
+            <section class="writing-exercise" hidden aria-label="Bài tập viết">
+                <div class="writing-exercise-header">
+                    <h2 class="writing-exercise-title">Bài tập viết</h2>
+                    <p class="writing-exercise-subtitle">Ôn lại từ vừa học bằng cách viết chính tả</p>
+                </div>
+                <div class="writing-exercise-input-wrapper">
+                    <label for="writing-input" class="writing-exercise-label">Nhập từ tiếng Anh</label>
+                    <input type="text" id="writing-input" class="writing-exercise-input" placeholder="Nhập từ..." autocomplete="off">
+                </div>
+                <div class="writing-exercise-status">
+                    <span class="writing-exercise-hint">Viết đúng chính tả từ vựng bạn vừa học</span>
+                </div>
+            </section>
+
+        </div>
+        <!-- ===== END LEARN CONTAINER ===== -->
+
+    </main>
+    <!-- ===== END MAIN CONTENT ===== -->
+
+    <!-- ===== AI CHAT PLACEHOLDER ===== -->
+    <!-- AI Chat Component sẽ được load từ component dùng chung -->
+    <div id="ai-chat-placeholder" class="ai-chat-placeholder">
+        <!-- AI Chat component sẽ được inject vào đây -->
+    </div>
+
+    <!-- ===== BOTTOM NAVIGATION PLACEHOLDER ===== -->
+    <!-- Bottom Navigation sẽ được load từ component dùng chung -->
+    <div id="bottom-nav">
+        <!-- Bottom Navigation component sẽ được inject vào đây -->
+    </div>
+
+    <script type="module" src="../../js/pages/learn.js"></script>
+
+</body>
+
+</html>

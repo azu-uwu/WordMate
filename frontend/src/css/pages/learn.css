@@ -1,0 +1,819 @@
+/* ============================================================
+   learn.css — WordMate Learn Flashcard Page Styles
+   Design System: #FFC300 primary, Inter font
+   ============================================================ */
+
+/* ============================================================
+   1. CSS VARIABLES (DESIGN TOKENS)
+   ============================================================ */
+
+:root {
+    /* Primary palette — Warm Gold */
+    --wm-primary: #FFC300;
+    --wm-primary-dark: #E6B000;
+    --wm-primary-light: #FFD633;
+    --wm-primary-bg: #FFF8E1;
+
+    /* Semantic colors */
+    --wm-success: #10B981;
+    --wm-warning: #F59E0B;
+    --wm-error: #F43F5E;
+
+    /* Neutral palette — Light & bright */
+    --wm-text-primary: #1E293B;
+    --wm-text-secondary: #64748B;
+    --wm-text-muted: #94A3B8;
+    --wm-bg-page: #F8FAFC;
+    --wm-bg-card: #FFFFFF;
+    --wm-border: #E2E8F0;
+    --wm-border-focus: #FFC300;
+
+    /* Typography */
+    --wm-font-family: 'Inter', 'Roboto', system-ui, -apple-system, sans-serif;
+
+    /* Spacing */
+    --wm-radius-sm: 8px;
+    --wm-radius-md: 12px;
+    --wm-radius-lg: 20px;
+    --wm-radius-card: 24px;
+    --wm-shadow-card: 0 4px 24px rgba(0, 0, 0, 0.06), 0 1px 4px rgba(0, 0, 0, 0.04);
+    --wm-shadow-card-hover: 0 8px 40px rgba(0, 0, 0, 0.10), 0 2px 8px rgba(0, 0, 0, 0.06);
+
+    /* Transitions */
+    --wm-transition-fast: 150ms ease;
+    --wm-transition-base: 200ms ease;
+    --wm-transition-slow: 300ms ease;
+}
+
+/* ============================================================
+   2. LAYOUT — Body & Main Content
+   ============================================================ */
+
+body {
+    margin: 0;
+    background: url("../../../public/image/background.png") center/cover fixed;
+}
+
+.learn-container {
+    width: 60%;
+    max-width: 1400px;
+    min-width: 500px;
+    margin: 0 auto;         /* chỉ căn giữa theo chiều ngang */
+    padding: 0 1rem;         /* padding ngang cho màn hình nhỏ */
+    animation: fadeIn 0.5s ease forwards;
+    padding-bottom: 6rem;
+    min-height: 100vh;
+    background: var(--wm-bg-page);
+    font-family: var(--wm-font-family);
+}
+
+/* ============================================================
+   3. HEADER PLACEHOLDER — header-placeholder
+   ============================================================ */
+
+.header-placeholder {
+    /* Placeholder cho Header component */
+    /* Header sẽ được inject từ component dùng chung */
+    min-height: 64px; /* Reserve space for header */
+}
+
+/* ============================================================
+   4. LEARN HEADER — learn-header
+   ============================================================ */
+
+.learn-header {
+    margin-bottom: 1.5rem;
+    animation: fadeInDown 0.6s ease forwards;
+}
+
+.learn-title {
+    font-size: 2.5rem;
+    font-weight: 800;
+    color: var(--wm-text-primary);
+    margin: 0 0 0.5rem 0;
+    letter-spacing: -0.02em;
+    line-height: 1.2;
+}
+
+.learn-subtitle {
+    font-size: 1.0625rem;
+    font-weight: 400;
+    color: var(--wm-text-secondary);
+    margin: 0;
+    line-height: 1.6;
+}
+
+/* ============================================================
+   5. PROGRESS BAR — progress-section
+   ============================================================ */
+
+.progress-section {
+    margin-bottom: 2rem;
+    animation: fadeInUp 0.7s ease forwards;
+}
+
+.progress-info {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 0.75rem;
+}
+
+.progress-label {
+    font-size: 0.9375rem;
+    font-weight: 600;
+    color: var(--wm-text-secondary);
+}
+
+.progress-count {
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--wm-text-primary);
+    background: var(--wm-bg-card);
+    padding: 0.375rem 0.875rem;
+    border-radius: var(--wm-radius-sm);
+    border: 1px solid var(--wm-border);
+}
+
+.progress-bar-wrapper {
+    width: 100%;
+    height: 12px;
+    background: var(--wm-border);
+    border-radius: 999px;
+    overflow: hidden;
+}
+
+.progress-bar-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--wm-primary) 0%, var(--wm-primary-light) 100%);
+    border-radius: 999px;
+    transition: width var(--wm-transition-slow);
+}
+
+/* ============================================================
+   6. FLASHCARD SECTION — flashcard-section
+   ============================================================ */
+
+.flashcard-section {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 2rem;
+    animation: fadeInUp 0.8s ease forwards;
+}
+
+.flashcard-container {
+    width: 100%;
+    max-width: 480px;
+    perspective: 1200px;
+}
+
+/* ============================================================
+   7. FLASHCARD — flashcard (3D Flip)
+   ============================================================ */
+
+.flashcard {
+    position: relative;
+    width: 100%;
+    height: 420px;
+    transform-style: preserve-3d;
+    transition: transform 0.6s cubic-bezier(0.4, 0.2, 0.2, 1);
+    cursor: pointer;
+}
+
+.flashcard.is-flipped {
+    transform: rotateY(180deg);
+}
+
+/* .flashcard:hover {
+    transform: translateY(-4px);
+} */
+
+.flashcard:active {
+    transform: translateY(-2px);
+}
+
+/* Focus visible for accessibility */
+.flashcard:focus-visible {
+    outline: 2px solid var(--wm-primary);
+    outline-offset: 2px;
+    border-radius: var(--wm-radius-card);
+}
+
+/* ============================================================
+   8. FLASHCARD FACES — flashcard-face
+   ============================================================ */
+
+.flashcard-face {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    backface-visibility: hidden;
+    -webkit-backface-visibility: hidden;
+    border-radius: var(--wm-radius-card);
+    background: var(--wm-bg-card);
+    box-shadow: var(--wm-shadow-card);
+    border: 1px solid var(--wm-border);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+/* Mặt sau xoay 180 độ để tạo hiệu ứng lật */
+.flashcard-back {
+    transform: rotateY(180deg);
+}
+
+/* ============================================================
+   9. FLASHCARD FRONT — flashcard-front
+   ============================================================ */
+
+.flashcard-image {
+    width: 100%;
+    height: 200px;
+    background: linear-gradient(135deg, var(--wm-primary-bg) 0%, var(--wm-bg-page) 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    border-bottom: 1px solid var(--wm-border);
+}
+
+.flashcard-image-placeholder {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.flashcard-body {
+    padding: 1.5rem;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+}
+
+.flashcard-pronunciation {
+    font-size: 0.9375rem;
+    font-weight: 500;
+    color: var(--wm-text-muted);
+    margin-bottom: 0.5rem;
+}
+
+.flashcard-word {
+    font-size: 2.25rem;
+    font-weight: 800;
+    color: var(--wm-text-primary);
+    margin: 0 0 0.75rem 0;
+    letter-spacing: -0.02em;
+    line-height: 1.2;
+}
+
+.flashcard-audio {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    background: var(--wm-primary-bg);
+    border: 1px solid var(--wm-primary);
+    color: var(--wm-primary-dark);
+    font-size: 1.25rem;
+    cursor: pointer;
+    transition: background var(--wm-transition-base),
+                color var(--wm-transition-base),
+                transform var(--wm-transition-base);
+}
+
+.flashcard-audio:hover {
+    background: var(--wm-primary);
+    color: var(--wm-text-primary);
+    transform: scale(1.05);
+}
+
+.flashcard-audio:active {
+    transform: scale(0.95);
+}
+
+.flashcard-hint {
+    padding: 1rem 1.5rem;
+    background: var(--wm-bg-page);
+    border-top: 1px solid var(--wm-border);
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: var(--wm-text-secondary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+}
+
+.flashcard-hint i {
+    font-size: 0.875rem;
+    color: var(--wm-primary-dark);
+}
+
+/* ============================================================
+   10. FLASHCARD BACK — flashcard-back
+   ============================================================ */
+
+.flashcard-back .flashcard-body {
+    padding: 2rem 1.5rem 1rem 1.5rem;
+}
+
+.flashcard-part-of-speech {
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--wm-primary-dark);
+    background: var(--wm-primary-bg);
+    padding: 0.375rem 0.875rem;
+    border-radius: 999px;
+    margin-bottom: 0.75rem;
+}
+
+.flashcard-meaning {
+    font-size: 1.125rem;
+    font-weight: 500;
+    color: var(--wm-text-secondary);
+    margin: 0;
+    line-height: 1.6;
+}
+
+.flashcard-example {
+    padding: 1.25rem 1.5rem;
+    background: var(--wm-bg-page);
+    border-top: 1px solid var(--wm-border);
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.flashcard-example-text {
+    font-size: 0.9375rem;
+    font-weight: 500;
+    color: var(--wm-text-primary);
+    font-style: italic;
+    margin: 0;
+    line-height: 1.5;
+}
+
+.flashcard-example-meaning {
+    font-size: 0.875rem;
+    font-weight: 400;
+    color: var(--wm-text-secondary);
+    margin: 0;
+    line-height: 1.5;
+}
+
+/* ============================================================
+   11. ACTION BUTTONS — learn-actions
+   ============================================================ */
+
+.learn-actions {
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+    margin-bottom: 2rem;
+    animation: fadeInUp 0.9s ease forwards;
+}
+
+.btn-learn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    padding: 0.875rem 2rem;
+    border-radius: var(--wm-radius-md);
+    font-family: var(--wm-font-family);
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    border: none;
+    transition: background var(--wm-transition-base),
+                color var(--wm-transition-base),
+                transform var(--wm-transition-base),
+                box-shadow var(--wm-transition-base);
+}
+
+.btn-learn i {
+    font-size: 1rem;
+}
+
+.btn-learn-complete {
+    background: var(--wm-success);
+    color: #FFFFFF;
+}
+
+.btn-learn-complete:hover {
+    background: #0EA371;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 16px rgba(16, 185, 129, 0.3);
+}
+
+.btn-learn-complete:active {
+    transform: translateY(0);
+}
+
+.btn-learn-continue {
+    background: var(--wm-primary);
+    color: var(--wm-text-primary);
+}
+
+.btn-learn-continue:hover {
+    background: var(--wm-primary-dark);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 16px rgba(255, 195, 0, 0.3);
+}
+
+.btn-learn-continue:active {
+    transform: translateY(0);
+}
+
+/* ============================================================
+   12. WRITING EXERCISE — writing-exercise (placeholder)
+   ============================================================ */
+
+.writing-exercise {
+    background: var(--wm-bg-card);
+    border-radius: var(--wm-radius-card);
+    box-shadow: var(--wm-shadow-card);
+    border: 1px solid var(--wm-border);
+    padding: 2rem;
+    margin-bottom: 2rem;
+    animation: fadeInUp 0.8s ease forwards;
+}
+
+.writing-exercise-header {
+    margin-bottom: 1.5rem;
+}
+
+.writing-exercise-title {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--wm-text-primary);
+    margin: 0 0 0.5rem 0;
+}
+
+.writing-exercise-subtitle {
+    font-size: 0.9375rem;
+    font-weight: 400;
+    color: var(--wm-text-secondary);
+    margin: 0;
+    line-height: 1.6;
+}
+
+.writing-exercise-input-wrapper {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+}
+
+.writing-exercise-label {
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--wm-text-secondary);
+}
+
+.writing-exercise-input {
+    width: 100%;
+    padding: 0.875rem 1rem;
+    border: 1px solid var(--wm-border);
+    border-radius: var(--wm-radius-md);
+    font-family: var(--wm-font-family);
+    font-size: 1rem;
+    color: var(--wm-text-primary);
+    background: var(--wm-bg-page);
+    transition: border-color var(--wm-transition-base),
+                box-shadow var(--wm-transition-base);
+    box-sizing: border-box;
+}
+
+.writing-exercise-input::placeholder {
+    color: var(--wm-text-muted);
+}
+
+.writing-exercise-input:focus {
+    outline: none;
+    border-color: var(--wm-border-focus);
+    box-shadow: 0 0 0 3px rgba(255, 195, 0, 0.2);
+    background: var(--wm-bg-card);
+}
+
+.writing-exercise-status {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.writing-exercise-hint {
+    font-size: 0.8125rem;
+    font-weight: 400;
+    color: var(--wm-text-muted);
+}
+
+/* ============================================================
+   13. AI CHAT PLACEHOLDER — ai-chat-placeholder
+   ============================================================ */
+
+.ai-chat-placeholder {
+    /* Placeholder cho AI Chat component */
+    /* AI Chat sẽ được inject từ component dùng chung */
+    position: fixed;
+    bottom: 80px;
+    right: 20px;
+    z-index: 1000;
+}
+
+/* ============================================================
+   14. BOTTOM NAVIGATION PLACEHOLDER — bottom-nav-placeholder
+   ============================================================ */
+
+.bottom-nav-placeholder {
+    /* Placeholder cho Bottom Navigation component */
+    /* Bottom Navigation sẽ được inject từ component dùng chung */
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    z-index: 999;
+    background: var(--wm-bg-card);
+    border-top: 1px solid var(--wm-border);
+    box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.05);
+}
+
+/* ============================================================
+   15. ANIMATIONS
+   ============================================================ */
+
+@keyframes fadeIn {
+    0% {
+        opacity: 0;
+    }
+    100% {
+        opacity: 1;
+    }
+}
+
+@keyframes fadeInDown {
+    0% {
+        opacity: 0;
+        transform: translateY(-20px);
+    }
+    100% {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes fadeInUp {
+    0% {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    100% {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* ============================================================
+   16. UTILITIES
+   ============================================================ */
+
+html {
+    scroll-behavior: smooth;
+    -webkit-text-size-adjust: 100%;
+}
+
+body {
+    overflow-x: hidden;
+}
+
+/* ============================================================
+   17. RESPONSIVE — Breakpoints
+   ============================================================ */
+
+/* === Laptop / Small Desktop (≤ 1200px) === */
+@media (max-width: 1200px) {
+    .learn-container {
+        padding: 1.75rem 1.25rem;
+    }
+
+    .learn-title {
+        font-size: 2.25rem;
+    }
+
+    .flashcard {
+        height: 400px;
+    }
+}
+
+/* === Tablet (≤ 768px) === */
+@media (max-width: 768px) {
+    .learn-container {
+        padding: 1.5rem 1rem;
+    }
+
+    .learn-header {
+        margin-bottom: 1.25rem;
+    }
+
+    .learn-title {
+        font-size: 2rem;
+    }
+
+    .learn-subtitle {
+        font-size: 1rem;
+    }
+
+    .progress-section {
+        margin-bottom: 1.5rem;
+    }
+
+    .flashcard {
+        height: 380px;
+    }
+
+    .flashcard-image {
+        height: 180px;
+    }
+
+    .flashcard-word {
+        font-size: 2rem;
+    }
+
+    .learn-actions {
+        gap: 0.75rem;
+    }
+
+    .btn-learn {
+        padding: 0.75rem 1.5rem;
+        font-size: 0.9375rem;
+    }
+
+    .writing-exercise {
+        padding: 1.5rem;
+    }
+}
+
+/* === Mobile (≤ 480px) === */
+@media (max-width: 480px) {
+    .learn-container {
+        padding: 1rem 0.75rem;
+    }
+
+    .learn-header {
+        margin-bottom: 1rem;
+    }
+
+    .learn-title {
+        font-size: 1.75rem;
+    }
+
+    .learn-subtitle {
+        font-size: 0.9375rem;
+    }
+
+    .progress-section {
+        margin-bottom: 1.25rem;
+    }
+
+    .progress-bar-wrapper {
+        height: 10px;
+    }
+
+    .flashcard {
+        height: 360px;
+    }
+
+    .flashcard-image {
+        height: 160px;
+    }
+
+    .flashcard-body {
+        padding: 1.25rem;
+    }
+
+    .flashcard-word {
+        font-size: 1.75rem;
+    }
+
+    .flashcard-pronunciation {
+        font-size: 0.875rem;
+    }
+
+    .flashcard-audio {
+        width: 44px;
+        height: 44px;
+        font-size: 1.125rem;
+    }
+
+    .flashcard-hint {
+        padding: 0.875rem 1.25rem;
+        font-size: 0.8125rem;
+    }
+
+    .flashcard-back .flashcard-body {
+        padding: 1.5rem 1.25rem 0.875rem 1.25rem;
+    }
+
+    .flashcard-meaning {
+        font-size: 1rem;
+    }
+
+    .flashcard-example {
+        padding: 1rem 1.25rem;
+    }
+
+    .flashcard-example-text {
+        font-size: 0.875rem;
+    }
+
+    .flashcard-example-meaning {
+        font-size: 0.8125rem;
+    }
+
+    .learn-actions {
+        flex-direction: column;
+        gap: 0.75rem;
+    }
+
+    .btn-learn {
+        width: 100%;
+        padding: 0.875rem 1.5rem;
+        font-size: 0.9375rem;
+    }
+
+    .writing-exercise {
+        padding: 1.25rem;
+    }
+
+    .writing-exercise-title {
+        font-size: 1.25rem;
+    }
+
+    .writing-exercise-subtitle {
+        font-size: 0.875rem;
+    }
+}
+
+/* === Small Mobile (≤ 360px) === */
+@media (max-width: 360px) {
+    .learn-container {
+        padding: 0.75rem 0.5rem;
+    }
+
+    .learn-title {
+        font-size: 1.5rem;
+    }
+
+    .learn-subtitle {
+        font-size: 0.875rem;
+    }
+
+    .flashcard {
+        height: 340px;
+    }
+
+    .flashcard-image {
+        height: 140px;
+    }
+
+    .flashcard-word {
+        font-size: 1.5rem;
+    }
+
+    .flashcard-body {
+        padding: 1rem;
+    }
+
+    .flashcard-hint {
+        padding: 0.75rem 1rem;
+        font-size: 0.75rem;
+    }
+
+    .flashcard-back .flashcard-body {
+        padding: 1.25rem 1rem 0.75rem 1rem;
+    }
+
+    .flashcard-example {
+        padding: 0.875rem 1rem;
+    }
+
+    .writing-exercise {
+        padding: 1rem;
+    }
+
+    .writing-exercise-title {
+        font-size: 1.125rem;
+    }
+}
+
+/* ============================================================
+      END OF learn.css
+     ============================================================ */
