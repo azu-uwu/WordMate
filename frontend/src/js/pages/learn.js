@@ -458,6 +458,25 @@ function showFlashcardView() {
 }
 
 /**
+ * Replace the vocabulary word in a sentence with an underscore.
+ * Uses word boundaries so partial matches (e.g. "art" inside "artificial") are not replaced,
+ * and matches case-insensitively (e.g. "Thanks" matches "thanks").
+ * @param {string} sentence - The example sentence
+ * @param {string} word - The vocabulary word to mask
+ * @returns {string} The sentence with the word replaced by "_"
+ */
+function maskWordInSentence(sentence, word) {
+    if (!sentence || !word) return sentence;
+
+    // Escape regex special characters in the word
+    const escapedWord = word.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    // Word boundaries prevent partial matches; 'i' flag matches case-insensitively
+    const regex = new RegExp(`\\b${escapedWord}\\b`, 'i');
+
+    return sentence.replace(regex, '___');
+}
+
+/**
  * Display the writing prompt (meaning, example, example meaning) for the current vocabulary.
  */
 function populateWritingPrompt() {
@@ -466,7 +485,7 @@ function populateWritingPrompt() {
     writingMeaning.textContent = currentWritingData.meaning || '';
 
     if (currentWritingData.example) {
-        writingExample.textContent = currentWritingData.example;
+        writingExample.textContent = maskWordInSentence(currentWritingData.example, currentWritingData.word);
         writingExample.hidden = false;
     } else {
         writingExample.textContent = '';
