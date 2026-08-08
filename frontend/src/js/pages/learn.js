@@ -648,6 +648,66 @@ function handleWritingNext() {
 }
 
 // ============================================================
+// KEYBOARD SHORTCUTS
+// ============================================================
+
+/**
+ * Setup global keyboard shortcuts for the learning page.
+ *
+ * Context-aware:
+ * - Flashcard view: Space = flip, ArrowRight = mastered, ArrowLeft = continue
+ * - Writing exercise: no flashcard shortcuts (Enter is handled by the writing input listener)
+ * - Summary: no shortcuts - screen stays frozen until the user clicks a button
+ *
+ * Reuses the existing flipCard / handleMastered / handleContinue handlers
+ * so no duplicate logic is introduced.
+ */
+function setupKeyboardShortcuts() {
+    document.addEventListener('keydown', (event) => {
+        // Never block normal typing in form controls
+        const tagName = event.target.tagName;
+        if (tagName === 'INPUT' || tagName === 'TEXTAREA' || tagName === 'SELECT') {
+            return;
+        }
+
+        // Don't hijack browser/OS shortcuts (Alt/Ctrl/Meta + key)
+        if (event.altKey || event.ctrlKey || event.metaKey) {
+            return;
+        }
+
+        // Summary screen: keep its state unchanged until the user acts
+        if (!summarySection.hidden) return;
+
+        // Writing exercise: only Enter inside #writing-input is handled by its own listener
+        if (!writingExercise.hidden) return;
+
+        // Error / other non-flashcard states: no shortcuts
+        if (flashcardSection.hidden) return;
+
+        if (event.key === ' ') {
+            // Don't override native button activation (e.g. Space on a focused button)
+            if (tagName === 'BUTTON') {
+                return;
+            }
+            event.preventDefault();
+            flipCard();
+        } else if (event.key === 'ArrowRight') {
+            // Reuse the mastered handler; disabled check prevents duplicate requests
+            if (!btnMastered.disabled) {
+                event.preventDefault();
+                handleMastered();
+            }
+        } else if (event.key === 'ArrowLeft') {
+            // Reuse the continue handler; disabled check prevents duplicate requests
+            if (!btnContinue.disabled) {
+                event.preventDefault();
+                handleContinue();
+            }
+        }
+    });
+}
+
+// ============================================================
 // EVENT LISTENERS
 // ============================================================
 
@@ -725,6 +785,7 @@ async function initLearn() {
 
         // Step 6: Bind event listeners
         setupEventListeners();
+        setupKeyboardShortcuts();
 
     } catch (error) {
         console.error('Learn initialization error:', error);
