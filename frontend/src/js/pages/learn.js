@@ -655,7 +655,7 @@ function handleWritingNext() {
  * Setup global keyboard shortcuts for the learning page.
  *
  * Context-aware:
- * - Flashcard view: Space = flip, ArrowRight = mastered, ArrowLeft = continue
+ * - Flashcard view: Space = flip, ArrowRight = continue, ArrowLeft = mastered
  * - Writing exercise: no flashcard shortcuts (Enter is handled by the writing input listener)
  * - Summary: no shortcuts - screen stays frozen until the user clicks a button
  *
@@ -692,16 +692,16 @@ function setupKeyboardShortcuts() {
             event.preventDefault();
             flipCard();
         } else if (event.key === 'ArrowRight') {
-            // Reuse the mastered handler; disabled check prevents duplicate requests
-            if (!btnMastered.disabled) {
-                event.preventDefault();
-                handleMastered();
-            }
-        } else if (event.key === 'ArrowLeft') {
             // Reuse the continue handler; disabled check prevents duplicate requests
             if (!btnContinue.disabled) {
                 event.preventDefault();
                 handleContinue();
+            }
+        } else if (event.key === 'ArrowLeft') {
+            // Reuse the mastered handler; disabled check prevents duplicate requests
+            if (!btnMastered.disabled) {
+                event.preventDefault();
+                handleMastered();
             }
         }
     });
