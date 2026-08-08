@@ -102,11 +102,16 @@
                 </button>
             </div>
 
-            <!-- ===== WRITING EXERCISE CONTAINER (placeholder, mặc định ẩn) ===== -->
+            <!-- ===== WRITING EXERCISE CONTAINER (mặc định ẩn) ===== -->
             <section class="writing-exercise" hidden aria-label="Bài tập viết">
                 <div class="writing-exercise-header">
                     <h2 class="writing-exercise-title">Bài tập viết</h2>
                     <p class="writing-exercise-subtitle">Ôn lại từ vừa học bằng cách viết chính tả</p>
+                </div>
+                <div class="writing-exercise-prompt">
+                    <p class="writing-exercise-meaning">meaning</p>
+                    <p class="writing-exercise-example">example</p>
+                    <p class="writing-exercise-example-meaning">example_meaning</p>
                 </div>
                 <div class="writing-exercise-input-wrapper">
                     <label for="writing-input" class="writing-exercise-label">Nhập từ tiếng Anh</label>
@@ -118,6 +123,12 @@
                     </div>
                 </div>
                 <div class="writing-exercise-result" hidden></div>
+                <div class="writing-exercise-next-wrapper">
+                    <button type="button" class="btn-learn btn-learn-continue writing-exercise-next" hidden>
+                        <span>Tiếp theo</span>
+                        <i class="fa-solid fa-arrow-right"></i>
+                    </button>
+                </div>
                 <div class="writing-exercise-status">
                     <span class="writing-exercise-hint">Viết đúng chính tả từ vựng bạn vừa học</span>
                 </div>

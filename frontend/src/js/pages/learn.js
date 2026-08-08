@@ -61,6 +61,13 @@ const btnMastered = document.querySelector('.btn-learn-complete');
 const btnContinue = document.querySelector('.btn-learn-continue');
 
 const writingExercise = document.querySelector('.writing-exercise');
+const writingMeaning = document.querySelector('.writing-exercise-meaning');
+const writingExample = document.querySelector('.writing-exercise-example');
+const writingExampleMeaning = document.querySelector('.writing-exercise-example-meaning');
+const writingInput = document.querySelector('.writing-exercise-input');
+const writingSubmitBtn = document.querySelector('.writing-exercise-submit');
+const writingResult = document.querySelector('.writing-exercise-result');
+const writingNextBtn = document.querySelector('.writing-exercise-next');
 
 // ============================================================
 // STATE
@@ -69,6 +76,8 @@ const writingExercise = document.querySelector('.writing-exercise');
 let vocabularies = [];
 let currentIndex = 0;
 let isFlipped = false;
+let currentWritingData = null;
+let isWritingSubmitting = false;
 
 // ============================================================
 // AUTHENTICATION
@@ -137,6 +146,18 @@ async function markAsMastered(vocabularyId) {
 async function getWritingData(vocabularyId) {
     const response = await api.post('/learning/writing', { vocabulary_id: vocabularyId });
     return response.data;
+}
+
+/**
+ * Submit a writing exercise answer.
+ * POST /api/learning/writing/submit
+ * @param {number} vocabularyId - The vocabulary ID
+ * @param {string} answer - The user's answer
+ * @returns {Promise<Object>} Response data
+ */
+async function submitWritingExercise(vocabularyId, answer) {
+    const response = await api.post('/learning/writing/submit', { vocabulary_id: vocabularyId, answer });
+    return response;
 }
 
 // ============================================================
@@ -362,7 +383,8 @@ async function handleContinue() {
     disableActionButtons();
 
     try {
-        await getWritingData(vocabulary.id);
+        const data = await getWritingData(vocabulary.id);
+        currentWritingData = data;
         showWritingExercise();
     } catch (error) {
         console.error('Get writing data error:', error);
@@ -405,6 +427,58 @@ function showWritingExercise() {
     writingExercise.hidden = false;
 
     learnSubtitle.textContent = DEFAULT_SUBTITLE;
+
+    populateWritingPrompt();
+    resetWritingExercise();
+    writingInput.focus();
+}
+
+/**
+ * Show the flashcard view and hide the writing exercise.
+ */
+function showFlashcardView() {
+    flashcardSection.hidden = false;
+    learnActions.hidden = false;
+    writingExercise.hidden = true;
+
+    learnSubtitle.textContent = DEFAULT_SUBTITLE;
+}
+
+/**
+ * Display the writing prompt (meaning, example, example meaning) for the current vocabulary.
+ */
+function populateWritingPrompt() {
+    if (!currentWritingData) return;
+
+    writingMeaning.textContent = currentWritingData.meaning || '';
+
+    if (currentWritingData.example) {
+        writingExample.textContent = currentWritingData.example;
+        writingExample.hidden = false;
+    } else {
+        writingExample.textContent = '';
+        writingExample.hidden = true;
+    }
+
+    if (currentWritingData.example_meaning) {
+        writingExampleMeaning.textContent = currentWritingData.example_meaning;
+        writingExampleMeaning.hidden = false;
+    } else {
+        writingExampleMeaning.textContent = '';
+        writingExampleMeaning.hidden = true;
+    }
+}
+
+/**
+ * Reset the writing exercise form for a new vocabulary attempt.
+ */
+function resetWritingExercise() {
+    writingInput.value = '';
+    writingInput.disabled = false;
+    writingSubmitBtn.disabled = false;
+    writingResult.hidden = true;
+    writingResult.className = 'writing-exercise-result';
+    writingNextBtn.hidden = true;
 }
 
 /**
@@ -420,6 +494,104 @@ function showSessionComplete() {
 
     learnTitle.textContent = 'Hoàn thành phiên học!';
     learnSubtitle.textContent = 'Bạn đã học hết tất cả từ vựng trong chủ đề này.';
+}
+
+// ============================================================
+// WRITING EXERCISE SUBMIT
+// ============================================================
+
+/**
+ * Handle the writing submit button / Enter key.
+ * Validates input, calls POST /api/learning/writing/submit, then shows the result.
+ */
+async function handleWritingSubmit() {
+    if (isWritingSubmitting) return;
+
+    const answer = writingInput.value.trim();
+    if (answer === '') {
+        showWritingValidationMessage();
+        return;
+    }
+
+    if (currentIndex >= vocabularies.length || !currentWritingData) return;
+
+    const vocabulary = vocabularies[currentIndex];
+    isWritingSubmitting = true;
+    writingInput.disabled = true;
+    writingSubmitBtn.disabled = true;
+
+    try {
+        const result = await submitWritingExercise(vocabulary.id, answer);
+        showWritingResult(result);
+    } catch (error) {
+        console.error('Submit writing error:', error);
+        handleActionError(error, 'Không thể kiểm tra câu trả lời. Vui lòng thử lại.');
+        writingInput.disabled = false;
+        writingSubmitBtn.disabled = false;
+        writingInput.focus();
+    } finally {
+        isWritingSubmitting = false;
+    }
+}
+
+/**
+ * Show a validation message when the input is empty and refocus the input.
+ */
+function showWritingValidationMessage() {
+    writingResult.textContent = 'Vui lòng nhập từ trước khi kiểm tra.';
+    writingResult.className = 'writing-exercise-result';
+    writingResult.hidden = false;
+    writingInput.focus();
+}
+
+/**
+ * Show the writing result (correct or incorrect).
+ * @param {Object} result - The submit API response
+ */
+function showWritingResult(result) {
+    if (result.isCorrect === true) {
+        showWritingResultCorrect(result);
+    } else {
+        showWritingResultIncorrect();
+    }
+}
+
+/**
+ * Show the correct-answer state: success message, keep the answer, show "Tiếp theo".
+ * @param {Object} result - The submit API response
+ */
+function showWritingResultCorrect(result) {
+    writingResult.textContent = result.message || 'Chính xác!';
+    writingResult.className = 'writing-exercise-result is-correct';
+    writingResult.hidden = false;
+    writingNextBtn.hidden = false;
+}
+
+/**
+ * Show the incorrect-answer state: wrong message + correct answer, keep the answer, show "Tiếp theo".
+ */
+function showWritingResultIncorrect() {
+    const correctAnswer = currentWritingData ? currentWritingData.word : '';
+    writingResult.textContent = `Sai rồi! Đáp án đúng: ${correctAnswer}`;
+    writingResult.className = 'writing-exercise-result is-incorrect';
+    writingResult.hidden = false;
+    writingNextBtn.hidden = false;
+}
+
+/**
+ * Handle the "Tiếp theo" button click in the writing exercise.
+ * Moves to the next vocabulary and resets the writing exercise.
+ */
+function handleWritingNext() {
+    if (isWritingSubmitting) return;
+
+    resetWritingExercise();
+    currentWritingData = null;
+    goToNextVocabulary();
+
+    if (currentIndex < vocabularies.length) {
+        showFlashcardView();
+    }
 }
 
 // ============================================================
@@ -441,6 +613,15 @@ function setupEventListeners() {
     flashcardAudioBtn.addEventListener('click', handlePlayAudio);
     btnMastered.addEventListener('click', handleMastered);
     btnContinue.addEventListener('click', handleContinue);
+
+    writingSubmitBtn.addEventListener('click', handleWritingSubmit);
+    writingNextBtn.addEventListener('click', handleWritingNext);
+    writingInput.addEventListener('keydown', (event) => {
+        if (event.key === 'Enter') {
+            event.preventDefault();
+            handleWritingSubmit();
+        }
+    });
 }
 
 // ============================================================
