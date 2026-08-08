@@ -656,7 +656,8 @@ function handleWritingNext() {
  *
  * Context-aware:
  * - Flashcard view: Space = flip, ArrowRight = continue, ArrowLeft = mastered
- * - Writing exercise: no flashcard shortcuts (Enter is handled by the writing input listener)
+ * - Writing exercise: no flashcard shortcuts (Enter is handled by the writing input listener);
+ *   after submit, ArrowRight acts like the "Tiếp theo" button
  * - Summary: no shortcuts - screen stays frozen until the user clicks a button
  *
  * Reuses the existing flipCard / handleMastered / handleContinue handlers
@@ -678,8 +679,15 @@ function setupKeyboardShortcuts() {
         // Summary screen: keep its state unchanged until the user acts
         if (!summarySection.hidden) return;
 
-        // Writing exercise: only Enter inside #writing-input is handled by its own listener
-        if (!writingExercise.hidden) return;
+        // Writing exercise: only Enter inside #writing-input is handled by its own listener.
+        // After submit, ArrowRight acts like the "Tiếp theo" button (reuses handleWritingNext).
+        if (!writingExercise.hidden) {
+            if (event.key === 'ArrowRight' && !writingNextBtn.hidden) {
+                event.preventDefault();
+                handleWritingNext();
+            }
+            return;
+        }
 
         // Error / other non-flashcard states: no shortcuts
         if (flashcardSection.hidden) return;
