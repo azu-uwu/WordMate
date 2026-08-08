@@ -278,6 +278,45 @@ const submitWriting = async (req, res) => {
 };
 
 /**
+ * Lấy danh sách User Vocabulary của người dùng hiện tại
+ * GET /api/user-vocabularies
+ * Query: topic_id (optional)
+ */
+const getUserVocabularies = async (req, res) => {
+    try {
+        const userId = req.user.id;
+        const { topic_id } = req.query;
+
+        let vocabularies;
+        if (topic_id !== undefined && topic_id !== null && topic_id !== "") {
+            // Validate topic_id là số nguyên dương (theo convention hiện tại)
+            const parsedTopicId = Number(topic_id);
+            if (!Number.isInteger(parsedTopicId) || parsedTopicId <= 0) {
+                return res.status(400).json({
+                    success: false,
+                    message: "Topic ID không hợp lệ"
+                });
+            }
+
+            vocabularies = await UserVocabulary.getByUserAndTopic(userId, parsedTopicId);
+        } else {
+            vocabularies = await UserVocabulary.getByUser(userId);
+        }
+
+        return res.status(200).json({
+            success: true,
+            data: vocabularies
+        });
+    } catch (err) {
+        console.error(err);
+        return res.status(500).json({
+            success: false,
+            message: "Lỗi máy chủ"
+        });
+    }
+};
+
+/**
  * Lấy dữ liệu luyện viết cho từ vựng hiện tại
  * POST /api/learning/writing
  * Body: { vocabulary_id: number }
@@ -336,5 +375,6 @@ module.exports = {
     startLearning,
     markAsMastered,
     getWritingData,
-    submitWriting
+    submitWriting,
+    getUserVocabularies
 };

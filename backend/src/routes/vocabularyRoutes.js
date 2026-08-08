@@ -1,11 +1,16 @@
 const express = require("express");
 const router = express.Router();
+const userVocabularyRouter = express.Router();
 
 const vocabularyController = require("../controllers/vocabularyController");
 const authMiddleware = require("../middleware/authMiddleware");
 
 // GET danh sách Vocabulary theo topic_id (yêu cầu đăng nhập)
 router.get("/", authMiddleware, vocabularyController.getByTopic);
+
+// GET danh sách User Vocabulary của người dùng hiện tại (yêu cầu đăng nhập)
+// router được mount tại /api/user-vocabularies
+userVocabularyRouter.get("/", authMiddleware, vocabularyController.getUserVocabularies);
 
 // Khởi tạo phiên học Flashcard (yêu cầu đăng nhập)
 router.post("/start", authMiddleware, vocabularyController.startLearning);
@@ -29,3 +34,4 @@ router.get("/test", (req, res) => {
 });
 
 module.exports = router;
+module.exports.userVocabularyRouter = userVocabularyRouter;

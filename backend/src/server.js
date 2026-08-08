@@ -20,6 +20,7 @@ const topicRoutes = require("./routes/topicRoutes");
 
 // vocabulary
 const vocabularyRoutes = require("./routes/vocabularyRoutes");
+const userVocabularyRoutes = vocabularyRoutes.userVocabularyRouter;
 
 const app = express();
 
@@ -69,6 +70,9 @@ app.use("/api/vocabularies", vocabularyRoutes);
 
 // learning
 app.use("/api/learning", vocabularyRoutes);
+
+// user-vocabularies
+app.use("/api/user-vocabularies", userVocabularyRoutes);
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, async () => {
