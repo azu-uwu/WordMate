@@ -9,9 +9,9 @@
  * 3. Call POST /api/learning/start to load topic + vocabularies
  * 4. Display the first flashcard and update the progress bar
  * 5. Toggle CSS class to flip the flashcard (3D animation handled by CSS from M4-T7)
- * 6. Handle "Đã thuộc" - call POST /api/learning/mastered, move to next vocabulary
+ * 6. Handle "Đã thuộc" - call POST /api/learning/mastered, increment masteredCount, move to next vocabulary
  * 7. Handle "Tiếp tục" - call POST /api/learning/writing, show writing exercise placeholder
- * 8. Show completion message when all vocabularies are learned (no navigation)
+ * 8. Show summary screen when all vocabularies are completed
  */
 
 import api from '../../services/api.js';
@@ -27,6 +27,9 @@ const FLIP_CLASS = 'is-flipped';
 
 /** Default subtitle text (matches learn.html) */
 const DEFAULT_SUBTITLE = 'Nhấn vào thẻ để xem nghĩa của từ';
+
+/** Dashboard page URL (relative to the learn page) */
+const DASHBOARD_URL = '../dashboard/dashboard.html';
 
 // ============================================================
 // DOM ELEMENTS
@@ -69,6 +72,13 @@ const writingSubmitBtn = document.querySelector('.writing-exercise-submit');
 const writingResult = document.querySelector('.writing-exercise-result');
 const writingNextBtn = document.querySelector('.writing-exercise-next');
 
+const summarySection = document.querySelector('.summary-section');
+const summaryTotal = document.querySelector('.summary-stat-total');
+const summaryMastered = document.querySelector('.summary-stat-mastered');
+const summaryPractice = document.querySelector('.summary-stat-practice');
+const btnLearnAgain = document.querySelector('.summary-learn-again');
+const btnBackDashboard = document.querySelector('.summary-back-dashboard');
+
 // ============================================================
 // STATE
 // ============================================================
@@ -78,6 +88,7 @@ let currentIndex = 0;
 let isFlipped = false;
 let currentWritingData = null;
 let isWritingSubmitting = false;
+let masteredCount = 0;
 
 // ============================================================
 // AUTHENTICATION
@@ -354,6 +365,7 @@ function enableActionButtons() {
 /**
  * Handle the "Đã thuộc" button click.
  * Calls POST /api/learning/mastered, then moves to the next vocabulary.
+ * Only increments masteredCount after the API call succeeds.
  */
 async function handleMastered() {
     if (currentIndex >= vocabularies.length) return;
@@ -363,6 +375,7 @@ async function handleMastered() {
 
     try {
         await markAsMastered(vocabulary.id);
+        masteredCount++;
         goToNextVocabulary();
     } catch (error) {
         console.error('Mark as mastered error:', error);
@@ -400,13 +413,13 @@ async function handleContinue() {
 
 /**
  * Move to the next vocabulary.
- * Shows the completion message when there are no more vocabularies.
+ * Shows the summary when there are no more vocabularies.
  */
 function goToNextVocabulary() {
     currentIndex++;
 
     if (currentIndex >= vocabularies.length) {
-        showSessionComplete();
+        showSummary();
         return;
     }
 
@@ -482,18 +495,58 @@ function resetWritingExercise() {
 }
 
 /**
- * Show the session completion message when all vocabularies are done.
- * Does not navigate away.
+ * Show the summary screen when all vocabularies are completed.
+ * Calculates: totalLearned = vocabularies.length, masteredCount, needPractice = totalLearned - masteredCount.
  */
-function showSessionComplete() {
+function showSummary() {
     setProgressComplete();
 
     flashcardSection.hidden = true;
     learnActions.hidden = true;
     writingExercise.hidden = true;
 
-    learnTitle.textContent = 'Hoàn thành phiên học!';
-    learnSubtitle.textContent = 'Bạn đã học hết tất cả từ vựng trong chủ đề này.';
+    learnTitle.textContent = 'Học Flashcard';
+    learnSubtitle.textContent = 'Hoàn thành phiên học!';
+
+    const totalLearned = vocabularies.length;
+    const needPractice = totalLearned - masteredCount;
+
+    summaryTotal.textContent = String(totalLearned);
+    summaryMastered.textContent = String(masteredCount);
+    summaryPractice.textContent = String(needPractice);
+
+    summarySection.hidden = false;
+}
+
+/**
+ * Handle the "Học lại" button click.
+ * Resets the session state and starts over from the first vocabulary.
+ */
+function handleLearnAgain() {
+    masteredCount = 0;
+    currentIndex = 0;
+    isFlipped = false;
+    currentWritingData = null;
+    isWritingSubmitting = false;
+
+    summarySection.hidden = true;
+    writingExercise.hidden = true;
+
+    resetWritingExercise();
+    renderFlashcard(vocabularies[currentIndex]);
+    updateProgress();
+    showFlashcardView();
+
+    learnTitle.textContent = 'Học Flashcard';
+    learnSubtitle.textContent = DEFAULT_SUBTITLE;
+}
+
+/**
+ * Handle the "Về Dashboard" button click.
+ * Navigates to the existing Dashboard page.
+ */
+function handleBackDashboard() {
+    window.location.href = DASHBOARD_URL;
 }
 
 // ============================================================
@@ -622,6 +675,9 @@ function setupEventListeners() {
             handleWritingSubmit();
         }
     });
+
+    btnLearnAgain.addEventListener('click', handleLearnAgain);
+    btnBackDashboard.addEventListener('click', handleBackDashboard);
 }
 
 // ============================================================
@@ -661,8 +717,9 @@ async function initLearn() {
             return;
         }
 
-        // Step 5: Display the first flashcard and progress bar
+        // Step 5: Reset session state and display the first flashcard and progress bar
         currentIndex = 0;
+        masteredCount = 0;
         renderFlashcard(vocabularies[currentIndex]);
         updateProgress();
 

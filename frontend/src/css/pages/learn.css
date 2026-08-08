@@ -433,6 +433,23 @@ body {
     transform: translateY(0);
 }
 
+.btn-learn-dashboard {
+    background: var(--wm-bg-page);
+    color: var(--wm-text-secondary);
+    border: 1px solid var(--wm-border);
+}
+
+.btn-learn-dashboard:hover {
+    background: var(--wm-border);
+    color: var(--wm-text-primary);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 16px rgba(100, 116, 139, 0.2);
+}
+
+.btn-learn-dashboard:active {
+    transform: translateY(0);
+}
+
 /* ============================================================
    12. WRITING EXERCISE — writing-exercise (placeholder)
    ============================================================ */
@@ -607,6 +624,108 @@ body {
     font-size: 0.8125rem;
     font-weight: 400;
     color: var(--wm-text-muted);
+}
+
+/* ============================================================
+   12.1 SUMMARY — summary-section
+   ============================================================ */
+
+.summary-section {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 2rem;
+    animation: fadeInUp 0.8s ease forwards;
+}
+
+.summary-card {
+    width: 100%;
+    max-width: 480px;
+    background: var(--wm-bg-card);
+    border-radius: var(--wm-radius-card);
+    box-shadow: var(--wm-shadow-card);
+    border: 1px solid var(--wm-border);
+    padding: 2.5rem 2rem;
+    text-align: center;
+}
+
+.summary-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 72px;
+    height: 72px;
+    border-radius: 50%;
+    background: rgba(16, 185, 129, 0.1);
+    color: var(--wm-success);
+    font-size: 2.25rem;
+    margin-bottom: 1.25rem;
+}
+
+.summary-title {
+    font-size: 1.75rem;
+    font-weight: 800;
+    color: var(--wm-text-primary);
+    margin: 0 0 0.5rem 0;
+    letter-spacing: -0.02em;
+}
+
+.summary-subtitle {
+    font-size: 0.9375rem;
+    font-weight: 400;
+    color: var(--wm-text-secondary);
+    margin: 0 0 1.75rem 0;
+    line-height: 1.6;
+}
+
+.summary-stats {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    margin-bottom: 2rem;
+}
+
+.summary-stat {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.875rem 1.25rem;
+    background: var(--wm-bg-page);
+    border: 1px solid var(--wm-border);
+    border-radius: var(--wm-radius-md);
+}
+
+.summary-stat-label {
+    font-size: 0.9375rem;
+    font-weight: 500;
+    color: var(--wm-text-secondary);
+}
+
+.summary-stat-value {
+    font-size: 1.125rem;
+    font-weight: 800;
+    color: var(--wm-text-primary);
+}
+
+.summary-stat-total {
+    color: var(--wm-text-primary);
+}
+
+.summary-stat-mastered {
+    color: var(--wm-success);
+}
+
+.summary-stat-practice {
+    color: var(--wm-warning);
+}
+
+.summary-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.summary-actions .btn-learn {
+    width: 100%;
 }
 
 /* ============================================================
