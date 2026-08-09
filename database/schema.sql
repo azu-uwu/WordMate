@@ -234,3 +234,40 @@ CREATE TABLE ai_messages (
         FOREIGN KEY (conversation_id) REFERENCES ai_conversations (id)
         ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_unicode_ci;
+
+-- ============================================================
+-- 10. quiz_questions (update bổ sung cho minestone 5)
+-- Lưu các câu hỏi thuộc một lần làm Quiz.
+-- Quan hệ:
+--   quiz_attempts 1 ---- n quiz_questions
+--   vocabularies  1 ---- n quiz_questions
+-- ============================================================
+
+CREATE TABLE quiz_questions (
+    id              BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    quiz_attempt_id BIGINT UNSIGNED NOT NULL,
+    vocabulary_id   BIGINT UNSIGNED NOT NULL,
+    question_type   ENUM(
+        'WORD_TO_MEANING',
+        'MEANING_TO_WORD',
+        'FILL_IN_BLANK'
+    ) NOT NULL,
+    question_order  INT NOT NULL,
+
+    INDEX idx_quiz_questions_attempt (quiz_attempt_id),
+    INDEX idx_quiz_questions_vocabulary (vocabulary_id),
+
+    CONSTRAINT fk_quiz_questions_attempt
+        FOREIGN KEY (quiz_attempt_id)
+        REFERENCES quiz_attempts (id)
+        ON DELETE CASCADE
+        ON UPDATE CASCADE,
+
+    CONSTRAINT fk_quiz_questions_vocabulary
+        FOREIGN KEY (vocabulary_id)
+        REFERENCES vocabularies (id)
+        ON DELETE CASCADE
+        ON UPDATE CASCADE
+) ENGINE = InnoDB
+  DEFAULT CHARSET = utf8mb4
+  COLLATE = utf8mb4_unicode_ci;

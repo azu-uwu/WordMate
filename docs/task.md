@@ -1902,12 +1902,20 @@ Tạo API `GET /api/user-vocabularies` để lấy danh sách từ vựng  và t
 
 ### Mục tiêu
 
-Tạo model cho quiz_attempts và quiz_answers.
+Xây dựng Model layer cho Quiz, thao tác với dữ liệu quiz_attempts, quiz_questions và quiz_answers.
 
 ### Công việc cần thực hiện
 
 1. Tạo file `backend/src/models/quizModel.js`.
-2. Hàm: `createAttempt(userId)`, `createAnswer({ quizAttemptId, vocabularyId, userAnswer, correctAnswer, isCorrect })`, `updateAttempt(attemptId, { score, totalQuestions, correctAnswers })`, `getAttemptById(attemptId)`, `getAnswersByAttemptId(attemptId)`, `getIncompleteAttempt(userId)`.
+2. Implement các hàm:
+- `createAttempt(userId)`
+- `createQuestion({ quizAttemptId, vocabularyId, questionType, questionOrder })`
+- `getQuestionsByAttemptId(attemptId)`
+- `createAnswer({ quizAttemptId, vocabularyId, userAnswer, correctAnswer, isCorrect })`
+- `updateAttempt(attemptId, { score, totalQuestions, correctAnswers, duration })`
+- `getAttemptById(attemptId)`
+- `getAnswersByAttemptId(attemptId)`
+- `getIncompleteAttempt(userId)` <!-- số câu hỏi > số câu trả lời -> chưa hoàn thành -->
 
 ### File cần tạo
 
@@ -1919,34 +1927,46 @@ Tạo model cho quiz_attempts và quiz_answers.
 
 ### Thông tin
 
-- **ID**: M5-T2
-- **Tên**: API Bắt đầu Quiz
-- **Milestone**: M5
-- **User Story**: US-04
-- **Functional Requirement**: FR-021, FR-022
-- **Module**: Quiz
-- **Priority**: P0
-- **Complexity**: M
-- **Status**: Todo
-- **Dependencies**: M5-T1, M4-T1
+* **ID**: M5-T2
+* **Tên**: API Bắt đầu Quiz
+* **Milestone**: M5
+* **User Story**: US-04
+* **Functional Requirement**: FR-021, FR-022
+* **Module**: Quiz
+* **Priority**: P0
+* **Complexity**: M
+* **Status**: Todo
+* **Dependencies**: M5-T1, M4-T1
 
 ### Mục tiêu
 
-Tạo route POST /api/quiz/start + controller. Lọc từ cần ôn tập, tạo quiz, trả về câu hỏi (tối đa 20).
+Tạo API bắt đầu Quiz, chọn các vocabulary cần ôn, sinh tối đa 20 câu hỏi Multiple Choice và lưu các câu hỏi thuộc quiz attempt.
 
 ### Công việc cần thực hiện
 
 1. Tạo `backend/src/controllers/quizController.js`, `backend/src/routes/quizRoutes.js`.
-2. Hàm `startQuiz`: lọc user_vocabularies (status IN ('new','learning') OR next_review_at <= NOW()), áp dụng Quiz Generation Rules, tạo quiz_attempt, trả về questions.
+2. Implement `startQuiz` với các bước:
+
+   * Lọc vocabulary cần ôn từ `user_vocabularies`.
+   * Áp dụng Quiz Generation Rules và chọn tối đa 20 vocabulary.
+   * Tạo `quiz_attempt`.
+   * Với mỗi vocabulary, tạo một câu hỏi thuộc một trong 3 dạng:
+
+     * `WORD_TO_MEANING`
+     * `MEANING_TO_WORD`
+     * `FILL_IN_BLANK`
+   * Mỗi câu có 4 lựa chọn, gồm 1 đáp án đúng và 3 đáp án sai.
+   * Lưu thông tin câu hỏi vào `quiz_questions`.
+   * Trả danh sách câu hỏi về Frontend, không trả `correct_answer`.
 
 ### File cần tạo
 
-- `backend/src/controllers/quizController.js`
-- `backend/src/routes/quizRoutes.js`
+* `backend/src/controllers/quizController.js`
+* `backend/src/routes/quizRoutes.js`
 
 ### File cần chỉnh sửa
 
-- `backend/src/server.js` (mount quizRoutes)
+* `backend/src/server.js` (mount `quizRoutes`)
 
 ---
 
@@ -1954,25 +1974,37 @@ Tạo route POST /api/quiz/start + controller. Lọc từ cần ôn tập, tạo
 
 ### Thông tin
 
-- **ID**: M5-T3
-- **Tên**: API Trả lời Quiz
-- **Milestone**: M5
-- **User Story**: US-04
-- **Functional Requirement**: FR-024, FR-025
-- **Module**: Quiz
-- **Priority**: P0
-- **Complexity**: M
-- **Status**: Todo
-- **Dependencies**: M5-T2, M4-T6
+* **ID**: M5-T3
+* **Tên**: API Trả lời Quiz
+* **Milestone**: M5
+* **User Story**: US-04
+* **Functional Requirement**: FR-024, FR-025
+* **Module**: Quiz
+* **Priority**: P0
+* **Complexity**: M
+* **Status**: Todo
+* **Dependencies**: M5-T2, M4-T6
 
 ### Mục tiêu
 
-Tạo route POST /api/quiz/answer + controller. Kiểm tra đáp án, cập nhật SRS, lưu quiz_answers.
+Tạo API nhận câu trả lời của người dùng, kiểm tra đáp án, lưu kết quả vào `quiz_answers` và cập nhật SRS cho vocabulary được review.
+
+### Công việc cần thực hiện
+
+1. Implement endpoint `POST /api/quiz/answer`.
+2. Xác định câu hỏi thuộc `quiz_attempt` hiện tại và vocabulary tương ứng.
+3. Kiểm tra câu trả lời và xác định `isCorrect`.
+4. Lưu câu trả lời vào `quiz_answers`.
+5. Gọi logic SRS hiện có để xử lý kết quả:
+
+   * Trả lời đúng: tăng `review_count` và cập nhật `next_review_at` theo SRS.
+   * Trả lời sai: không tăng `review_count`, cập nhật SRS theo quy tắc trả lời sai.
+6. Trả kết quả đúng/sai về Frontend.
 
 ### File cần chỉnh sửa
 
-- `backend/src/controllers/quizController.js`
-- `backend/src/routes/quizRoutes.js`
+* `backend/src/controllers/quizController.js`
+* `backend/src/routes/quizRoutes.js`
 
 ---
 
@@ -1980,25 +2012,34 @@ Tạo route POST /api/quiz/answer + controller. Kiểm tra đáp án, cập nh�
 
 ### Thông tin
 
-- **ID**: M5-T4
-- **Tên**: API Hoàn thành Quiz
-- **Milestone**: M5
-- **User Story**: US-04
-- **Functional Requirement**: FR-026
-- **Module**: Quiz
-- **Priority**: P0
-- **Complexity**: M
-- **Status**: Todo
-- **Dependencies**: M5-T3
+* **ID**: M5-T4
+* **Tên**: API Hoàn thành Quiz
+* **Milestone**: M5
+* **User Story**: US-04
+* **Functional Requirement**: FR-026
+* **Module**: Quiz
+* **Priority**: P0
+* **Complexity**: M
+* **Status**: Todo
+* **Dependencies**: M5-T3
 
 ### Mục tiêu
 
-Tạo route POST /api/quiz/complete + controller. Tính score, cập nhật quiz_attempts.
+Tạo API hoàn thành Quiz, tính kết quả từ các câu trả lời đã lưu và cập nhật thông tin của `quiz_attempts`.
+
+### Công việc cần thực hiện
+
+1. Implement endpoint `POST /api/quiz/complete`.
+2. Xác định `quiz_attempt` cần hoàn thành.
+3. Lấy các câu hỏi và câu trả lời thuộc attempt.
+4. Tính `score`, `totalQuestions` và `correctAnswers`.
+5. Cập nhật `quiz_attempts` với kết quả và `duration`.
+6. Trả kết quả Quiz về Frontend.
 
 ### File cần chỉnh sửa
 
-- `backend/src/controllers/quizController.js`
-- `backend/src/routes/quizRoutes.js`
+* `backend/src/controllers/quizController.js`
+* `backend/src/routes/quizRoutes.js`
 
 ---
 
@@ -2006,25 +2047,33 @@ Tạo route POST /api/quiz/complete + controller. Tính score, cập nhật quiz
 
 ### Thông tin
 
-- **ID**: M5-T5
-- **Tên**: API Tiếp tục Quiz
-- **Milestone**: M5
-- **User Story**: US-04
-- **Functional Requirement**: FR-027
-- **Module**: Quiz
-- **Priority**: P1
-- **Complexity**: S
-- **Status**: Todo
-- **Dependencies**: M5-T2, M5-T1
+* **ID**: M5-T5
+* **Tên**: API Tiếp tục Quiz
+* **Milestone**: M5
+* **User Story**: US-04
+* **Functional Requirement**: FR-027
+* **Module**: Quiz
+* **Priority**: P1
+* **Complexity**: S
+* **Status**: Todo
+* **Dependencies**: M5-T2, M5-T3
 
 ### Mục tiêu
 
-Tạo route GET /api/quiz/continue + controller. Kiểm tra quiz chưa hoàn thành, trả về câu chưa làm.
+Tạo API tiếp tục Quiz chưa hoàn thành, lấy đúng các câu hỏi thuộc attempt đang dở và trả về các câu chưa được trả lời.
+
+### Công việc cần thực hiện
+
+1. Implement endpoint `GET /api/quiz/continue`.
+2. Tìm `quiz_attempt` chưa hoàn thành mới nhất của người dùng.
+3. Lấy các `quiz_questions` thuộc attempt đó.
+4. Đối chiếu với `quiz_answers` để xác định các câu chưa trả lời.
+5. Trả về thông tin attempt và các câu hỏi chưa làm cho Frontend.
 
 ### File cần chỉnh sửa
 
-- `backend/src/controllers/quizController.js`
-- `backend/src/routes/quizRoutes.js`
+* `backend/src/controllers/quizController.js`
+* `backend/src/routes/quizRoutes.js`
 
 ---
 
@@ -2032,30 +2081,42 @@ Tạo route GET /api/quiz/continue + controller. Kiểm tra quiz chưa hoàn th�
 
 ### Thông tin
 
-- **ID**: M5-T6
-- **Tên**: Trang Quiz - HTML & CSS
-- **Milestone**: M5
-- **User Story**: US-04
-- **Functional Requirement**: FR-021, FR-022, FR-026
-- **Module**: Quiz
-- **Priority**: P0
-- **Complexity**: M
-- **Status**: Todo
-- **Dependencies**: M1-T8, M1-T9
+* **ID**: M5-T6
+* **Tên**: Trang Quiz - HTML & CSS
+* **Milestone**: M5
+* **User Story**: US-04
+* **Functional Requirement**: FR-021, FR-022, FR-026, FR-027
+* **Module**: Quiz
+* **Priority**: P0
+* **Complexity**: M
+* **Status**: Todo
+* **Dependencies**: M1-T8, M1-T9
 
 ### Mục tiêu
 
-Tạo cấu trúc HTML và CSS cho trang Quiz.
+Tạo cấu trúc HTML và CSS cho trang Quiz, hỗ trợ bắt đầu Quiz, tiếp tục Quiz và hiển thị các dạng câu hỏi Multiple Choice.
 
 ### Công việc cần thực hiện
 
-1. Tạo `frontend/src/pages/quiz/quiz.html`: trạng thái trước khi bắt đầu (nút "Bắt đầu ôn tập"), câu hỏi (từ + 4 lựa chọn), progress bar, kết quả đúng/sai, màn hình kết quả cuối cùng, bottom navigation, AI Chat.
-2. Tạo `frontend/src/css/pages/quiz.css`: Tailwind CSS, Emerald-500 (đúng), Rose-500 (sai).
+1. Tạo `frontend/src/pages/quiz/quiz.html` với các trạng thái:
+
+   * Không có Quiz chưa hoàn thành: hiển thị nút "Bắt đầu ôn tập".
+   * Có Quiz chưa hoàn thành: chỉ hiển thị nút "Tiếp tục".
+   * Đang làm Quiz: câu hỏi, 4 lựa chọn và progress bar.
+   * Phản hồi đúng/sai sau khi chọn đáp án.
+   * Sau khi hoàn thành: hiển thị kết quả và nút "Bắt đầu Quiz mới".
+2. Hỗ trợ hiển thị 3 dạng câu hỏi:
+
+   * Word → Meaning.
+   * Meaning → Word.
+   * Fill in the blank.
+3. Tạo `frontend/src/css/pages/quiz.css` theo thiết kế Quiz hiện có, sử dụng Tailwind CSS và màu Emerald-500 cho đúng, Rose-500 cho sai.
+4. Giữ nguyên các shared component hiện có như Bottom Navigation và AI Chat, không triển khai lại logic của chúng.
 
 ### File cần tạo
 
-- `frontend/src/pages/quiz/quiz.html`
-- `frontend/src/css/pages/quiz.css`
+* `frontend/src/pages/quiz/quiz.html`
+* `frontend/src/css/pages/quiz.css`
 
 ### File cần chỉnh sửa
 
@@ -2067,28 +2128,38 @@ Không.
 
 ### Thông tin
 
-- **ID**: M5-T7
-- **Tên**: Trang Quiz - JavaScript & Logic
-- **Milestone**: M5
-- **User Story**: US-04
-- **Functional Requirement**: FR-021, FR-022, FR-024, FR-025, FR-026, FR-027
-- **Module**: Quiz
-- **Priority**: P0
-- **Complexity**: M
-- **Status**: Todo
-- **Dependencies**: M5-T6, M5-T2, M5-T3, M5-T4, M5-T5
+* **ID**: M5-T7
+* **Tên**: Trang Quiz - JavaScript & Logic
+* **Milestone**: M5
+* **User Story**: US-04
+* **Functional Requirement**: FR-021, FR-022, FR-024, FR-025, FR-026, FR-027
+* **Module**: Quiz
+* **Priority**: P0
+* **Complexity**: M
+* **Status**: Todo
+* **Dependencies**: M5-T6, M5-T2, M5-T3, M5-T4, M5-T5
 
 ### Mục tiêu
 
-Tạo JavaScript cho Quiz.
+Tạo JavaScript xử lý toàn bộ luồng Quiz và tương tác với các API Quiz.
 
 ### Công việc cần thực hiện
 
-1. Tạo `frontend/src/js/pages/quiz.js`: kiểm tra quiz dang dở (GET /api/quiz/continue), bấm "Bắt đầu" → POST /api/quiz/start, chọn đáp án → POST /api/quiz/answer, hoàn thành → POST /api/quiz/complete. Handle tiếp tục quiz (nút "Tiếp tục" và "Bắt đầu mới").
+1. Tạo `frontend/src/js/pages/quiz.js`.
+2. Khi vào trang Quiz, kiểm tra Quiz chưa hoàn thành bằng `GET /api/quiz/continue`:
+
+   * Có Quiz chưa hoàn thành → chỉ hiển thị và tiếp tục Quiz đó.
+   * Không có Quiz chưa hoàn thành → cho phép bắt đầu Quiz mới.
+3. Xử lý `POST /api/quiz/start` khi người dùng bắt đầu Quiz mới.
+4. Hiển thị câu hỏi và 4 lựa chọn, hỗ trợ 3 dạng câu hỏi.
+5. Xử lý lựa chọn đáp án và gửi `POST /api/quiz/answer`.
+6. Hiển thị kết quả đúng/sai theo response từ Backend.
+7. Khi hoàn thành tất cả câu hỏi, gửi `POST /api/quiz/complete` và hiển thị kết quả Quiz.
+8. Sau khi hoàn thành Quiz, cho phép người dùng bắt đầu Quiz mới.
 
 ### File cần tạo
 
-- `frontend/src/js/pages/quiz.js`
+* `frontend/src/js/pages/quiz.js`
 
 ### File cần chỉnh sửa
 
