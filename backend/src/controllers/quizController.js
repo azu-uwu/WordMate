@@ -426,7 +426,129 @@ const answerQuestion = async (req, res) => {
     }
 };
 
+/**
+ * API Hoàn thành Quiz
+ * POST /api/quiz/complete
+ * Body: { attemptId: number, duration: number }
+ * Không nhận score, correctAnswers hoặc totalQuestions từ Frontend.
+ * Không tạo attempt mới. Không cập nhật SRS (đã xử lý ở M5-T3).
+ */
+const completeQuiz = async (req, res) => {
+    try {
+        const userId = req.user.id;
+        const { attemptId, duration } = req.body;
+
+        // 1. Validate required fields
+        if (attemptId === undefined || attemptId === null || attemptId === "") {
+            return res.status(400).json({
+                success: false,
+                message: "Thiếu attemptId"
+            });
+        }
+        if (duration === undefined || duration === null || duration === "") {
+            return res.status(400).json({
+                success: false,
+                message: "Thiếu duration"
+            });
+        }
+
+        // 2. Validate types
+        if (!Number.isInteger(attemptId) || attemptId <= 0) {
+            return res.status(400).json({
+                success: false,
+                message: "attemptId không hợp lệ"
+            });
+        }
+        if (!Number.isInteger(duration) || duration < 0) {
+            return res.status(400).json({
+                success: false,
+                message: "duration không hợp lệ"
+            });
+        }
+
+        // 3. Kiểm tra quiz_attempt tồn tại và thuộc người dùng hiện tại
+        const attempt = await Quiz.getAttemptById(attemptId);
+        if (!attempt) {
+            return res.status(404).json({
+                success: false,
+                message: "Quiz không tồn tại"
+            });
+        }
+        if (attempt.user_id !== userId) {
+            return res.status(403).json({
+                success: false,
+                message: "Quiz không thuộc về người dùng hiện tại"
+            });
+        }
+
+        // 4. Kiểm tra attempt đã được hoàn thành trước đó chưa.
+        // total_questions chỉ được cập nhật khi hoàn thành Quiz (M5-T4),
+        // nên total_questions > 0 nghĩa là attempt đã hoàn thành.
+        if (attempt.total_questions > 0) {
+            return res.status(409).json({
+                success: false,
+                message: "Quiz đã được hoàn thành trước đó"
+            });
+        }
+
+        // 5. Lấy quiz_questions và quiz_answers của attempt
+        const questions = await Quiz.getQuestionsByAttemptId(attemptId);
+        const answers = await Quiz.getAnswersByAttemptId(attemptId);
+
+        // 6. Kiểm tra tất cả câu hỏi đã được trả lời
+        if (questions.length === 0) {
+            return res.status(400).json({
+                success: false,
+                message: "Quiz không có câu hỏi nào"
+            });
+        }
+        if (answers.length < questions.length) {
+            return res.status(400).json({
+                success: false,
+                message: "Chưa trả lời đủ tất cả câu hỏi"
+            });
+        }
+
+        // 7. Tính kết quả dựa trên quiz_answers đã lưu (không nhận từ Frontend,
+        // không tự chấm lại đáp án - sử dụng is_correct đã lưu ở M5-T3)
+        const totalQuestions = questions.length;
+        const correctAnswers = answers.filter(
+            (a) => Number(a.is_correct) === 1
+        ).length;
+        const score = Math.round((correctAnswers / totalQuestions) * 10000) / 100;
+
+        // 8. Cập nhật quiz_attempts (chỉ score, total_questions, correct_answers, duration.
+        // Không cập nhật review_count, next_review_at hoặc SRS trong M5-T4)
+        await Quiz.updateAttempt(attemptId, {
+            score,
+            totalQuestions,
+            correctAnswers,
+            duration
+        });
+
+        // 9. Trả về kết quả Quiz để Frontend hiển thị
+        return res.status(200).json({
+            success: true,
+            message: "Hoàn thành Quiz thành công",
+            data: {
+                quiz_id: attemptId,
+                score,
+                total_questions: totalQuestions,
+                correct_answers: correctAnswers,
+                duration
+            }
+        });
+    } catch (err) {
+        console.error(err);
+        return res.status(500).json({
+            success: false,
+            message: "Lỗi máy chủ"
+        });
+    }
+};
+
 module.exports = {
     startQuiz,
-    answerQuestion
+    answerQuestion,
+    completeQuiz
 };
