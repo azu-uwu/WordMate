@@ -80,14 +80,14 @@
                         </div>
                     </div>
 
-                    <!-- Tiến độ quiz đang dở -->
+                    <!-- Tiến độ quiz đang dở (M5-T7 sẽ điền dữ liệu) -->
                     <div class="quiz-continue-progress">
                         <div class="quiz-continue-progress-info">
                             <span class="quiz-continue-progress-label">Tiến độ</span>
-                            <span class="quiz-continue-progress-count">3 / 10</span>
+                            <span class="quiz-continue-progress-count">{{current_question}} / {{total_questions}}</span>
                         </div>
-                        <div class="progress-bar-wrapper" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="30" aria-label="Tiến độ quiz">
-                            <div class="progress-bar-fill" style="width: 30%;"></div>
+                        <div class="progress-bar-wrapper" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" aria-label="Tiến độ quiz">
+                            <div class="progress-bar-fill" style="width: 0%;"></div>
                         </div>
                     </div>
 
@@ -109,57 +109,62 @@
                     <div class="quiz-progress-section">
                         <div class="quiz-progress-info">
                             <span class="quiz-progress-label">Câu hỏi</span>
-                            <span class="quiz-progress-count">1 / 10</span>
+                            <span class="quiz-progress-count">{{current_question}} / {{total_questions}}</span>
                         </div>
-                        <div class="progress-bar-wrapper" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="10" aria-label="Tiến độ quiz">
-                            <div class="progress-bar-fill" style="width: 10%;"></div>
+                        <div class="progress-bar-wrapper" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" aria-label="Tiến độ quiz">
+                            <div class="progress-bar-fill" style="width: 0%;"></div>
                         </div>
                     </div>
 
                     <!-- ===== QUESTION CARD ===== -->
                     <div class="quiz-card quiz-question-card">
 
-                        <!-- ===== DẠNG 1: WORD_TO_MEANING (mẫu hiển thị) ===== -->
+                        <!-- =============================================
+                             DẠNG 1: WORD_TO_MEANING
+                             MẪU TRẠNG THÁI ĐÚNG (Emerald-500)
+                             Nội dung là placeholder — M5-T7 sẽ điền dữ liệu
+                             ============================================= -->
                         <div class="quiz-question" data-question-type="WORD_TO_MEANING">
                             <span class="quiz-question-type-badge">
                                 <i class="fa-solid fa-language" aria-hidden="true"></i>
                                 Word → Meaning
                             </span>
-                            <h2 class="quiz-question-text">What does "goodbye" mean?</h2>
+                            <h2 class="quiz-question-text">{{question}}</h2>
 
-                            <!-- 4 lựa chọn Multiple Choice -->
+                            <!-- 4 lựa chọn Multiple Choice (M5-T7 sẽ điền dữ liệu)
+                                 Mẫu: option D được highlight ĐÚNG bằng class .is-correct (Emerald-500) -->
                             <div class="quiz-options">
                                 <button type="button" class="quiz-option">
                                     <span class="quiz-option-letter">A</span>
-                                    <span class="quiz-option-text">anh trai hoặc em trai</span>
+                                    <span class="quiz-option-text">{{option_1}}</span>
                                 </button>
                                 <button type="button" class="quiz-option">
                                     <span class="quiz-option-letter">B</span>
-                                    <span class="quiz-option-text">mẹ</span>
+                                    <span class="quiz-option-text">{{option_2}}</span>
                                 </button>
                                 <button type="button" class="quiz-option">
                                     <span class="quiz-option-letter">C</span>
-                                    <span class="quiz-option-text">cảm ơn</span>
+                                    <span class="quiz-option-text">{{option_3}}</span>
                                 </button>
                                 <button type="button" class="quiz-option is-correct">
                                     <span class="quiz-option-letter">D</span>
-                                    <span class="quiz-option-text">tạm biệt</span>
+                                    <span class="quiz-option-text">{{option_4}}</span>
                                     <span class="quiz-option-icon" aria-hidden="true">
                                         <i class="fa-solid fa-circle-check"></i>
                                     </span>
                                 </button>
                             </div>
 
-                            <!-- ===== FEEDBACK: ĐÚNG (mẫu hiển thị) ===== -->
+                            <!-- ===== FEEDBACK: ĐÚNG (Emerald-500) — M5-T7 sẽ điền dữ liệu ===== -->
                             <div class="quiz-feedback is-correct" role="status">
                                 <i class="fa-solid fa-circle-check" aria-hidden="true"></i>
-                                <span>Chính xác! "goodbye" có nghĩa là "tạm biệt".</span>
+                                <span>{{feedback_correct}}</span>
                             </div>
 
-                            <!-- ===== FEEDBACK: SAI (mẫu ẩn) ===== -->
+                            <!-- ===== FEEDBACK: SAI (Rose-500) ===== -->
                             <div class="quiz-feedback is-incorrect" role="status" hidden>
                                 <i class="fa-solid fa-circle-xmark" aria-hidden="true"></i>
-                                <span>Sai rồi! Đáp án đúng là "tạm biệt".</span>
+                                <span>{{feedback_incorrect}}</span>
                             </div>
 
                             <!-- Nút chuyển sang câu tiếp theo -->
@@ -171,44 +176,55 @@
                             </div>
                         </div>
 
-                        <!-- ===== DẠNG 1b: WORD_TO_MEANING — TRẠNG THÁI SAI (mẫu ẩn) ===== -->
+                        <!-- =============================================
+                             DẠNG 1b: WORD_TO_MEANING
+                             MẪU TRẠNG THÁI SAI (Rose-500 + hiển thị đáp án đúng)
+                             Ẩn mặc định — M5-T7 sẽ hiện khi cần
+                             ============================================= -->
                         <div class="quiz-question" data-question-type="WORD_TO_MEANING" data-feedback-state="incorrect" hidden>
                             <span class="quiz-question-type-badge">
                                 <i class="fa-solid fa-language" aria-hidden="true"></i>
                                 Word → Meaning
                             </span>
-                            <h2 class="quiz-question-text">What does "goodbye" mean?</h2>
+                            <h2 class="quiz-question-text">{{question}}</h2>
 
-                            <!-- Lựa chọn sai được highlight Rose-500, đáp án đúng được hiển thị -->
+                            <!-- Mẫu: option C bị chọn SAI (.is-incorrect — Rose-500),
+                                 option D hiển thị ĐÁP ÁN ĐÚNG (.is-correct-answer — Emerald-500) -->
                             <div class="quiz-options">
                                 <button type="button" class="quiz-option">
                                     <span class="quiz-option-letter">A</span>
-                                    <span class="quiz-option-text">anh trai hoặc em trai</span>
+                                    <span class="quiz-option-text">{{option_1}}</span>
                                 </button>
                                 <button type="button" class="quiz-option">
                                     <span class="quiz-option-letter">B</span>
-                                    <span class="quiz-option-text">mẹ</span>
+                                    <span class="quiz-option-text">{{option_2}}</span>
                                 </button>
                                 <button type="button" class="quiz-option is-incorrect">
                                     <span class="quiz-option-letter">C</span>
-                                    <span class="quiz-option-text">cảm ơn</span>
+                                    <span class="quiz-option-text">{{option_3}}</span>
                                     <span class="quiz-option-icon" aria-hidden="true">
                                         <i class="fa-solid fa-circle-xmark"></i>
                                     </span>
                                 </button>
                                 <button type="button" class="quiz-option is-correct-answer">
                                     <span class="quiz-option-letter">D</span>
-                                    <span class="quiz-option-text">tạm biệt</span>
+                                    <span class="quiz-option-text">{{option_4}}</span>
                                     <span class="quiz-option-icon" aria-hidden="true">
                                         <i class="fa-solid fa-circle-check"></i>
                                     </span>
                                 </button>
                             </div>
 
-                            <!-- Feedback sai -->
+                            <!-- ===== FEEDBACK: SAI (Rose-500) ===== -->
                             <div class="quiz-feedback is-incorrect" role="status">
                                 <i class="fa-solid fa-circle-xmark" aria-hidden="true"></i>
-                                <span>Sai rồi! Đáp án đúng là "tạm biệt".</span>
+                                <span>{{feedback_incorrect}}</span>
+                            </div>
+
+                            <!-- ===== FEEDBACK: ĐÚNG (Emerald-500) ===== -->
+                            <div class="quiz-feedback is-correct" role="status" hidden>
+                                <i class="fa-solid fa-circle-check" aria-hidden="true"></i>
+                                <span>{{feedback_correct}}</span>
                             </div>
 
                             <div class="quiz-question-actions">
@@ -219,44 +235,44 @@
                             </div>
                         </div>
 
-                        <!-- ===== DẠNG 2: MEANING_TO_WORD (mẫu ẩn) ===== -->
+                        <!-- =============================================
+                             DẠNG 2: MEANING_TO_WORD
+                             Ẩn mặc định — M5-T7 sẽ hiện khi cần
+                             ============================================= -->
                         <div class="quiz-question" data-question-type="MEANING_TO_WORD" hidden>
                             <span class="quiz-question-type-badge">
                                 <i class="fa-solid fa-language" aria-hidden="true"></i>
                                 Meaning → Word
                             </span>
-                            <h2 class="quiz-question-text">Which English word means "mẹ"?</h2>
+                            <h2 class="quiz-question-text">{{question}}</h2>
 
                             <div class="quiz-options">
                                 <button type="button" class="quiz-option">
                                     <span class="quiz-option-letter">A</span>
-                                    <span class="quiz-option-text">father</span>
+                                    <span class="quiz-option-text">{{option_1}}</span>
                                 </button>
-                                <button type="button" class="quiz-option is-correct">
+                                <button type="button" class="quiz-option">
                                     <span class="quiz-option-letter">B</span>
-                                    <span class="quiz-option-text">mother</span>
-                                    <span class="quiz-option-icon" aria-hidden="true">
-                                        <i class="fa-solid fa-circle-check"></i>
-                                    </span>
+                                    <span class="quiz-option-text">{{option_2}}</span>
                                 </button>
                                 <button type="button" class="quiz-option">
                                     <span class="quiz-option-letter">C</span>
-                                    <span class="quiz-option-text">goodbye</span>
+                                    <span class="quiz-option-text">{{option_3}}</span>
                                 </button>
                                 <button type="button" class="quiz-option">
                                     <span class="quiz-option-letter">D</span>
-                                    <span class="quiz-option-text">hello</span>
+                                    <span class="quiz-option-text">{{option_4}}</span>
                                 </button>
                             </div>
 
-                            <div class="quiz-feedback is-correct" role="status">
+                            <div class="quiz-feedback is-correct" role="status" hidden>
                                 <i class="fa-solid fa-circle-check" aria-hidden="true"></i>
-                                <span>Chính xác! "mother" có nghĩa là "mẹ".</span>
+                                <span>{{feedback_correct}}</span>
                             </div>
 
                             <div class="quiz-feedback is-incorrect" role="status" hidden>
                                 <i class="fa-solid fa-circle-xmark" aria-hidden="true"></i>
-                                <span>Sai rồi! Đáp án đúng là "mother".</span>
+                                <span>{{feedback_incorrect}}</span>
                             </div>
 
                             <div class="quiz-question-actions">
@@ -267,44 +283,44 @@
                             </div>
                         </div>
 
-                        <!-- ===== DẠNG 3: FILL_IN_BLANK (mẫu ẩn) ===== -->
+                        <!-- =============================================
+                             DẠNG 3: FILL_IN_BLANK
+                             Ẩn mặc định — M5-T7 sẽ hiện khi cần
+                             ============================================= -->
                         <div class="quiz-question" data-question-type="FILL_IN_BLANK" hidden>
                             <span class="quiz-question-type-badge">
                                 <i class="fa-solid fa-pen-to-square" aria-hidden="true"></i>
                                 Fill in the blank
                             </span>
-                            <h2 class="quiz-question-text">______! Nice to meet you.</h2>
+                            <h2 class="quiz-question-text">{{question}}</h2>
 
                             <div class="quiz-options">
                                 <button type="button" class="quiz-option">
                                     <span class="quiz-option-letter">A</span>
-                                    <span class="quiz-option-text">father</span>
+                                    <span class="quiz-option-text">{{option_1}}</span>
                                 </button>
                                 <button type="button" class="quiz-option">
                                     <span class="quiz-option-letter">B</span>
-                                    <span class="quiz-option-text">goodbye</span>
+                                    <span class="quiz-option-text">{{option_2}}</span>
                                 </button>
                                 <button type="button" class="quiz-option">
                                     <span class="quiz-option-letter">C</span>
-                                    <span class="quiz-option-text">brother</span>
+                                    <span class="quiz-option-text">{{option_3}}</span>
                                 </button>
-                                <button type="button" class="quiz-option is-correct">
+                                <button type="button" class="quiz-option">
                                     <span class="quiz-option-letter">D</span>
-                                    <span class="quiz-option-text">hello</span>
-                                    <span class="quiz-option-icon" aria-hidden="true">
-                                        <i class="fa-solid fa-circle-check"></i>
-                                    </span>
+                                    <span class="quiz-option-text">{{option_4}}</span>
                                 </button>
                             </div>
 
-                            <div class="quiz-feedback is-correct" role="status">
+                            <div class="quiz-feedback is-correct" role="status" hidden>
                                 <i class="fa-solid fa-circle-check" aria-hidden="true"></i>
-                                <span>Chính xác! "Hello! Nice to meet you."</span>
+                                <span>{{feedback_correct}}</span>
                             </div>
 
                             <div class="quiz-feedback is-incorrect" role="status" hidden>
                                 <i class="fa-solid fa-circle-xmark" aria-hidden="true"></i>
-                                <span>Sai rồi! Đáp án đúng là "hello".</span>
+                                <span>{{feedback_incorrect}}</span>
                             </div>
 
                             <div class="quiz-question-actions">
@@ -333,23 +349,23 @@
                     <h2 class="quiz-card-title">Hoàn thành!</h2>
                     <p class="quiz-card-desc">Bạn đã hoàn thành quiz. Dưới đây là kết quả của bạn.</p>
 
-                    <!-- ===== SCORE ===== -->
+                    <!-- ===== SCORE (M5-T7 sẽ điền dữ liệu) ===== -->
                     <div class="quiz-result-score">
-                        <span class="quiz-result-score-value">80</span>
-                        <span class="quiz-result-score-unit">/ 100</span>
+                        <span class="quiz-result-score-value">{{score}}</span>
+                        <span class="quiz-result-score-unit">/ {{score_max}}</span>
                     </div>
 
                     <!-- ===== STATS ===== -->
                     <div class="quiz-result-stats">
                         <div class="quiz-result-stat">
                             <span class="quiz-result-stat-label">Số câu đúng</span>
-                            <span class="quiz-result-stat-value quiz-result-stat-correct">8 / 10</span>
+                            <span class="quiz-result-stat-value quiz-result-stat-correct">{{correct_count}} / {{total_questions}}</span>
                         </div>
                         <div class="quiz-result-stat">
                             <span class="quiz-result-stat-label">Thời gian làm bài</span>
                             <span class="quiz-result-stat-value">
                                 <i class="fa-regular fa-clock" aria-hidden="true"></i>
-                                02:35
+                                {{time_spent}}
                             </span>
                         </div>
                     </div>
