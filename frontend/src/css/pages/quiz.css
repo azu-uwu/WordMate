@@ -1,0 +1,946 @@
+/* ============================================================
+   quiz.css — WordMate Quiz Page Styles
+   Design System: #FFC300 primary, Inter font
+   ============================================================ */
+
+/* ============================================================
+   1. CSS VARIABLES (DESIGN TOKENS)
+   ============================================================ */
+
+:root {
+    /* Primary palette — Warm Gold */
+    --wm-primary: #FFC300;
+    --wm-primary-dark: #E6B000;
+    --wm-primary-light: #FFD633;
+    --wm-primary-bg: #FFF8E1;
+
+    /* Semantic colors */
+    --wm-success: #10B981;      /* Emerald-500 */
+    --wm-warning: #F59E0B;
+    --wm-error: #F43F5E;        /* Rose-500 */
+
+    /* Neutral palette — Light & bright */
+    --wm-text-primary: #1E293B;
+    --wm-text-secondary: #64748B;
+    --wm-text-muted: #94A3B8;
+    --wm-bg-page: #F8FAFC;
+    --wm-bg-card: #FFFFFF;
+    --wm-border: #E2E8F0;
+    --wm-border-focus: #FFC300;
+
+    /* Typography */
+    --wm-font-family: 'Inter', 'Roboto', system-ui, -apple-system, sans-serif;
+
+    /* Spacing */
+    --wm-radius-sm: 8px;
+    --wm-radius-md: 12px;
+    --wm-radius-lg: 20px;
+    --wm-radius-card: 24px;
+    --wm-shadow-card: 0 4px 24px rgba(0, 0, 0, 0.06), 0 1px 4px rgba(0, 0, 0, 0.04);
+    --wm-shadow-card-hover: 0 8px 40px rgba(0, 0, 0, 0.10), 0 2px 8px rgba(0, 0, 0, 0.06);
+
+    /* Transitions */
+    --wm-transition-fast: 150ms ease;
+    --wm-transition-base: 200ms ease;
+    --wm-transition-slow: 300ms ease;
+}
+
+/* ============================================================
+   2. LAYOUT — Body & Main Content
+   ============================================================ */
+
+body {
+    margin: 0;
+    background: url("../../../public/image/background.png") center/cover fixed;
+}
+
+.quiz-container {
+    width: 60%;
+    max-width: 1400px;
+    min-width: 500px;
+    margin: 0 auto;         /* chỉ căn giữa theo chiều ngang */
+    padding: 0 1rem;         /* padding ngang cho màn hình nhỏ */
+    animation: fadeIn 0.5s ease forwards;
+    padding-bottom: 6rem;
+    min-height: 100vh;
+    background: var(--wm-bg-page);
+    font-family: var(--wm-font-family);
+}
+
+/* ============================================================
+   3. HEADER PLACEHOLDER — header-placeholder
+   ============================================================ */
+
+.header-placeholder {
+    /* Placeholder cho Header component */
+    /* Header sẽ được inject từ component dùng chung */
+    min-height: 64px; /* Reserve space for header */
+}
+
+/* ============================================================
+   4. QUIZ HEADER — quiz-header
+   ============================================================ */
+
+.quiz-header {
+    margin-bottom: 1.5rem;
+    animation: fadeInDown 0.6s ease forwards;
+}
+
+.quiz-title {
+    font-size: 2.5rem;
+    font-weight: 800;
+    color: var(--wm-text-primary);
+    margin: 0 0 0.5rem 0;
+    letter-spacing: -0.02em;
+    line-height: 1.2;
+}
+
+.quiz-subtitle {
+    font-size: 1.0625rem;
+    font-weight: 400;
+    color: var(--wm-text-secondary);
+    margin: 0;
+    line-height: 1.6;
+}
+
+/* ============================================================
+   5. QUIZ STATES — quiz-state
+   ============================================================ */
+
+.quiz-state {
+    animation: fadeInUp 0.7s ease forwards;
+}
+
+/* ============================================================
+   6. QUIZ CARD — quiz-card (chung cho Start / Continue / Result)
+   ============================================================ */
+
+.quiz-card {
+    background: var(--wm-bg-card);
+    border-radius: var(--wm-radius-card);
+    box-shadow: var(--wm-shadow-card);
+    border: 1px solid var(--wm-border);
+    padding: 2.5rem 2rem;
+    text-align: center;
+    animation: fadeInUp 0.7s ease forwards;
+}
+
+.quiz-card-title {
+    font-size: 1.75rem;
+    font-weight: 800;
+    color: var(--wm-text-primary);
+    margin: 0 0 0.5rem 0;
+    letter-spacing: -0.02em;
+    line-height: 1.2;
+}
+
+.quiz-card-desc {
+    font-size: 0.9375rem;
+    font-weight: 400;
+    color: var(--wm-text-secondary);
+    margin: 0 0 1.75rem 0;
+    line-height: 1.6;
+}
+
+/* ============================================================
+   7. STATE 1 — START (quiz-start-card)
+   ============================================================ */
+
+.quiz-start-card {
+    max-width: 480px;
+    margin: 0 auto;
+}
+
+.quiz-start-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 72px;
+    height: 72px;
+    border-radius: 50%;
+    background: var(--wm-primary-bg);
+    color: var(--wm-primary-dark);
+    font-size: 2.25rem;
+    margin-bottom: 1.25rem;
+}
+
+/* ============================================================
+   8. STATE 2 — CONTINUE (quiz-continue-card)
+   ============================================================ */
+
+.quiz-continue-card {
+    max-width: 480px;
+    margin: 0 auto;
+}
+
+.quiz-continue-header {
+    display: flex;
+    align-items: flex-start;
+    gap: 1rem;
+    text-align: left;
+    margin-bottom: 1.5rem;
+}
+
+.quiz-continue-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    width: 56px;
+    height: 56px;
+    border-radius: var(--wm-radius-md);
+    background: var(--wm-primary-bg);
+    color: var(--wm-primary-dark);
+    font-size: 1.5rem;
+}
+
+.quiz-continue-info .quiz-card-title {
+    font-size: 1.375rem;
+    margin-bottom: 0.375rem;
+}
+
+.quiz-continue-info .quiz-card-desc {
+    font-size: 0.875rem;
+    margin-bottom: 0;
+}
+
+/* Tiến độ quiz đang dở */
+.quiz-continue-progress {
+    margin-bottom: 1.75rem;
+}
+
+.quiz-continue-progress-info {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 0.75rem;
+}
+
+.quiz-continue-progress-label {
+    font-size: 0.9375rem;
+    font-weight: 600;
+    color: var(--wm-text-secondary);
+}
+
+.quiz-continue-progress-count {
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--wm-text-primary);
+    background: var(--wm-bg-page);
+    padding: 0.375rem 0.875rem;
+    border-radius: var(--wm-radius-sm);
+    border: 1px solid var(--wm-border);
+}
+
+/* ============================================================
+   9. PROGRESS BAR — progress-bar-wrapper (dùng chung)
+   ============================================================ */
+
+.progress-bar-wrapper {
+    width: 100%;
+    height: 12px;
+    background: var(--wm-border);
+    border-radius: 999px;
+    overflow: hidden;
+}
+
+.progress-bar-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--wm-primary) 0%, var(--wm-primary-light) 100%);
+    border-radius: 999px;
+    transition: width var(--wm-transition-slow);
+}
+
+/* ============================================================
+   10. STATE 3 — QUESTION (quiz-question-wrapper)
+   ============================================================ */
+
+.quiz-question-wrapper {
+    max-width: 640px;
+    margin: 0 auto;
+}
+
+/* Progress section trong câu hỏi */
+.quiz-progress-section {
+    margin-bottom: 1.5rem;
+    animation: fadeInUp 0.6s ease forwards;
+}
+
+.quiz-progress-info {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 0.75rem;
+}
+
+.quiz-progress-label {
+    font-size: 0.9375rem;
+    font-weight: 600;
+    color: var(--wm-text-secondary);
+}
+
+.quiz-progress-count {
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--wm-text-primary);
+    background: var(--wm-bg-card);
+    padding: 0.375rem 0.875rem;
+    border-radius: var(--wm-radius-sm);
+    border: 1px solid var(--wm-border);
+}
+
+/* Question card */
+.quiz-question-card {
+    text-align: left;
+    padding: 2rem;
+}
+
+/* ============================================================
+   11. QUESTION — quiz-question
+   ============================================================ */
+
+.quiz-question {
+    animation: fadeInUp 0.5s ease forwards;
+}
+
+.quiz-question-type-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.8125rem;
+    font-weight: 600;
+    color: var(--wm-primary-dark);
+    background: var(--wm-primary-bg);
+    padding: 0.375rem 0.875rem;
+    border-radius: 999px;
+    margin-bottom: 1rem;
+}
+
+.quiz-question-type-badge i {
+    font-size: 0.8125rem;
+}
+
+.quiz-question-text {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--wm-text-primary);
+    margin: 0 0 1.75rem 0;
+    line-height: 1.4;
+    letter-spacing: -0.01em;
+}
+
+/* ============================================================
+   12. OPTIONS — quiz-options / quiz-option
+   ============================================================ */
+
+.quiz-options {
+    display: flex;
+    flex-direction: column;
+    gap: 0.875rem;
+    margin-bottom: 1.5rem;
+}
+
+.quiz-option {
+    display: flex;
+    align-items: center;
+    gap: 0.875rem;
+    width: 100%;
+    padding: 1rem 1.25rem;
+    background: var(--wm-bg-card);
+    border: 1px solid var(--wm-border);
+    border-radius: var(--wm-radius-md);
+    font-family: var(--wm-font-family);
+    font-size: 1rem;
+    font-weight: 500;
+    color: var(--wm-text-primary);
+    text-align: left;
+    cursor: pointer;
+    transition: border-color var(--wm-transition-base),
+                background var(--wm-transition-base),
+                box-shadow var(--wm-transition-base),
+                transform var(--wm-transition-base);
+}
+
+.quiz-option:hover {
+    border-color: var(--wm-primary);
+    background: var(--wm-primary-bg);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(255, 195, 0, 0.15);
+}
+
+.quiz-option:active {
+    transform: translateY(0);
+}
+
+.quiz-option:focus-visible {
+    outline: 2px solid var(--wm-primary);
+    outline-offset: 2px;
+}
+
+.quiz-option-letter {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    width: 32px;
+    height: 32px;
+    border-radius: var(--wm-radius-sm);
+    background: var(--wm-bg-page);
+    border: 1px solid var(--wm-border);
+    font-size: 0.875rem;
+    font-weight: 700;
+    color: var(--wm-text-secondary);
+    transition: background var(--wm-transition-base),
+                color var(--wm-transition-base),
+                border-color var(--wm-transition-base);
+}
+
+.quiz-option:hover .quiz-option-letter {
+    background: var(--wm-primary);
+    border-color: var(--wm-primary);
+    color: var(--wm-text-primary);
+}
+
+.quiz-option-text {
+    flex: 1;
+    line-height: 1.5;
+}
+
+.quiz-option-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    font-size: 1.25rem;
+}
+
+/* ============================================================
+   12.1 OPTION STATES — Đúng / Sai
+   ============================================================ */
+
+/* === ĐÚNG — Emerald-500 (#10B981) === */
+.quiz-option.is-correct {
+    background: rgba(16, 185, 129, 0.1);
+    border-color: var(--wm-success);
+    color: var(--wm-text-primary);
+}
+
+.quiz-option.is-correct .quiz-option-letter {
+    background: var(--wm-success);
+    border-color: var(--wm-success);
+    color: #FFFFFF;
+}
+
+.quiz-option.is-correct .quiz-option-icon {
+    color: var(--wm-success);
+}
+
+/* === SAI — Rose-500 (#F43F5E) === */
+.quiz-option.is-incorrect {
+    background: rgba(244, 63, 94, 0.1);
+    border-color: var(--wm-error);
+    color: var(--wm-text-primary);
+}
+
+.quiz-option.is-incorrect .quiz-option-letter {
+    background: var(--wm-error);
+    border-color: var(--wm-error);
+    color: #FFFFFF;
+}
+
+.quiz-option.is-incorrect .quiz-option-icon {
+    color: var(--wm-error);
+}
+
+/* === ĐÁP ÁN ĐÚNG (hiển thị khi trả lời sai) — Emerald-500 === */
+.quiz-option.is-correct-answer {
+    background: rgba(16, 185, 129, 0.1);
+    border-color: var(--wm-success);
+    color: var(--wm-text-primary);
+}
+
+.quiz-option.is-correct-answer .quiz-option-letter {
+    background: var(--wm-success);
+    border-color: var(--wm-success);
+    color: #FFFFFF;
+}
+
+.quiz-option.is-correct-answer .quiz-option-icon {
+    color: var(--wm-success);
+}
+
+/* ============================================================
+   13. FEEDBACK — quiz-feedback (Đúng / Sai)
+   ============================================================ */
+
+.quiz-feedback {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.875rem 1.25rem;
+    border-radius: var(--wm-radius-md);
+    font-size: 0.9375rem;
+    font-weight: 600;
+    line-height: 1.5;
+    margin-bottom: 1.5rem;
+    animation: fadeInUp 0.4s ease forwards;
+}
+
+.quiz-feedback i {
+    font-size: 1.25rem;
+    flex-shrink: 0;
+}
+
+/* === ĐÚNG — Emerald-500 === */
+.quiz-feedback.is-correct {
+    background: rgba(16, 185, 129, 0.1);
+    color: var(--wm-success);
+    border: 1px solid rgba(16, 185, 129, 0.3);
+}
+
+/* === SAI — Rose-500 === */
+.quiz-feedback.is-incorrect {
+    background: rgba(244, 63, 94, 0.1);
+    color: var(--wm-error);
+    border: 1px solid rgba(244, 63, 94, 0.3);
+}
+
+/* ============================================================
+   14. QUESTION ACTIONS — quiz-question-actions
+   ============================================================ */
+
+.quiz-question-actions {
+    display: flex;
+    justify-content: flex-end;
+}
+
+/* ============================================================
+   15. BUTTONS — btn-quiz
+   ============================================================ */
+
+.btn-quiz {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    padding: 0.875rem 2rem;
+    border-radius: var(--wm-radius-md);
+    font-family: var(--wm-font-family);
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    border: none;
+    transition: background var(--wm-transition-base),
+                color var(--wm-transition-base),
+                transform var(--wm-transition-base),
+                box-shadow var(--wm-transition-base);
+}
+
+.btn-quiz i {
+    font-size: 1rem;
+}
+
+.btn-quiz-primary {
+    background: var(--wm-primary);
+    color: var(--wm-text-primary);
+}
+
+.btn-quiz-primary:hover {
+    background: var(--wm-primary-dark);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 16px rgba(255, 195, 0, 0.3);
+}
+
+.btn-quiz-primary:active {
+    transform: translateY(0);
+}
+
+.btn-quiz-primary:focus-visible {
+    outline: 2px solid var(--wm-primary-dark);
+    outline-offset: 2px;
+}
+
+/* ============================================================
+   16. STATE 4 — RESULT (quiz-result-card)
+   ============================================================ */
+
+.quiz-result-card {
+    max-width: 480px;
+    margin: 0 auto;
+}
+
+.quiz-result-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 72px;
+    height: 72px;
+    border-radius: 50%;
+    background: rgba(16, 185, 129, 0.1);
+    color: var(--wm-success);
+    font-size: 2.25rem;
+    margin-bottom: 1.25rem;
+}
+
+/* Score */
+.quiz-result-score {
+    display: flex;
+    align-items: baseline;
+    justify-content: center;
+    gap: 0.25rem;
+    margin-bottom: 1.75rem;
+}
+
+.quiz-result-score-value {
+    font-size: 3.5rem;
+    font-weight: 800;
+    color: var(--wm-text-primary);
+    letter-spacing: -0.03em;
+    line-height: 1;
+}
+
+.quiz-result-score-unit {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: var(--wm-text-muted);
+}
+
+/* Stats */
+.quiz-result-stats {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    margin-bottom: 2rem;
+}
+
+.quiz-result-stat {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.875rem 1.25rem;
+    background: var(--wm-bg-page);
+    border: 1px solid var(--wm-border);
+    border-radius: var(--wm-radius-md);
+}
+
+.quiz-result-stat-label {
+    font-size: 0.9375rem;
+    font-weight: 500;
+    color: var(--wm-text-secondary);
+}
+
+.quiz-result-stat-value {
+    font-size: 1.125rem;
+    font-weight: 800;
+    color: var(--wm-text-primary);
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.quiz-result-stat-value i {
+    font-size: 1rem;
+    color: var(--wm-text-muted);
+}
+
+.quiz-result-stat-correct {
+    color: var(--wm-success);
+}
+
+/* Actions */
+.quiz-result-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.quiz-result-actions .btn-quiz {
+    width: 100%;
+}
+
+/* ============================================================
+   17. AI CHAT PLACEHOLDER — ai-chat-placeholder
+   ============================================================ */
+
+.ai-chat-placeholder {
+    /* Placeholder cho AI Chat component */
+    /* AI Chat sẽ được inject từ component dùng chung */
+    position: fixed;
+    bottom: 80px;
+    right: 20px;
+    z-index: 1000;
+}
+
+/* ============================================================
+   18. BOTTOM NAVIGATION PLACEHOLDER — bottom-nav-placeholder
+   ============================================================ */
+
+.bottom-nav-placeholder {
+    /* Placeholder cho Bottom Navigation component */
+    /* Bottom Navigation sẽ được inject từ component dùng chung */
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    z-index: 999;
+    background: var(--wm-bg-card);
+    border-top: 1px solid var(--wm-border);
+    box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.05);
+}
+
+/* ============================================================
+   19. ANIMATIONS
+   ============================================================ */
+
+@keyframes fadeIn {
+    0% {
+        opacity: 0;
+    }
+    100% {
+        opacity: 1;
+    }
+}
+
+@keyframes fadeInDown {
+    0% {
+        opacity: 0;
+        transform: translateY(-20px);
+    }
+    100% {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes fadeInUp {
+    0% {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    100% {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* ============================================================
+   20. UTILITIES
+   ============================================================ */
+
+html {
+    scroll-behavior: smooth;
+    -webkit-text-size-adjust: 100%;
+}
+
+body {
+    overflow-x: hidden;
+}
+
+/* ============================================================
+   21. RESPONSIVE — Breakpoints
+   ============================================================ */
+
+/* === Laptop / Small Desktop (≤ 1200px) === */
+@media (max-width: 1200px) {
+    .quiz-container {
+        padding: 1.75rem 1.25rem;
+    }
+
+    .quiz-title {
+        font-size: 2.25rem;
+    }
+}
+
+/* === Tablet (≤ 768px) === */
+@media (max-width: 768px) {
+    .quiz-container {
+        padding: 1.5rem 1rem;
+    }
+
+    .quiz-header {
+        margin-bottom: 1.25rem;
+    }
+
+    .quiz-title {
+        font-size: 2rem;
+    }
+
+    .quiz-subtitle {
+        font-size: 1rem;
+    }
+
+    .quiz-card {
+        padding: 2rem 1.5rem;
+    }
+
+    .quiz-question-card {
+        padding: 1.5rem;
+    }
+
+    .quiz-question-text {
+        font-size: 1.375rem;
+    }
+
+    .quiz-option {
+        padding: 0.875rem 1rem;
+        font-size: 0.9375rem;
+    }
+
+    .btn-quiz {
+        padding: 0.75rem 1.5rem;
+        font-size: 0.9375rem;
+    }
+}
+
+/* === Mobile (≤ 480px) === */
+@media (max-width: 480px) {
+    .quiz-container {
+        padding: 1rem 0.75rem;
+    }
+
+    .quiz-header {
+        margin-bottom: 1rem;
+    }
+
+    .quiz-title {
+        font-size: 1.75rem;
+    }
+
+    .quiz-subtitle {
+        font-size: 0.9375rem;
+    }
+
+    .quiz-card {
+        padding: 1.75rem 1.25rem;
+    }
+
+    .quiz-card-title {
+        font-size: 1.5rem;
+    }
+
+    .quiz-card-desc {
+        font-size: 0.875rem;
+    }
+
+    .quiz-start-icon,
+    .quiz-result-icon {
+        width: 64px;
+        height: 64px;
+        font-size: 2rem;
+    }
+
+    .quiz-continue-header {
+        flex-direction: column;
+        gap: 0.75rem;
+    }
+
+    .quiz-continue-icon {
+        width: 48px;
+        height: 48px;
+        font-size: 1.25rem;
+    }
+
+    .progress-bar-wrapper {
+        height: 10px;
+    }
+
+    .quiz-question-card {
+        padding: 1.25rem;
+    }
+
+    .quiz-question-text {
+        font-size: 1.25rem;
+        margin-bottom: 1.5rem;
+    }
+
+    .quiz-options {
+        gap: 0.75rem;
+    }
+
+    /* Lựa chọn dễ bấm trên mobile */
+    .quiz-option {
+        padding: 0.875rem 1rem;
+        min-height: 56px;
+        font-size: 0.9375rem;
+    }
+
+    .quiz-option-letter {
+        width: 28px;
+        height: 28px;
+        font-size: 0.8125rem;
+    }
+
+    .quiz-feedback {
+        padding: 0.75rem 1rem;
+        font-size: 0.875rem;
+    }
+
+    .quiz-question-actions {
+        justify-content: stretch;
+    }
+
+    .quiz-question-actions .btn-quiz {
+        width: 100%;
+    }
+
+    .quiz-result-score-value {
+        font-size: 3rem;
+    }
+
+    .quiz-result-stat {
+        padding: 0.75rem 1rem;
+    }
+
+    .quiz-result-stat-label {
+        font-size: 0.875rem;
+    }
+
+    .quiz-result-stat-value {
+        font-size: 1rem;
+    }
+}
+
+/* === Small Mobile (≤ 360px) === */
+@media (max-width: 360px) {
+    .quiz-container {
+        padding: 0.75rem 0.5rem;
+    }
+
+    .quiz-title {
+        font-size: 1.5rem;
+    }
+
+    .quiz-subtitle {
+        font-size: 0.875rem;
+    }
+
+    .quiz-card {
+        padding: 1.5rem 1rem;
+    }
+
+    .quiz-card-title {
+        font-size: 1.375rem;
+    }
+
+    .quiz-question-card {
+        padding: 1rem;
+    }
+
+    .quiz-question-text {
+        font-size: 1.125rem;
+    }
+
+    .quiz-option {
+        padding: 0.75rem 0.875rem;
+        min-height: 52px;
+        font-size: 0.875rem;
+    }
+
+    .quiz-result-score-value {
+        font-size: 2.5rem;
+    }
+}
+
+/* ============================================================
+      END OF quiz.css
+     ============================================================ */

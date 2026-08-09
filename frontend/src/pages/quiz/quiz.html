@@ -1,0 +1,388 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quiz | WordMate</title>
+    <link rel="icon" type="image/svg+xml" href="../../../public/image/wordmate-logo.svg">
+
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Google Fonts: Inter (hỗ trợ tiếng Việt đầy đủ) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:ital,wght@0,400;0,500;0,600;0,700;0,800&display=swap" rel="stylesheet">
+
+    <!-- Font Awesome 6 (Free) -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="../../css/components/header.css">
+    <link rel="stylesheet" href="../../css/pages/quiz.css">
+</head>
+
+<body>
+    <!-- ===== HEADER COMPONENT PLACEHOLDER ===== -->
+    <!-- Header sẽ được load từ component dùng chung -->
+    <div id="header">
+        <!-- Header component sẽ được inject vào đây -->
+    </div>
+
+    <!-- ===== MAIN CONTENT ===== -->
+    <main class="main-content">
+
+        <!-- ===== QUIZ CONTAINER ===== -->
+        <div class="quiz-container">
+
+            <!-- ===== QUIZ HEADER ===== -->
+            <div class="quiz-header">
+                <h1 class="quiz-title">Quiz</h1>
+                <p class="quiz-subtitle">Kiểm tra và củng cố vốn từ vựng của bạn</p>
+            </div>
+
+            <!-- ============================================================
+                 STATE 1 — START (Không có Quiz chưa hoàn thành)
+                 ============================================================ -->
+            <section id="quiz-start-state" class="quiz-state" aria-label="Bắt đầu ôn tập">
+                <div class="quiz-card quiz-start-card">
+                    <div class="quiz-start-icon" aria-hidden="true">
+                        <i class="fa-solid fa-brain"></i>
+                    </div>
+                    <h2 class="quiz-card-title">Ôn tập từ vựng</h2>
+                    <p class="quiz-card-desc">
+                        Trả lời các câu hỏi trắc nghiệm để ôn lại từ vựng đã học.
+                        Hoàn thành quiz để củng cố kiến thức và theo dõi tiến độ của bạn.
+                    </p>
+                    <button type="button" class="btn-quiz btn-quiz-primary">
+                        <i class="fa-solid fa-play"></i>
+                        <span>Bắt đầu ôn tập</span>
+                    </button>
+                </div>
+            </section>
+            <!-- ===== END STATE 1 ===== -->
+
+            <!-- ============================================================
+                 STATE 2 — CONTINUE (Có Quiz chưa hoàn thành)
+                 ============================================================ -->
+            <section id="quiz-continue-state" class="quiz-state" aria-label="Quiz đang dở" hidden>
+                <div class="quiz-card quiz-continue-card">
+                    <div class="quiz-continue-header">
+                        <div class="quiz-continue-icon" aria-hidden="true">
+                            <i class="fa-solid fa-book-open"></i>
+                        </div>
+                        <div class="quiz-continue-info">
+                            <h2 class="quiz-card-title">Quiz đang dở</h2>
+                            <p class="quiz-card-desc">
+                                Bạn có một quiz chưa hoàn thành. Hãy tiếp tục để hoàn thành nó!
+                            </p>
+                        </div>
+                    </div>
+
+                    <!-- Tiến độ quiz đang dở -->
+                    <div class="quiz-continue-progress">
+                        <div class="quiz-continue-progress-info">
+                            <span class="quiz-continue-progress-label">Tiến độ</span>
+                            <span class="quiz-continue-progress-count">3 / 10</span>
+                        </div>
+                        <div class="progress-bar-wrapper" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="30" aria-label="Tiến độ quiz">
+                            <div class="progress-bar-fill" style="width: 30%;"></div>
+                        </div>
+                    </div>
+
+                    <button type="button" class="btn-quiz btn-quiz-primary">
+                        <span>Tiếp tục</span>
+                        <i class="fa-solid fa-arrow-right"></i>
+                    </button>
+                </div>
+            </section>
+            <!-- ===== END STATE 2 ===== -->
+
+            <!-- ============================================================
+                 STATE 3 — QUESTION (Đang làm Quiz)
+                 ============================================================ -->
+            <section id="quiz-question-state" class="quiz-state" aria-label="Câu hỏi quiz" hidden>
+                <div class="quiz-question-wrapper">
+
+                    <!-- ===== PROGRESS BAR ===== -->
+                    <div class="quiz-progress-section">
+                        <div class="quiz-progress-info">
+                            <span class="quiz-progress-label">Câu hỏi</span>
+                            <span class="quiz-progress-count">1 / 10</span>
+                        </div>
+                        <div class="progress-bar-wrapper" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="10" aria-label="Tiến độ quiz">
+                            <div class="progress-bar-fill" style="width: 10%;"></div>
+                        </div>
+                    </div>
+
+                    <!-- ===== QUESTION CARD ===== -->
+                    <div class="quiz-card quiz-question-card">
+
+                        <!-- ===== DẠNG 1: WORD_TO_MEANING (mẫu hiển thị) ===== -->
+                        <div class="quiz-question" data-question-type="WORD_TO_MEANING">
+                            <span class="quiz-question-type-badge">
+                                <i class="fa-solid fa-language" aria-hidden="true"></i>
+                                Word → Meaning
+                            </span>
+                            <h2 class="quiz-question-text">What does "goodbye" mean?</h2>
+
+                            <!-- 4 lựa chọn Multiple Choice -->
+                            <div class="quiz-options">
+                                <button type="button" class="quiz-option">
+                                    <span class="quiz-option-letter">A</span>
+                                    <span class="quiz-option-text">anh trai hoặc em trai</span>
+                                </button>
+                                <button type="button" class="quiz-option">
+                                    <span class="quiz-option-letter">B</span>
+                                    <span class="quiz-option-text">mẹ</span>
+                                </button>
+                                <button type="button" class="quiz-option">
+                                    <span class="quiz-option-letter">C</span>
+                                    <span class="quiz-option-text">cảm ơn</span>
+                                </button>
+                                <button type="button" class="quiz-option is-correct">
+                                    <span class="quiz-option-letter">D</span>
+                                    <span class="quiz-option-text">tạm biệt</span>
+                                    <span class="quiz-option-icon" aria-hidden="true">
+                                        <i class="fa-solid fa-circle-check"></i>
+                                    </span>
+                                </button>
+                            </div>
+
+                            <!-- ===== FEEDBACK: ĐÚNG (mẫu hiển thị) ===== -->
+                            <div class="quiz-feedback is-correct" role="status">
+                                <i class="fa-solid fa-circle-check" aria-hidden="true"></i>
+                                <span>Chính xác! "goodbye" có nghĩa là "tạm biệt".</span>
+                            </div>
+
+                            <!-- ===== FEEDBACK: SAI (mẫu ẩn) ===== -->
+                            <div class="quiz-feedback is-incorrect" role="status" hidden>
+                                <i class="fa-solid fa-circle-xmark" aria-hidden="true"></i>
+                                <span>Sai rồi! Đáp án đúng là "tạm biệt".</span>
+                            </div>
+
+                            <!-- Nút chuyển sang câu tiếp theo -->
+                            <div class="quiz-question-actions">
+                                <button type="button" class="btn-quiz btn-quiz-primary">
+                                    <span>Câu tiếp theo</span>
+                                    <i class="fa-solid fa-arrow-right"></i>
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- ===== DẠNG 1b: WORD_TO_MEANING — TRẠNG THÁI SAI (mẫu ẩn) ===== -->
+                        <div class="quiz-question" data-question-type="WORD_TO_MEANING" data-feedback-state="incorrect" hidden>
+                            <span class="quiz-question-type-badge">
+                                <i class="fa-solid fa-language" aria-hidden="true"></i>
+                                Word → Meaning
+                            </span>
+                            <h2 class="quiz-question-text">What does "goodbye" mean?</h2>
+
+                            <!-- Lựa chọn sai được highlight Rose-500, đáp án đúng được hiển thị -->
+                            <div class="quiz-options">
+                                <button type="button" class="quiz-option">
+                                    <span class="quiz-option-letter">A</span>
+                                    <span class="quiz-option-text">anh trai hoặc em trai</span>
+                                </button>
+                                <button type="button" class="quiz-option">
+                                    <span class="quiz-option-letter">B</span>
+                                    <span class="quiz-option-text">mẹ</span>
+                                </button>
+                                <button type="button" class="quiz-option is-incorrect">
+                                    <span class="quiz-option-letter">C</span>
+                                    <span class="quiz-option-text">cảm ơn</span>
+                                    <span class="quiz-option-icon" aria-hidden="true">
+                                        <i class="fa-solid fa-circle-xmark"></i>
+                                    </span>
+                                </button>
+                                <button type="button" class="quiz-option is-correct-answer">
+                                    <span class="quiz-option-letter">D</span>
+                                    <span class="quiz-option-text">tạm biệt</span>
+                                    <span class="quiz-option-icon" aria-hidden="true">
+                                        <i class="fa-solid fa-circle-check"></i>
+                                    </span>
+                                </button>
+                            </div>
+
+                            <!-- Feedback sai -->
+                            <div class="quiz-feedback is-incorrect" role="status">
+                                <i class="fa-solid fa-circle-xmark" aria-hidden="true"></i>
+                                <span>Sai rồi! Đáp án đúng là "tạm biệt".</span>
+                            </div>
+
+                            <div class="quiz-question-actions">
+                                <button type="button" class="btn-quiz btn-quiz-primary">
+                                    <span>Câu tiếp theo</span>
+                                    <i class="fa-solid fa-arrow-right"></i>
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- ===== DẠNG 2: MEANING_TO_WORD (mẫu ẩn) ===== -->
+                        <div class="quiz-question" data-question-type="MEANING_TO_WORD" hidden>
+                            <span class="quiz-question-type-badge">
+                                <i class="fa-solid fa-language" aria-hidden="true"></i>
+                                Meaning → Word
+                            </span>
+                            <h2 class="quiz-question-text">Which English word means "mẹ"?</h2>
+
+                            <div class="quiz-options">
+                                <button type="button" class="quiz-option">
+                                    <span class="quiz-option-letter">A</span>
+                                    <span class="quiz-option-text">father</span>
+                                </button>
+                                <button type="button" class="quiz-option is-correct">
+                                    <span class="quiz-option-letter">B</span>
+                                    <span class="quiz-option-text">mother</span>
+                                    <span class="quiz-option-icon" aria-hidden="true">
+                                        <i class="fa-solid fa-circle-check"></i>
+                                    </span>
+                                </button>
+                                <button type="button" class="quiz-option">
+                                    <span class="quiz-option-letter">C</span>
+                                    <span class="quiz-option-text">goodbye</span>
+                                </button>
+                                <button type="button" class="quiz-option">
+                                    <span class="quiz-option-letter">D</span>
+                                    <span class="quiz-option-text">hello</span>
+                                </button>
+                            </div>
+
+                            <div class="quiz-feedback is-correct" role="status">
+                                <i class="fa-solid fa-circle-check" aria-hidden="true"></i>
+                                <span>Chính xác! "mother" có nghĩa là "mẹ".</span>
+                            </div>
+
+                            <div class="quiz-feedback is-incorrect" role="status" hidden>
+                                <i class="fa-solid fa-circle-xmark" aria-hidden="true"></i>
+                                <span>Sai rồi! Đáp án đúng là "mother".</span>
+                            </div>
+
+                            <div class="quiz-question-actions">
+                                <button type="button" class="btn-quiz btn-quiz-primary">
+                                    <span>Câu tiếp theo</span>
+                                    <i class="fa-solid fa-arrow-right"></i>
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- ===== DẠNG 3: FILL_IN_BLANK (mẫu ẩn) ===== -->
+                        <div class="quiz-question" data-question-type="FILL_IN_BLANK" hidden>
+                            <span class="quiz-question-type-badge">
+                                <i class="fa-solid fa-pen-to-square" aria-hidden="true"></i>
+                                Fill in the blank
+                            </span>
+                            <h2 class="quiz-question-text">______! Nice to meet you.</h2>
+
+                            <div class="quiz-options">
+                                <button type="button" class="quiz-option">
+                                    <span class="quiz-option-letter">A</span>
+                                    <span class="quiz-option-text">father</span>
+                                </button>
+                                <button type="button" class="quiz-option">
+                                    <span class="quiz-option-letter">B</span>
+                                    <span class="quiz-option-text">goodbye</span>
+                                </button>
+                                <button type="button" class="quiz-option">
+                                    <span class="quiz-option-letter">C</span>
+                                    <span class="quiz-option-text">brother</span>
+                                </button>
+                                <button type="button" class="quiz-option is-correct">
+                                    <span class="quiz-option-letter">D</span>
+                                    <span class="quiz-option-text">hello</span>
+                                    <span class="quiz-option-icon" aria-hidden="true">
+                                        <i class="fa-solid fa-circle-check"></i>
+                                    </span>
+                                </button>
+                            </div>
+
+                            <div class="quiz-feedback is-correct" role="status">
+                                <i class="fa-solid fa-circle-check" aria-hidden="true"></i>
+                                <span>Chính xác! "Hello! Nice to meet you."</span>
+                            </div>
+
+                            <div class="quiz-feedback is-incorrect" role="status" hidden>
+                                <i class="fa-solid fa-circle-xmark" aria-hidden="true"></i>
+                                <span>Sai rồi! Đáp án đúng là "hello".</span>
+                            </div>
+
+                            <div class="quiz-question-actions">
+                                <button type="button" class="btn-quiz btn-quiz-primary">
+                                    <span>Câu tiếp theo</span>
+                                    <i class="fa-solid fa-arrow-right"></i>
+                                </button>
+                            </div>
+                        </div>
+
+                    </div>
+                    <!-- ===== END QUESTION CARD ===== -->
+
+                </div>
+            </section>
+            <!-- ===== END STATE 3 ===== -->
+
+            <!-- ============================================================
+                 STATE 4 — RESULT (Kết quả)
+                 ============================================================ -->
+            <section id="quiz-result-state" class="quiz-state" aria-label="Kết quả quiz" hidden>
+                <div class="quiz-card quiz-result-card">
+                    <div class="quiz-result-icon" aria-hidden="true">
+                        <i class="fa-solid fa-trophy"></i>
+                    </div>
+                    <h2 class="quiz-card-title">Hoàn thành!</h2>
+                    <p class="quiz-card-desc">Bạn đã hoàn thành quiz. Dưới đây là kết quả của bạn.</p>
+
+                    <!-- ===== SCORE ===== -->
+                    <div class="quiz-result-score">
+                        <span class="quiz-result-score-value">80</span>
+                        <span class="quiz-result-score-unit">/ 100</span>
+                    </div>
+
+                    <!-- ===== STATS ===== -->
+                    <div class="quiz-result-stats">
+                        <div class="quiz-result-stat">
+                            <span class="quiz-result-stat-label">Số câu đúng</span>
+                            <span class="quiz-result-stat-value quiz-result-stat-correct">8 / 10</span>
+                        </div>
+                        <div class="quiz-result-stat">
+                            <span class="quiz-result-stat-label">Thời gian làm bài</span>
+                            <span class="quiz-result-stat-value">
+                                <i class="fa-regular fa-clock" aria-hidden="true"></i>
+                                02:35
+                            </span>
+                        </div>
+                    </div>
+
+                    <!-- ===== ACTION: Chỉ thuộc trạng thái kết quả ===== -->
+                    <div class="quiz-result-actions">
+                        <button type="button" class="btn-quiz btn-quiz-primary">
+                            <i class="fa-solid fa-rotate-right"></i>
+                            <span>Bắt đầu Quiz mới</span>
+                        </button>
+                    </div>
+                </div>
+            </section>
+            <!-- ===== END STATE 4 ===== -->
+
+        </div>
+        <!-- ===== END QUIZ CONTAINER ===== -->
+
+    </main>
+    <!-- ===== END MAIN CONTENT ===== -->
+
+    <!-- ===== AI CHAT PLACEHOLDER ===== -->
+    <!-- AI Chat Component sẽ được load từ component dùng chung -->
+    <div id="ai-chat-placeholder" class="ai-chat-placeholder">
+        <!-- AI Chat component sẽ được inject vào đây -->
+    </div>
+
+    <!-- ===== BOTTOM NAVIGATION PLACEHOLDER ===== -->
+    <!-- Bottom Navigation sẽ được load từ component dùng chung -->
+    <div id="bottom-nav">
+        <!-- Bottom Navigation component sẽ được inject vào đây -->
+    </div>
+
+</body>
+
+</html>
