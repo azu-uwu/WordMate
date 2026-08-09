@@ -500,7 +500,7 @@ async function completeQuiz() {
  */
 function showResult(data) {
     resultScore.textContent = data.score;
-    resultScoreMax.textContent = `/ ${data.total_questions}`;
+    resultScoreMax.textContent = '/ 100';
     correctStat.textContent = `${data.correct_answers} / ${data.total_questions}`;
     timeStat.innerHTML = `<i class="fa-regular fa-clock" aria-hidden="true"></i> ${formatDuration(data.duration)}`;
 
