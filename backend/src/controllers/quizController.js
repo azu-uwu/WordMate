@@ -396,8 +396,11 @@ const answerQuestion = async (req, res) => {
             : srsService.handleWrongAnswer();
 
         const now = new Date();
+        const newStatus = srsResult.reviewCount >= 5
+            ? "mastered"
+            : "learning";
         await UserVocabulary.upsert(userId, question.vocabulary_id, {
-            status: "learning",
+            status: newStatus,
             review_count: srsResult.reviewCount,
             next_review_at: srsResult.nextReviewAt,
             last_reviewed_at: now
