@@ -2173,62 +2173,36 @@ Không.
 
 ### Thông tin
 
-- **ID**: M6-T1
-- **Tên**: API Lấy Sổ tay từ vựng
-- **Milestone**: M6
-- **User Story**: US-05
-- **Functional Requirement**: FR-028, FR-029, FR-030
-- **Module**: Notebook
-- **Priority**: P0
-- **Complexity**: M
-- **Status**: Todo
-- **Dependencies**: M2-T4, M4-T1
+* **ID**: M6-T1
+* **Tên**: API Lấy Sổ tay từ vựng
+* **Milestone**: M6
+* **User Story**: US-05
+* **Functional Requirement**: FR-028, FR-029, FR-030
+* **Module**: Notebook
+* **Priority**: P0
+* **Complexity**: M
+* **Status**: Todo
+* **Dependencies**: M2-T4, M4-T1
 
 ### Mục tiêu
 
-Tạo route GET /api/notebook + controller. Query params: search, status, page. JOIN user_vocabularies + vocabularies.
+Tạo route `GET /api/notebook` + controller. Query params: `search`, `topic_id`, `status`, `page`, `limit`. JOIN `user_vocabularies` + `vocabularies` + `topics`. Chỉ lấy từ có status `learning` hoặc `mastered`, không phụ thuộc roadmap. Search theo cả `word` và `meaning`.
 
 ### Công việc cần thực hiện
 
 1. Tạo `backend/src/models/notebookModel.js`, `backend/src/controllers/notebookController.js`, `backend/src/routes/notebookRoutes.js`.
-2. Hàm `getAll(userId, { search, status, page, limit })`: JOIN, WHERE, LIKE, ORDER BY, LIMIT.
+2. Hàm `getAll(userId, { search, topicId, status, page, limit })`: JOIN, WHERE, LIKE trên `word`/`meaning`, lọc `topic_id`/`status`, ORDER BY, LIMIT.
+3. Hàm `getTotal(userId, { search, topicId, status })` để lấy tổng số kết quả.
 
 ### File cần tạo
 
-- `backend/src/models/notebookModel.js`
-- `backend/src/controllers/notebookController.js`
-- `backend/src/routes/notebookRoutes.js`
+* `backend/src/models/notebookModel.js`
+* `backend/src/controllers/notebookController.js`
+* `backend/src/routes/notebookRoutes.js`
 
 ### File cần chỉnh sửa
 
-- `backend/src/server.js` (mount notebookRoutes)
-
----
-
-## Task M6-T2 (Backend)
-
-### Thông tin
-
-- **ID**: M6-T2
-- **Tên**: API Chi tiết từ trong Sổ tay
-- **Milestone**: M6
-- **User Story**: US-05
-- **Functional Requirement**: FR-031
-- **Module**: Notebook
-- **Priority**: P0
-- **Complexity**: S
-- **Status**: Todo
-- **Dependencies**: M6-T1
-
-### Mục tiêu
-
-Tạo route GET /api/notebook/:vocabulary_id + controller.
-
-### File cần chỉnh sửa
-
-- `backend/src/models/notebookModel.js`
-- `backend/src/controllers/notebookController.js`
-- `backend/src/routes/notebookRoutes.js`
+* `backend/src/server.js` (mount notebookRoutes)
 
 ---
 
@@ -2236,25 +2210,33 @@ Tạo route GET /api/notebook/:vocabulary_id + controller.
 
 ### Thông tin
 
-- **ID**: M6-T3
-- **Tên**: API Ôn lại từ
-- **Milestone**: M6
-- **User Story**: US-05
-- **Functional Requirement**: FR-032
-- **Module**: Notebook
-- **Priority**: P0
-- **Complexity**: S
-- **Status**: Todo
-- **Dependencies**: M6-T1
+* **ID**: M6-T3
+* **Tên**: API Đưa từ đã thuộc về luyện tập
+* **Milestone**: M6
+* **User Story**: US-05
+* **Functional Requirement**: FR-032
+* **Module**: Notebook
+* **Priority**: P0
+* **Complexity**: S
+* **Status**: Todo
+* **Dependencies**: M6-T1
 
 ### Mục tiêu
 
-Tạo route POST /api/notebook/review/:vocabulary_id + controller. Chuyển status từ mastered về learning.
+Tạo route `POST /api/notebook/review/:vocabulary_id` + controller. Chỉ cho phép từ có status `mastered` được đưa về `learning` và đưa lại vào hàng đợi ôn tập bằng cách cập nhật `next_review_at = NOW()`.
+
+### Công việc cần thực hiện
+
+1. Thêm hàm xử lý trong `backend/src/models/notebookModel.js` để cập nhật vocabulary của user.
+2. Trong controller, lấy `userId` từ `req.user.id` và xử lý `vocabulary_id`.
+3. Cập nhật `status = 'learning'`, `next_review_at = NOW()` khi vocabulary đang ở trạng thái `mastered`.
+4. Từ không thuộc user hoặc không ở trạng thái `mastered` phải được xử lý theo quy ước lỗi hiện tại của API.
 
 ### File cần chỉnh sửa
 
-- `backend/src/controllers/notebookController.js`
-- `backend/src/routes/notebookRoutes.js`
+* `backend/src/models/notebookModel.js`
+* `backend/src/controllers/notebookController.js`
+* `backend/src/routes/notebookRoutes.js`
 
 ---
 
@@ -2262,16 +2244,16 @@ Tạo route POST /api/notebook/review/:vocabulary_id + controller. Chuyển stat
 
 ### Thông tin
 
-- **ID**: M6-T4
-- **Tên**: Trang Sổ tay từ vựng - HTML & CSS
-- **Milestone**: M6
-- **User Story**: US-05
-- **Functional Requirement**: FR-028, FR-029, FR-030
-- **Module**: Notebook
-- **Priority**: P0
-- **Complexity**: M
-- **Status**: Todo
-- **Dependencies**: M1-T8, M1-T9
+* **ID**: M6-T4
+* **Tên**: Trang Sổ tay từ vựng - HTML & CSS
+* **Milestone**: M6
+* **User Story**: US-05
+* **Functional Requirement**: FR-028, FR-029, FR-030
+* **Module**: Notebook
+* **Priority**: P0
+* **Complexity**: M
+* **Status**: Todo
+* **Dependencies**: M1-T8, M1-T9
 
 ### Mục tiêu
 
@@ -2279,13 +2261,15 @@ Tạo cấu trúc HTML và CSS cho trang Sổ tay từ vựng.
 
 ### Công việc cần thực hiện
 
-1. Tạo `frontend/src/pages/notebook/notebook.html`: header, tổng số từ, thanh tìm kiếm, tabs status (Tất cả, New, Learning, Mastered), danh sách từ, modal chi tiết, bottom navigation, AI Chat.
-2. Tạo `frontend/src/css/pages/notebook.css`: status badges (gray, Amber-500, Emerald-500).
+1. Tạo `frontend/src/pages/notebook/notebook.html`: header, tổng số từ, thanh tìm kiếm, nút lọc topic, danh sách từ, cột action, bottom navigation, AI Chat placehoder.
+2. Danh sách hiển thị: từ vựng, phát âm, từ loại, nghĩa tiếng Việt và action tương ứng với status.
+3. Với từ `learning`, hiển thị nút **Đánh dấu đã thuộc**; với từ `mastered`, hiển thị nút **Đưa về luyện tập**.
+4. Tạo `frontend/src/css/pages/notebook.css`: style danh sách, pronunciation, action buttons và giao diện lọc topic.
 
 ### File cần tạo
 
-- `frontend/src/pages/notebook/notebook.html`
-- `frontend/src/css/pages/notebook.css`
+* `frontend/src/pages/notebook/notebook.html`
+* `frontend/src/css/pages/notebook.css`
 
 ### File cần chỉnh sửa
 
@@ -2297,16 +2281,16 @@ Không.
 
 ### Thông tin
 
-- **ID**: M6-T5
-- **Tên**: Trang Sổ tay từ vựng - JavaScript
-- **Milestone**: M6
-- **User Story**: US-05
-- **Functional Requirement**: FR-028, FR-029, FR-030, FR-031, FR-032
-- **Module**: Notebook
-- **Priority**: P0
-- **Complexity**: M
-- **Status**: Todo
-- **Dependencies**: M6-T4, M6-T1, M6-T2, M6-T3
+* **ID**: M6-T5
+* **Tên**: Trang Sổ tay từ vựng - JavaScript
+* **Milestone**: M6
+* **User Story**: US-05
+* **Functional Requirement**: FR-028, FR-029, FR-030, FR-031, FR-032
+* **Module**: Notebook
+* **Priority**: P0
+* **Complexity**: M
+* **Status**: Todo
+* **Dependencies**: M6-T4, M6-T1, M6-T2, M6-T3
 
 ### Mục tiêu
 
@@ -2314,11 +2298,15 @@ Tạo JavaScript cho trang Sổ tay.
 
 ### Công việc cần thực hiện
 
-1. Tạo `frontend/src/js/pages/notebook.js`: gọi GET /api/notebook, render danh sách, search debounce, filter status, modal chi tiết (GET /api/notebook/:id), nút "Ôn lại" (POST /api/notebook/review/:id).
+1. Tạo `frontend/src/js/pages/notebook.js`: gọi `GET /api/notebook`, render danh sách, search debounce, lọc theo topic, cập nhật phân trang.
+2. Gọi `GET /api/notebook/topics` để hiển thị danh sách topic khi người dùng mở bộ lọc.
+3. Với từ `learning`, gọi `POST /api/notebook/master/:vocabulary_id` khi người dùng bấm **Đánh dấu đã thuộc**.
+4. Với từ `mastered`, gọi `POST /api/notebook/review/:vocabulary_id` khi người dùng bấm **Đưa về luyện tập**.
+5. Sau khi cập nhật status thành công, cập nhật lại danh sách hoặc item tương ứng.
 
 ### File cần tạo
 
-- `frontend/src/js/pages/notebook.js`
+* `frontend/src/js/pages/notebook.js`
 
 ### File cần chỉnh sửa
 
