@@ -1,5 +1,7 @@
 const Quiz = require("../models/quizModel");
 const UserVocabulary = require("../models/userVocabularyModel");
+const Vocabulary = require("../models/vocabularyModel");
+const srsService = require("../services/srsService");
 
 const MAX_QUESTIONS = 20;
 
@@ -270,6 +272,158 @@ const startQuiz = async (req, res) => {
     }
 };
 
+/**
+ * API Trả lời Quiz
+ * POST /api/quiz/answer
+ * Body: { attemptId: number, questionId: number, userAnswer: string }
+ * Không nhận isCorrect hoặc correctAnswer từ Frontend.
+ */
+const answerQuestion = async (req, res) => {
+    try {
+        const userId = req.user.id;
+        const { attemptId, questionId, userAnswer } = req.body;
+
+        // 1. Validate required fields
+        if (attemptId === undefined || attemptId === null || attemptId === "") {
+            return res.status(400).json({
+                success: false,
+                message: "Thiếu attemptId"
+            });
+        }
+        if (questionId === undefined || questionId === null || questionId === "") {
+            return res.status(400).json({
+                success: false,
+                message: "Thiếu questionId"
+            });
+        }
+        if (userAnswer === undefined || userAnswer === null || userAnswer === "") {
+            return res.status(400).json({
+                success: false,
+                message: "Thiếu userAnswer"
+            });
+        }
+
+        // 2. Validate types
+        if (!Number.isInteger(attemptId) || attemptId <= 0) {
+            return res.status(400).json({
+                success: false,
+                message: "attemptId không hợp lệ"
+            });
+        }
+        if (!Number.isInteger(questionId) || questionId <= 0) {
+            return res.status(400).json({
+                success: false,
+                message: "questionId không hợp lệ"
+            });
+        }
+        if (typeof userAnswer !== "string") {
+            return res.status(400).json({
+                success: false,
+                message: "userAnswer phải là chuỗi"
+            });
+        }
+
+        // 3. Kiểm tra quiz_attempt tồn tại và thuộc người dùng hiện tại
+        const attempt = await Quiz.getAttemptById(attemptId);
+        if (!attempt) {
+            return res.status(404).json({
+                success: false,
+                message: "Quiz không tồn tại"
+            });
+        }
+        if (attempt.user_id !== userId) {
+            return res.status(403).json({
+                success: false,
+                message: "Quiz không thuộc về người dùng hiện tại"
+            });
+        }
+
+        // 4. Kiểm tra question thuộc quiz_attempt đó
+        const questions = await Quiz.getQuestionsByAttemptId(attemptId);
+        const question = questions.find((q) => q.id === questionId);
+        if (!question) {
+            return res.status(404).json({
+                success: false,
+                message: "Câu hỏi không tồn tại hoặc không thuộc Quiz này"
+            });
+        }
+
+        // 5. Kiểm tra câu hỏi đã được trả lời trước đó chưa
+        const answers = await Quiz.getAnswersByAttemptId(attemptId);
+        const alreadyAnswered = answers.some(
+            (a) => a.vocabulary_id === question.vocabulary_id
+        );
+        if (alreadyAnswered) {
+            return res.status(409).json({
+                success: false,
+                message: "Câu hỏi này đã được trả lời trước đó"
+            });
+        }
+
+        // 6. Lấy vocabulary tương ứng
+        const vocabulary = await Vocabulary.findById(question.vocabulary_id);
+        if (!vocabulary) {
+            return res.status(404).json({
+                success: false,
+                message: "Từ vựng không tồn tại"
+            });
+        }
+
+        // 7. Xác định đáp án đúng dựa trên question_type
+        const correctAnswer = getCorrectAnswerValue(vocabulary, question.question_type);
+
+        // 8. So sánh userAnswer với đáp án đúng
+        // Bỏ khoảng trắng đầu/cuối, không phân biệt hoa thường (theo convention submitWriting)
+        const normalizedUserAnswer = String(userAnswer).trim().toLowerCase();
+        const normalizedCorrectAnswer = String(correctAnswer).trim().toLowerCase();
+        const isCorrect = normalizedUserAnswer === normalizedCorrectAnswer;
+
+        // 9. Lưu câu trả lời vào quiz_answers
+        await Quiz.createAnswer({
+            quizAttemptId: attemptId,
+            vocabularyId: question.vocabulary_id,
+            userAnswer: String(userAnswer).trim(),
+            correctAnswer: String(correctAnswer),
+            isCorrect: isCorrect ? 1 : 0
+        });
+
+        // 10. Cập nhật SRS theo logic M4-T6 (chỉ khi người dùng thực sự trả lời)
+        const existingRecord = await UserVocabulary.findByUserAndVocab(userId, question.vocabulary_id);
+        const currentReviewCount = existingRecord ? existingRecord.review_count : 0;
+
+        const srsResult = isCorrect
+            ? srsService.handleCorrectAnswer(currentReviewCount)
+            : srsService.handleWrongAnswer();
+
+        const now = new Date();
+        await UserVocabulary.upsert(userId, question.vocabulary_id, {
+            status: "learning",
+            review_count: srsResult.reviewCount,
+            next_review_at: srsResult.nextReviewAt,
+            last_reviewed_at: now
+        });
+
+        // 11. Trả về kết quả
+        return res.status(200).json({
+            success: true,
+            message: isCorrect ? "Chính xác!" : "Sai rồi",
+            data: {
+                isCorrect,
+                correctAnswer: String(correctAnswer),
+                review_count: srsResult.reviewCount,
+                next_review_at: srsResult.nextReviewAt
+            }
+        });
+    } catch (err) {
+        console.error(err);
+        return res.status(500).json({
+            success: false,
+            message: "Lỗi máy chủ"
+        });
+    }
+};
+
 module.exports = {
-    startQuiz
+    startQuiz,
+    answerQuestion
 };

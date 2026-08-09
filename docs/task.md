@@ -1940,7 +1940,7 @@ Xây dựng Model layer cho Quiz, thao tác với dữ liệu quiz_attempts, qui
 
 ### Mục tiêu
 
-Tạo API bắt đầu Quiz POST /api/quiz/start, chọn các vocabulary cần ôn, sinh tối đa 20 câu hỏi Multiple Choice và lưu các câu hỏi thuộc quiz attempt.
+Tạo API bắt đầu Quiz `POST /api/quiz/start`, chọn các vocabulary cần ôn, sinh tối đa 20 câu hỏi Multiple Choice và lưu các câu hỏi thuộc quiz attempt.
 
 ### Công việc cần thực hiện
 
