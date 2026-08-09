@@ -547,8 +547,89 @@ const completeQuiz = async (req, res) => {
     }
 };
 
+/**
+ * API Tiếp tục Quiz
+ * GET /api/quiz/continue
+ * Chỉ đọc dữ liệu. Không tạo attempt mới, không tạo câu hỏi/trả lời,
+ * không cập nhật SRS (review_count, next_review_at, status) hay quiz_attempts.
+ */
+const continueQuiz = async (req, res) => {
+    try {
+        const userId = req.user.id;
+
+        // 1. Tìm quiz_attempt chưa hoàn thành mới nhất của người dùng hiện tại
+        const attempt = await Quiz.getIncompleteAttempt(userId);
+        if (!attempt) {
+            return res.status(200).json({
+                success: true,
+                message: "Không có Quiz chưa hoàn thành",
+                data: {
+                    hasIncompleteQuiz: false
+                }
+            });
+        }
+
+        // 2. Lấy tất cả câu hỏi của attempt (giữ nguyên question_order)
+        const questions = await Quiz.getQuestionsByAttemptId(attempt.id);
+
+        // 3. Lấy danh sách câu trả lời của attempt
+        const answers = await Quiz.getAnswersByAttemptId(attempt.id);
+        const answeredVocabularyIds = new Set(
+            answers.map((a) => a.vocabulary_id)
+        );
+
+        // 4. Chỉ giữ các câu hỏi chưa được trả lời
+        const unansweredQuestions = questions.filter(
+            (q) => !answeredVocabularyIds.has(q.vocabulary_id)
+        );
+
+        // 5. Lấy pool vocabulary của người dùng để tạo options (cùng cách M5-T2)
+        const userVocabularies = await UserVocabulary.getByUser(userId);
+
+        // 6. Xây dựng nội dung câu hỏi cho từng câu chưa trả lời.
+        // Dùng đúng question_type đã lưu trong quiz_questions để không sinh lại
+        // một câu hỏi khác. Không trả correct_answer.
+        const questionData = [];
+        for (const question of unansweredQuestions) {
+            const vocabulary = await Vocabulary.findById(question.vocabulary_id);
+            if (!vocabulary) continue;
+
+            const options = buildOptions(vocabulary, question.question_type, userVocabularies);
+            if (!options) continue;
+
+            questionData.push({
+                id: question.id,
+                vocabulary_id: question.vocabulary_id,
+                question_type: question.question_type,
+                question: buildQuestionText(vocabulary, question.question_type),
+                options,
+                question_order: question.question_order
+            });
+        }
+
+        // 7. Trả về danh sách câu hỏi chưa trả lời (không trả các câu đã làm)
+        return res.status(200).json({
+            success: true,
+            message: "Tiếp tục Quiz thành công",
+            data: {
+                quiz_id: attempt.id,
+                total_questions: questions.length,
+                remaining_questions: questionData.length,
+                questions: questionData
+            }
+        });
+    } catch (err) {
+        console.error(err);
+        return res.status(500).json({
+            success: false,
+            message: "Lỗi máy chủ"
+        });
+    }
+};
+
 module.exports = {
     startQuiz,
     answerQuestion,
-    completeQuiz
+    completeQuiz,
+    continueQuiz
 };

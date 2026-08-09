@@ -13,4 +13,7 @@ router.post("/answer", authMiddleware, quizController.answerQuestion);
 // Hoàn thành Quiz (yêu cầu đăng nhập)
 router.post("/complete", authMiddleware, quizController.completeQuiz);
 
+// Tiếp tục Quiz (yêu cầu đăng nhập)
+router.get("/continue", authMiddleware, quizController.continueQuiz);
+
 module.exports = router;
