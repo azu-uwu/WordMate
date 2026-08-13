@@ -5,17 +5,16 @@
  *
  * Flow:
  * 1. Check authentication and load shared components
- * 2. Call GET /api/notebook to load the vocabulary list (search, topic_id, status, page, limit)
- * 3. Render vocabulary items
- * 4. Search with debounce → re-fetch with search=<keyword>, reset page to 1
- * 5. Pagination → re-fetch with page=<page>&limit=<limit>, keep filters
- * 6. Action by status:
+ * 2. Call GET /api/topics/user to load the user's topics for the filter
+ * 3. Call GET /api/notebook to load the vocabulary list (search, topic_id, status, page, limit)
+ * 4. Render vocabulary items
+ * 5. Search with debounce → re-fetch with search=<keyword>, reset page to 1
+ * 6. Topic filter → re-fetch with topic_id=<id>, reset page to 1
+ * 7. Pagination → re-fetch with page=<page>&limit=<limit>, keep filters
+ * 8. Action by status:
  *    - learning  → POST /api/learning/mastered { vocabulary_id }  (M4-T3 endpoint)
  *    - mastered  → POST /api/notebook/review/:vocabulary_id        (M6-T3 endpoint)
- * 7. Reload the current list after a successful status change
- *
- * NOTE: GET /api/notebook/topics does NOT exist in the backend.
- * Per M6-T5 scope, no backend is created, so the topic filter is not wired to an API.
+ * 9. Reload the current list after a successful status change
  */
 
 import api from '../../services/api.js';
@@ -38,6 +37,7 @@ const SEARCH_DEBOUNCE_MS = 400;
 
 const notebookSubtitle = document.querySelector('.notebook-subtitle');
 const searchInput = document.querySelector('.notebook-search-input');
+const filterOptions = document.querySelector('.notebook-filter-options');
 const listSection = document.querySelector('.notebook-list-section');
 const listHeader = document.querySelector('.notebook-list-header');
 const listCount = document.querySelector('.notebook-list-count');
@@ -116,6 +116,16 @@ async function loadNotebook() {
 
     const response = await api.get(`/notebook?${params.toString()}`);
     return response.data;
+}
+
+/**
+ * Load the topics that the current user actually has vocabulary for.
+ * GET /api/topics/user
+ * @returns {Promise<Array>} List of topics [{ id, name }]
+ */
+async function loadUserTopics() {
+    const response = await api.get('/topics/user');
+    return response.data || [];
 }
 
 /**
@@ -410,6 +420,36 @@ function renderNotebook(data) {
     }
 }
 
+/**
+ * Render the topic filter chips into the filter container.
+ * Always includes "Tất cả" first, then the user's actual topics.
+ * @param {Array} topics - List of topics [{ id, name }]
+ */
+function renderTopicFilters(topics) {
+    if (!filterOptions) return;
+
+    // Clear existing chips (including any hard-coded ones)
+    filterOptions.innerHTML = '';
+
+    // "Tất cả" chip (no topic_id → clears the filter)
+    const allChip = document.createElement('button');
+    allChip.type = 'button';
+    allChip.className = 'notebook-filter-chip is-active';
+    allChip.textContent = 'Tất cả';
+    allChip.dataset.topicId = '';
+    filterOptions.appendChild(allChip);
+
+    // Render the user's actual topics
+    (topics || []).forEach((topic) => {
+        const chip = document.createElement('button');
+        chip.type = 'button';
+        chip.className = 'notebook-filter-chip';
+        chip.textContent = topic.name;
+        chip.dataset.topicId = String(topic.id);
+        filterOptions.appendChild(chip);
+    });
+}
+
 // ============================================================
 // DATA LOADING
 // ============================================================
@@ -473,6 +513,38 @@ function handlePageChange(page) {
 }
 
 // ============================================================
+// TOPIC FILTER
+// ============================================================
+
+/**
+ * Handle a topic filter chip click (event delegation).
+ * Updates the active chip, sets the topic_id, resets page to 1,
+ * and re-fetches the list. "Tất cả" clears the topic filter.
+ * @param {Event} event - The click event
+ */
+function handleTopicClick(event) {
+    const chip = event.target.closest('.notebook-filter-chip');
+    if (!chip) return;
+
+    // Update active state on all chips
+    const chips = filterOptions ? filterOptions.querySelectorAll('.notebook-filter-chip') : [];
+    chips.forEach((c) => c.classList.remove('is-active'));
+    chip.classList.add('is-active');
+
+    // Parse topic_id (empty string → "Tất cả" → clear filter)
+    const rawTopicId = chip.dataset.topicId;
+    const topicId = rawTopicId ? Number(rawTopicId) : null;
+    const nextTopicId = Number.isInteger(topicId) && topicId > 0 ? topicId : null;
+
+    // Only re-fetch if the filter actually changed
+    if (nextTopicId === currentTopicId) return;
+
+    currentTopicId = nextTopicId;
+    currentPage = 1;
+    fetchAndRender();
+}
+
+// ============================================================
 // ACTIONS (STATUS CHANGE)
 // ============================================================
 
@@ -525,6 +597,10 @@ function setupEventListeners() {
         searchInput.addEventListener('input', handleSearchInput);
     }
 
+    if (filterOptions) {
+        filterOptions.addEventListener('click', handleTopicClick);
+    }
+
     if (listSection) {
         listSection.addEventListener('click', handleActionClick);
     }
@@ -551,7 +627,11 @@ async function initNotebook() {
         // Step 3: Load shared components (header, bottom-nav)
         await loadAllComponents();
 
-        // Step 4: Load the notebook list
+        // Step 4: Load the user's topics for the filter
+        const topics = await loadUserTopics();
+        renderTopicFilters(topics);
+
+        // Step 5: Load the notebook list
         await fetchAndRender();
 
     } catch (error) {
