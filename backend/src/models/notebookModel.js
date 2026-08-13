@@ -106,7 +106,73 @@ const getTotal = async (userId, { search, topicId, status }) => {
     return rows[0].total;
 };
 
+/**
+ * Đưa vocabulary của user từ trạng thái 'mastered' về 'learning' để ôn tập lại.
+ * Chỉ update khi bản ghi đồng thời thỏa:
+ *   - user_id = userId (bảo vệ dữ liệu user, không cho user A sửa từ của user B)
+ *   - vocabulary_id = vocabularyId
+ *   - status = 'mastered' (chỉ từ đã thuộc mới được đưa về luyện tập)
+ *
+ * SET:
+ *   - status = 'learning'
+ *   - next_review_at = NOW()
+ *
+ * Không thay đổi review_count, last_reviewed_at hay các field khác.
+ *
+ * @param {number} userId - ID người dùng
+ * @param {number} vocabularyId - ID từ vựng
+ * @returns {Promise<object>} Kết quả UPDATE (chứa affectedRows)
+ */
+const reviewVocabulary = async (userId, vocabularyId) => {
+    const [result] = await pool.execute(
+        `UPDATE user_vocabularies
+         SET
+            status = 'learning',
+            next_review_at = NOW()
+         WHERE
+            user_id = ?
+            AND vocabulary_id = ?
+            AND status = 'mastered'`,
+        [userId, vocabularyId]
+    );
+    return result;
+};
+
+/**
+ * Kiểm tra vocabulary có tồn tại trong bảng vocabularies hay không.
+ * Dùng để phân biệt lỗi "không tồn tại" khi UPDATE reviewVocabulary không ảnh hưởng row nào.
+ *
+ * @param {number} vocabularyId - ID từ vựng
+ * @returns {Promise<object|null>} Bản ghi vocabulary hoặc null
+ */
+const findVocabularyById = async (vocabularyId) => {
+    const [rows] = await pool.execute(
+        "SELECT id FROM vocabularies WHERE id = ?",
+        [vocabularyId]
+    );
+    return rows[0] || null;
+};
+
+/**
+ * Kiểm tra bản ghi user_vocabularies của user theo vocabulary_id.
+ * Dùng để phân biệt lỗi "không thuộc user" khi UPDATE reviewVocabulary không ảnh hưởng row nào.
+ *
+ * @param {number} userId - ID người dùng
+ * @param {number} vocabularyId - ID từ vựng
+ * @returns {Promise<object|null>} Bản ghi user_vocabularies hoặc null
+ */
+const findUserVocabulary = async (userId, vocabularyId) => {
+    const [rows] = await pool.execute(
+        "SELECT id, status FROM user_vocabularies WHERE user_id = ? AND vocabulary_id = ?",
+        [userId, vocabularyId]
+    );
+    return rows[0] || null;
+};
+
 module.exports = {
     getAll,
-    getTotal
+    getTotal,
+    reviewVocabulary,
+    findVocabularyById,
+    findUserVocabulary
 };

@@ -8,4 +8,8 @@ const authMiddleware = require("../middleware/authMiddleware");
 // Query params: search, topic_id, status, page, limit
 router.get("/", authMiddleware, notebookController.getNotebook);
 
+// POST đưa từ đã thuộc (mastered) về luyện tập (learning) (yêu cầu đăng nhập)
+// Params: vocabulary_id
+router.post("/review/:vocabulary_id", authMiddleware, notebookController.reviewVocabulary);
+
 module.exports = router;
