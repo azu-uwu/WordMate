@@ -2314,7 +2314,7 @@ Không.
 
 ---
 
-## Task M6-T6 (Backend)
+<!-- ## Task M6-T6 (Backend)
 
 ### Thông tin
 
@@ -2406,7 +2406,7 @@ Cập nhật Dashboard frontend: hiển thị streak từ API.
 
 - `frontend/src/js/pages/dashboard.js`
 
----
+--- -->
 
 # Milestone 7: AI Assistant
 

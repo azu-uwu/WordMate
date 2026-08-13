@@ -25,6 +25,9 @@ const userVocabularyRoutes = vocabularyRoutes.userVocabularyRouter;
 // quiz
 const quizRoutes = require("./routes/quizRoutes");
 
+// notebook
+const notebookRoutes = require("./routes/notebookRoutes");
+
 const app = express();
 
 app.use(cors());
@@ -79,6 +82,9 @@ app.use("/api/user-vocabularies", userVocabularyRoutes);
 
 // quiz
 app.use("/api/quiz", quizRoutes);
+
+// notebook
+app.use("/api/notebook", notebookRoutes);
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, async () => {
