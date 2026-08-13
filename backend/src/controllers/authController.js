@@ -135,6 +135,9 @@ const login = async (req, res) => {
             });
         }
 
+        // Kiểm tra & reset streak nếu bỏ lỡ > 1 ngày → lấy streak đúng nhất
+        const streak = await User.checkAndResetStreak(user.id);
+
         // Generate JWT token (HS256, 24h)
         const token = jwt.sign(
             { id: user.id, email: user.email, role: user.role },
@@ -152,7 +155,7 @@ const login = async (req, res) => {
                     email: user.email,
                     role: user.role,
                     roadmap_id: user.roadmap_id,
-                    streak: user.streak
+                    streak
                 }
             }
         });
