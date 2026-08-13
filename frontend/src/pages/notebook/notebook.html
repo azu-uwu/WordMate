@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sổ tay từ vựng | WordMate</title>
+    <link rel="icon" type="image/svg+xml" href="../../../public/image/wordmate-logo.svg">
+
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Google Fonts: Inter (hỗ trợ tiếng Việt đầy đủ) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:ital,wght@0,400;0,500;0,600;0,700;0,800&display=swap" rel="stylesheet">
+
+    <!-- Font Awesome 6 (Free) -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="../../css/components/header.css">
+    <link rel="stylesheet" href="../../css/pages/notebook.css">
+</head>
+
+<body>
+    <!-- ===== HEADER COMPONENT PLACEHOLDER ===== -->
+    <!-- Header sẽ được load từ component dùng chung -->
+    <div id="header">
+        <!-- Header component sẽ được inject vào đây -->
+    </div>
+
+    <!-- ===== MAIN CONTENT ===== -->
+    <main class="main-content">
+
+        <!-- ===== NOTEBOOK CONTAINER ===== -->
+        <div class="notebook-container">
+
+            <!-- ===== NOTEBOOK HEADER ===== -->
+            <div class="notebook-header">
+                <h1 class="notebook-title">Sổ tay</h1>
+                <p class="notebook-subtitle">120 từ</p>
+            </div>
+
+            <!-- ===== SEARCH BAR ===== -->
+            <section class="notebook-search-section" aria-label="Tìm kiếm từ vựng">
+                <div class="notebook-search-wrapper">
+                    <i class="fa-solid fa-magnifying-glass notebook-search-icon" aria-hidden="true"></i>
+                    <input type="text" class="notebook-search-input" placeholder="Tìm kiếm từ vựng..." aria-label="Tìm kiếm từ vựng">
+                </div>
+            </section>
+
+            <!-- ===== TOPIC FILTER ===== -->
+            <section class="notebook-filter-section" aria-label="Lọc theo chủ đề">
+                <div class="notebook-filter-header">
+                    <span class="notebook-filter-label">Chủ đề</span>
+                </div>
+                <div class="notebook-filter-options">
+                    <button type="button" class="notebook-filter-chip is-active">Tất cả</button>
+                    <button type="button" class="notebook-filter-chip">Greetings</button>
+                    <button type="button" class="notebook-filter-chip">Family</button>
+                    <button type="button" class="notebook-filter-chip">Daily Activities</button>
+                    <button type="button" class="notebook-filter-chip">Business Meeting</button>
+                    <button type="button" class="notebook-filter-chip">Travel</button>
+                    <button type="button" class="notebook-filter-chip">Office Communication</button>
+                </div>
+            </section>
+
+            <!-- ===== VOCABULARY LIST ===== -->
+            <section class="notebook-list-section" aria-label="Danh sách từ vựng">
+                <div class="notebook-list-header">
+                    <h2 class="notebook-list-title">Từ vựng của bạn</h2>
+                    <span class="notebook-list-count">120 từ</span>
+                </div>
+
+                <!-- ===== VOCABULARY ITEM — STATUS: learning ===== -->
+                <article class="vocab-item" data-status="learning">
+                    <div class="vocab-item-main">
+                        <div class="vocab-item-info">
+                            <h3 class="vocab-word">hello</h3>
+                            <p class="vocab-pronunciation">/həˈloʊ/</p>
+                            <div class="vocab-meta">
+                                <span class="vocab-part-of-speech">other</span>
+                                <span class="vocab-status-badge vocab-status-learning">Đang học</span>
+                            </div>
+                            <p class="vocab-meaning">Xin chào</p>
+                        </div>
+                        <div class="vocab-item-actions">
+                            <button type="button" class="btn-notebook btn-notebook-primary">
+                                <i class="fa-solid fa-check" aria-hidden="true"></i>
+                                <span>Đánh dấu đã thuộc</span>
+                            </button>
+                        </div>
+                    </div>
+                </article>
+
+                <!-- ===== VOCABULARY ITEM — STATUS: learning ===== -->
+                <article class="vocab-item" data-status="learning">
+                    <div class="vocab-item-main">
+                        <div class="vocab-item-info">
+                            <h3 class="vocab-word">good morning</h3>
+                            <p class="vocab-pronunciation">/ɡʊd ˈmɔːrnɪŋ/</p>
+                            <div class="vocab-meta">
+                                <span class="vocab-part-of-speech">other</span>
+                                <span class="vocab-status-badge vocab-status-learning">Đang học</span>
+                            </div>
+                            <p class="vocab-meaning">Chào buổi sáng</p>
+                        </div>
+                        <div class="vocab-item-actions">
+                            <button type="button" class="btn-notebook btn-notebook-primary">
+                                <i class="fa-solid fa-check" aria-hidden="true"></i>
+                                <span>Đánh dấu đã thuộc</span>
+                            </button>
+                        </div>
+                    </div>
+                </article>
+
+                <!-- ===== VOCABULARY ITEM — STATUS: mastered ===== -->
+                <article class="vocab-item" data-status="mastered">
+                    <div class="vocab-item-main">
+                        <div class="vocab-item-info">
+                            <h3 class="vocab-word">father</h3>
+                            <p class="vocab-pronunciation">/ˈfɑːðər/</p>
+                            <div class="vocab-meta">
+                                <span class="vocab-part-of-speech">noun</span>
+                                <span class="vocab-status-badge vocab-status-mastered">Đã thuộc</span>
+                            </div>
+                            <p class="vocab-meaning">Cha</p>
+                        </div>
+                        <div class="vocab-item-actions">
+                            <button type="button" class="btn-notebook btn-notebook-secondary">
+                                <i class="fa-solid fa-rotate-left" aria-hidden="true"></i>
+                                <span>Đưa về luyện tập</span>
+                            </button>
+                        </div>
+                    </div>
+                </article>
+
+                <!-- ===== VOCABULARY ITEM — STATUS: mastered ===== -->
+                <article class="vocab-item" data-status="mastered">
+                    <div class="vocab-item-main">
+                        <div class="vocab-item-info">
+                            <h3 class="vocab-word">agenda</h3>
+                            <p class="vocab-pronunciation">/əˈdʒendə/</p>
+                            <div class="vocab-meta">
+                                <span class="vocab-part-of-speech">noun</span>
+                                <span class="vocab-status-badge vocab-status-mastered">Đã thuộc</span>
+                            </div>
+                            <p class="vocab-meaning">Chương trình nghị sự</p>
+                        </div>
+                        <div class="vocab-item-actions">
+                            <button type="button" class="btn-notebook btn-notebook-secondary">
+                                <i class="fa-solid fa-rotate-left" aria-hidden="true"></i>
+                                <span>Đưa về luyện tập</span>
+                            </button>
+                        </div>
+                    </div>
+                </article>
+
+                <!-- ===== VOCABULARY ITEM — STATUS: learning ===== -->
+                <article class="vocab-item" data-status="learning">
+                    <div class="vocab-item-main">
+                        <div class="vocab-item-info">
+                            <h3 class="vocab-word">passport</h3>
+                            <p class="vocab-pronunciation">/ˈpæspɔːrt/</p>
+                            <div class="vocab-meta">
+                                <span class="vocab-part-of-speech">noun</span>
+                                <span class="vocab-status-badge vocab-status-learning">Đang học</span>
+                            </div>
+                            <p class="vocab-meaning">Hộ chiếu</p>
+                        </div>
+                        <div class="vocab-item-actions">
+                            <button type="button" class="btn-notebook btn-notebook-primary">
+                                <i class="fa-solid fa-check" aria-hidden="true"></i>
+                                <span>Đánh dấu đã thuộc</span>
+                            </button>
+                        </div>
+                    </div>
+                </article>
+
+            </section>
+            <!-- ===== END VOCABULARY LIST ===== -->
+
+        </div>
+        <!-- ===== END NOTEBOOK CONTAINER ===== -->
+
+    </main>
+    <!-- ===== END MAIN CONTENT ===== -->
+
+    <!-- ===== AI CHAT PLACEHOLDER ===== -->
+    <!-- AI Chat Component sẽ được load từ component dùng chung -->
+    <div id="ai-chat-placeholder" class="ai-chat-placeholder">
+        <!-- AI Chat component sẽ được inject vào đây -->
+    </div>
+
+    <!-- ===== BOTTOM NAVIGATION PLACEHOLDER ===== -->
+    <!-- Bottom Navigation sẽ được load từ component dùng chung -->
+    <div id="bottom-nav">
+        <!-- Bottom Navigation component sẽ được inject vào đây -->
+    </div>
+
+</body>
+
+</html>
