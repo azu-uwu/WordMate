@@ -2,6 +2,7 @@ const Quiz = require("../models/quizModel");
 const UserVocabulary = require("../models/userVocabularyModel");
 const Vocabulary = require("../models/vocabularyModel");
 const srsService = require("../services/srsService");
+const { updateStudyStreak } = require("../models/userModel");
 
 const MAX_QUESTIONS = 20;
 
@@ -525,6 +526,10 @@ const completeQuiz = async (req, res) => {
             correctAnswers,
             duration
         });
+
+        // Cập nhật streak sau khi Quiz hoàn thành thành công
+        const now = new Date();
+        const streak = await updateStudyStreak(userId, now);
 
         // 9. Trả về kết quả Quiz để Frontend hiển thị
         return res.status(200).json({
