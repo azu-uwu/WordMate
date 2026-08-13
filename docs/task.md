@@ -2300,8 +2300,8 @@ Tạo JavaScript cho trang Sổ tay.
 
 1. Tạo `frontend/src/js/pages/notebook.js`: gọi `GET /api/notebook`, render danh sách, search debounce, lọc theo topic, cập nhật phân trang.
 2. Gọi `GET /api/notebook/topics` để hiển thị danh sách topic khi người dùng mở bộ lọc.
-3. Với từ `learning`, gọi `POST /api/notebook/master/:vocabulary_id` khi người dùng bấm **Đánh dấu đã thuộc**. review
-4. Với từ `mastered`, gọi `POST /api/notebook/review/:vocabulary_id` khi người dùng bấm **Đưa về luyện tập**.    api đánh dấu đsx thuộc ở flashcard
+3. Với từ `learning`, gọi `POST /api/notebook/master/:vocabulary_id` khi người dùng bấm **Đánh dấu đã thuộc**.
+4. Với từ `mastered`, gọi `POST /api/notebook/review/:vocabulary_id` khi người dùng bấm **Đưa về luyện tập**.  
 5. Sau khi cập nhật status thành công, cập nhật lại danh sách hoặc item tương ứng.
 
 ### File cần tạo
