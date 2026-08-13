@@ -32,6 +32,31 @@ const getByRoadmap = async (req, res) => {
     }
 };
 
+/**
+ * Lấy danh sách Topic mà user hiện tại thực sự có vocabulary (learning/mastered)
+ * GET /api/topics/user
+ */
+const getUserTopics = async (req, res) => {
+    try {
+        const userId = req.user.id;
+
+        // Gọi Model để lấy dữ liệu
+        const topics = await Topic.getUserTopics(userId);
+
+        return res.status(200).json({
+            success: true,
+            data: topics
+        });
+    } catch (err) {
+        console.error(err);
+        return res.status(500).json({
+            success: false,
+            message: "Lỗi máy chủ"
+        });
+    }
+};
+
 module.exports = {
-    getByRoadmap
+    getByRoadmap,
+    getUserTopics
 };

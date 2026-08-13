@@ -12,6 +12,29 @@ const getByRoadmapId = async (roadmapId) => {
     return rows;
 };
 
+/**
+ * Lấy danh sách Topic mà user thực sự có vocabulary (learning/mastered)
+ * JOIN qua bảng vocabularies vì user_vocabularies không có topic_id
+ */
+const getUserTopics = async (userId) => {
+    const [rows] = await pool.execute(
+        `SELECT DISTINCT
+            t.id,
+            t.name
+        FROM user_vocabularies uv
+        INNER JOIN vocabularies v
+            ON v.id = uv.vocabulary_id
+        INNER JOIN topics t
+            ON t.id = v.topic_id
+        WHERE uv.user_id = ?
+          AND uv.status IN ('learning', 'mastered')
+        ORDER BY t.name ASC`,
+        [userId]
+    );
+    return rows;
+};
+
 module.exports = {
     getByRoadmapId,
+    getUserTopics,
 };
