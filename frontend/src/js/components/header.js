@@ -1,5 +1,5 @@
 // Get DOM elements
-let avatarButton, dropdownMenu, dropdownUserName, dropdownUserEmail, headerAvatarImg;
+let avatarButton, dropdownMenu, dropdownUserName, dropdownUserEmail, headerAvatarImg, streakCount;
 
 function getDOMElements() {
     avatarButton = document.getElementById("avatar-button");
@@ -7,6 +7,7 @@ function getDOMElements() {
     dropdownUserName = document.getElementById("dropdown-user-name");
     dropdownUserEmail = document.getElementById("dropdown-user-email");
     headerAvatarImg = document.getElementById("header-avatar-img");
+    streakCount = document.querySelector(".streak-count");
 }
 
 // ============================================================
@@ -58,6 +59,32 @@ function loadUserData() {
 }
 
 // ============================================================
+// LOAD STREAK FROM BACKEND
+// ============================================================
+
+/**
+ * Load the user's current streak from GET /api/profile.
+ * Updates the streak count in the header.
+ * Frontend only reads and displays the value - no streak calculation.
+ */
+async function loadStreak() {
+    try {
+        const apiModule = await import('../../services/api.js');
+        const api = apiModule.default;
+        const response = await api.get('/profile');
+        if (response.success && streakCount) {
+            streakCount.textContent = response.data.streak != null ? response.data.streak : 0;
+        }
+    } catch (error) {
+        console.error('[Header] Failed to load streak:', error);
+    }
+}
+
+// Expose refresh function so pages can update the header streak
+// after backend updates (e.g., after writing submit)
+window.refreshHeaderStreak = loadStreak;
+
+// ============================================================
 // INITIALIZE HEADER
 // ============================================================
 
@@ -67,6 +94,9 @@ function initHeader() {
     
     // Load user data
     loadUserData();
+    
+    // Load streak from backend
+    loadStreak();
     
     // Add dropdown toggle event listener
     if (avatarButton && dropdownMenu) {
