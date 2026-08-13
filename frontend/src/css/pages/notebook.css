@@ -59,7 +59,7 @@ body {
     max-width: 1400px;
     min-width: 500px;
     margin: 0 auto;         /* chỉ căn giữa theo chiều ngang */
-    padding: 0 1rem;         /* padding ngang cho màn hình nhỏ */
+    padding: 1rem 1rem;         /* padding ngang cho màn hình nhỏ */
     animation: fadeIn 0.5s ease forwards;
     padding-bottom: 6rem;
     min-height: 100vh;
@@ -542,7 +542,7 @@ body {
 /* === Laptop / Small Desktop (≤ 1200px) === */
 @media (max-width: 1200px) {
     .notebook-container {
-        padding: 1.75rem 1.25rem;
+        padding: 1.75rem 1.25rem 6rem;
     }
 
     .notebook-title {
@@ -553,7 +553,7 @@ body {
 /* === Tablet (≤ 768px) === */
 @media (max-width: 768px) {
     .notebook-container {
-        padding: 1.5rem 1rem;
+        padding: 1.5rem 1rem  6rem;
     }
 
     .notebook-header {
@@ -594,7 +594,7 @@ body {
 /* === Mobile (≤ 480px) === */
 @media (max-width: 480px) {
     .notebook-container {
-        padding: 1rem 0.75rem;
+        padding: 1rem 0.75rem 6rem;
     }
 
     .notebook-header {
@@ -669,6 +669,7 @@ body {
 @media (max-width: 360px) {
     .notebook-container {
         padding: 0.75rem 0.5rem;
+        padding-bottom: 6rem;
     }
 
     .notebook-title {
@@ -706,6 +707,12 @@ body {
         min-height: 44px;
     }
 }
+/* 
+@media (max-width: 768px) {
+    .notebook-pagination {
+        margin-bottom: 6rem;
+    }
+} */
 
 /* ============================================================
       END OF notebook.css

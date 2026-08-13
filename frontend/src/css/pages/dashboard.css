@@ -60,7 +60,7 @@ body {
     max-width: 1400px;
     min-width: 500px;
     margin: 0 auto;         /* chỉ căn giữa theo chiều ngang */
-    padding: 0 1rem;         /* padding ngang cho màn hình nhỏ */
+    padding: 1rem 1rem;         /* padding ngang cho màn hình nhỏ */
     animation: fadeIn 0.5s ease forwards;
     padding-bottom: 5rem;
     min-height: 100vh;
