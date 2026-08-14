@@ -271,3 +271,44 @@ CREATE TABLE quiz_questions (
 ) ENGINE = InnoDB
   DEFAULT CHARSET = utf8mb4
   COLLATE = utf8mb4_unicode_ci;
+
+--   thêm lk với bảng custom
+ALTER TABLE quiz_questions
+ADD COLUMN custom_question_id BIGINT UNSIGNED NULL,
+ADD CONSTRAINT fk_quiz_questions_custom
+    FOREIGN KEY (custom_question_id)
+    REFERENCES quiz_custom_questions(id)
+    ON DELETE SET NULL
+    ON UPDATE CASCADE,
+ADD INDEX idx_quiz_questions_custom_question (custom_question_id);
+
+-- ============================================================
+-- 11. quiz_custom_questions (bổ sung admin có thể thêm câu hỏi custom cho từng từ)
+-- Lưu các câu hỏi tùy chỉnh cho Quiz.
+-- Quan hệ:
+--   vocabularies  1 ---- n quiz_custom_questions
+-- ============================================================
+CREATE TABLE quiz_custom_questions (
+    id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    vocabulary_id BIGINT UNSIGNED NOT NULL,
+    question TEXT NOT NULL,
+    option_a VARCHAR(255) NOT NULL,
+    option_b VARCHAR(255) NOT NULL,
+    option_c VARCHAR(255) NOT NULL,
+    option_d VARCHAR(255) NOT NULL,
+    correct_option ENUM('A', 'B', 'C', 'D') NOT NULL,
+    is_active BOOLEAN NOT NULL DEFAULT TRUE,
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+
+    INDEX idx_quiz_custom_questions_vocabulary_id (vocabulary_id),
+    INDEX idx_quiz_custom_questions_is_active (is_active),
+
+    CONSTRAINT fk_quiz_custom_questions_vocabulary
+        FOREIGN KEY (vocabulary_id)
+        REFERENCES vocabularies(id)
+        ON DELETE CASCADE
+        ON UPDATE CASCADE
+) ENGINE = InnoDB
+  DEFAULT CHARSET = utf8mb4
+  COLLATE = utf8mb4_unicode_ci;
