@@ -15,4 +15,15 @@ router.post("/roadmaps", adminController.createRoadmap);
 router.put("/roadmaps/:id", adminController.updateRoadmap);
 router.delete("/roadmaps/:id", adminController.deleteRoadmap);
 
+/**
+ * CRUD Topics
+ */
+router.get("/topics", adminController.getAllTopics);
+router.post("/topics", adminController.createTopic);
+router.put("/topics/:id", adminController.updateTopic);
+router.delete("/topics/:id", adminController.deleteTopic);
+
+// Hỗ trợ lọc: GET /topics?roadmap_id=:roadmapId
+// Query params roadmap_id sẽ được truyền qua req.query và sử dụng trong getAllTopics
+
 module.exports = router;

@@ -1,4 +1,6 @@
 const Roadmap = require("../models/roadmapModel");
+const Topic = require("../models/topicModel");
+const pool = require("../../config/db");
 
 /**
  * Lấy danh sách tất cả Roadmap (bao gồm cả is_active = 0) cho Admin
@@ -300,9 +302,269 @@ const deleteRoadmap = async (req, res) => {
     }
 };
 
+/**
+ * Lấy danh sách tất cả Topics (bao gồm cả is_active = 0) cho Admin
+ * GET /api/admin/topics
+ */
+const getAllTopics = async (req, res) => {
+    try {
+        const topics = await Topic.getAllForAdmin();
+        return res.status(200).json({
+            success: true,
+            data: topics
+        });
+    } catch (err) {
+        console.error(err);
+        return res.status(500).json({
+            success: false,
+            message: "Lỗi máy chủ"
+        });
+    }
+};
+
+/**
+ * Tạo Topic mới
+ * POST /api/admin/topics
+ * Body: { roadmap_id, name, description, image, sort_order, is_active }
+ */
+const createTopic = async (req, res) => {
+    try {
+        const { roadmap_id, name, description, image, sort_order, is_active } = req.body;
+
+        // Validate name là chuỗi không rỗng
+        if (name === undefined || name === null || typeof name !== "string" || name.trim() === "") {
+            return res.status(400).json({
+                success: false,
+                message: "Thiếu name"
+            });
+        }
+
+        // Kiểm tra roadmap_id hợp lệ
+        const roadmap = await Roadmap.findById(roadmap_id);
+        if (!roadmap) {
+            return res.status(400).json({
+                success: false,
+                message: "Roadmap không tồn tại"
+            });
+        }
+
+        // Kiểm tra trùng tên Topic trong cùng roadmap
+        const trimmedName = name.trim();
+        const [rows] = await pool.execute(
+            "SELECT id FROM topics WHERE name = ? AND roadmap_id = ? AND is_active = 1",
+            [trimmedName, roadmap_id]
+        );
+        if (rows.length > 0) {
+            return res.status(400).json({
+                success: false,
+                message: "Tên Topic đã tồn tại trong roadmap này"
+            });
+        }
+
+        // Gọi Model để tạo dữ liệu
+        const result = await Topic.create({
+            roadmap_id,
+            name: trimmedName,
+            description: description !== undefined && description !== null ? description : null,
+            image: image !== undefined && image !== null ? image : null,
+            sort_order: sort_order !== undefined ? sort_order : 0,
+            is_active: is_active !== undefined ? (is_active ? 1 : 0) : 1
+        });
+
+        const newTopic = await Topic.findById(result.insertId);
+
+        return res.status(201).json({
+            success: true,
+            message: "Tạo Topic thành công",
+            data: newTopic
+        });
+    } catch (err) {
+        console.error(err);
+        return res.status(500).json({
+            success: false,
+            message: "Lỗi máy chủ"
+        });
+    }
+};
+
+/**
+ * Cập nhật Topic theo id
+ * PUT /api/admin/topics/:id
+ * Body: { roadmap_id, name, description, image, sort_order, is_active }
+ */
+const updateTopic = async (req, res) => {
+    try {
+        const { id } = req.params;
+
+        // Validate id là số nguyên dương
+        const parsedId = Number(id);
+        if (!Number.isInteger(parsedId) || parsedId <= 0) {
+            return res.status(400).json({
+                success: false,
+                message: "Topic ID không hợp lệ"
+            });
+        }
+
+        // Kiểm tra Topic tồn tại
+        const existing = await Topic.findById(parsedId);
+        if (!existing) {
+            return res.status(404).json({
+                success: false,
+                message: "Topic không tồn tại"
+            });
+        }
+
+        const { roadmap_id, name, description, image, sort_order, is_active } = req.body;
+
+        // Kiểm tra roadmap_id hợp lệ nếu được cung cấp
+        if (roadmap_id !== undefined) {
+            const roadmap = await Roadmap.findById(roadmap_id);
+            if (!roadmap) {
+                return res.status(400).json({
+                    success: false,
+                    message: "Roadmap không tồn tại"
+                });
+            }
+        }
+
+        // Kiểm tra trùng tên, loại trừ chính Topic đang cập nhật
+        if (name) {
+            const trimmedName = name.trim();
+            const existingByName = await Topic.findByName(trimmedName, parsedId);
+            if (existingByName) {
+                return res.status(400).json({
+                    success: false,
+                    message: "Tên Topic đã tồn tại"
+                });
+            }
+        }
+
+        // Validate description (nếu có, cho phép null để xóa giá trị)
+        let updatedDescription = existing.description;
+        if (description !== undefined) {
+            if (description !== null && typeof description !== "string") {
+                return res.status(400).json({
+                    success: false,
+                    message: "Description phải là chuỗi hoặc null"
+                });
+            }
+            updatedDescription = description;
+        }
+
+        // Validate image (nếu có, cho phép null để xóa giá trị)
+        let updatedImage = existing.image;
+        if (image !== undefined) {
+            if (image !== null && typeof image !== "string") {
+                return res.status(400).json({
+                    success: false,
+                    message: "Image phải là chuỗi hoặc null"
+                });
+            }
+            updatedImage = image;
+        }
+
+        // Validate sort_order (nếu có)
+        let updatedSortOrder = sort_order !== undefined ? sort_order : existing.sort_order;
+        if (sort_order !== undefined && sort_order !== null && sort_order !== "") {
+            if (!Number.isInteger(sort_order)) {
+                return res.status(400).json({
+                    success: false,
+                    message: "sort_order phải là số nguyên"
+                });
+            }
+            updatedSortOrder = sort_order;
+        }
+
+        // Validate is_active (nếu có)
+        let updatedIsActive = is_active !== undefined ? (is_active ? 1 : 0) : existing.is_active;
+        if (is_active !== undefined && is_active !== null) {
+            if (typeof is_active === "boolean") {
+                updatedIsActive = is_active ? 1 : 0;
+            } else if (is_active === 0 || is_active === 1) {
+                updatedIsActive = is_active;
+            } else {
+                return res.status(400).json({
+                    success: false,
+                    message: "is_active phải là boolean (true/false) hoặc 0/1"
+                });
+            }
+        }
+
+        // Gọi Model để cập nhật
+        await Topic.update(parsedId, {
+            roadmap_id: roadmap_id !== undefined ? roadmap_id : existing.roadmap_id,
+            name: name !== undefined ? name.trim() : existing.name,
+            description: updatedDescription,
+            image: updatedImage,
+            sort_order: updatedSortOrder,
+            is_active: updatedIsActive
+        });
+
+        const updatedTopic = await Topic.findById(parsedId);
+
+        return res.status(200).json({
+            success: true,
+            message: "Cập nhật Topic thành công",
+            data: updatedTopic
+        });
+    } catch (err) {
+        console.error(err);
+        return res.status(500).json({
+            success: false,
+            message: "Lỗi máy chủ"
+        });
+    }
+};
+
+/**
+ * Xóa Topic theo id
+ * DELETE /api/admin/topics/:id
+ */
+const deleteTopic = async (req, res) => {
+    try {
+        const { id } = req.params;
+
+        // Validate id là số nguyên dương
+        const parsedId = Number(id);
+        if (!Number.isInteger(parsedId) || parsedId <= 0) {
+            return res.status(400).json({
+                success: false,
+                message: "Topic ID không hợp lệ"
+            });
+        }
+
+        // Kiểm tra Topic tồn tại
+        const existing = await Topic.findById(parsedId);
+        if (!existing) {
+            return res.status(404).json({
+                success: false,
+                message: "Topic không tồn tại"
+            });
+        }
+
+        // Gọi Model để xóa (soft delete)
+        await Topic.remove(parsedId);
+
+        return res.status(200).json({
+            success: true,
+            message: "Xóa Topic thành công"
+        });
+    } catch (err) {
+        console.error(err);
+        return res.status(500).json({
+            success: false,
+            message: "Lỗi máy chủ"
+        });
+    }
+};
+
 module.exports = {
     getAllRoadmaps,
     createRoadmap,
     updateRoadmap,
-    deleteRoadmap
+    deleteRoadmap,
+    getAllTopics,
+    createTopic,
+    updateTopic,
+    deleteTopic
 };
