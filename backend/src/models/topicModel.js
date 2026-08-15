@@ -141,7 +141,7 @@ const update = async (id, { roadmap_id, name, description, image, sort_order, is
  */
 const remove = async (id) => {
     const [result] = await pool.execute(
-        "UPDATE topics SET is_active = 0 WHERE id = ?",
+        "DELETE FROM topics WHERE id = ?",
         [id]
     );
     return result;
