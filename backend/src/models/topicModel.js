@@ -37,11 +37,20 @@ const getUserTopics = async (userId) => {
 /**
  * Lấy tất cả Topic cho Admin (bao gồm is_active = 0)
  * Sắp xếp theo sort_order ASC, id ASC
+ * Hỗ trợ lọc theo roadmap
  */
-const getAllForAdmin = async () => {
-    const [rows] = await pool.execute(
-        "SELECT * FROM topics ORDER BY sort_order ASC, id ASC"
-    );
+const getAllForAdmin = async (roadmapId = null) => {
+    let sql = "SELECT * FROM topics";
+    const params = [];
+
+    if (roadmapId !== null && roadmapId !== undefined) {
+        sql += " WHERE roadmap_id = ?";
+        params.push(roadmapId);
+    }
+
+    sql += " ORDER BY sort_order ASC, id ASC";
+
+    const [rows] = await pool.execute(sql, params);
     return rows;
 };
 

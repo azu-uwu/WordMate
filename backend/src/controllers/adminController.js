@@ -308,7 +308,23 @@ const deleteRoadmap = async (req, res) => {
  */
 const getAllTopics = async (req, res) => {
     try {
-        const topics = await Topic.getAllForAdmin();
+        const { roadmap_id } = req.query;
+
+        let roadmapId = null;
+
+        if (roadmap_id !== undefined) {
+            roadmapId = Number(roadmap_id);
+
+            if (!Number.isInteger(roadmapId) || roadmapId <= 0) {
+                return res.status(400).json({
+                    success: false,
+                    message: "roadmap_id không hợp lệ"
+                });
+            }
+        }
+
+        const topics = await Topic.getAllForAdmin(roadmapId);
+
         return res.status(200).json({
             success: true,
             data: topics
