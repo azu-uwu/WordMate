@@ -2622,12 +2622,25 @@ Tạo JavaScript cho AI Chat.
 
 ### Mục tiêu
 
-Tạo route GET/POST/PUT/DELETE /api/admin/roadmaps cho CRUD Roadmaps.
+Tạo API Admin để quản lý Roadmaps, bao gồm tạo, xem danh sách, cập nhật và xóa Roadmap.
 
 ### Công việc cần thực hiện
 
-1. Tạo `backend/src/controllers/adminController.js`, `backend/src/routes/adminRoutes.js`.
-2. CRUD đầy đủ: name, description, image, is_active, sort_order.
+1. Tạo `backend/src/controllers/adminController.js`.
+2. Tạo `backend/src/routes/adminRoutes.js`.
+3. Implement các API:
+   - `GET /api/admin/roadmaps`
+   - `POST /api/admin/roadmaps`
+   - `PUT /api/admin/roadmaps/:id`
+   - `DELETE /api/admin/roadmaps/:id`
+4. CRUD các trường:
+   - `name`
+   - `description`
+   - `image`
+   - `is_active`
+   - `sort_order`
+5. Kiểm tra dữ liệu đầu vào và xử lý lỗi phù hợp.
+6. Chỉ cho phép tài khoản có role `admin` sử dụng API.
 
 ### File cần tạo
 
@@ -2636,7 +2649,15 @@ Tạo route GET/POST/PUT/DELETE /api/admin/roadmaps cho CRUD Roadmaps.
 
 ### File cần chỉnh sửa
 
-- `backend/src/server.js` (mount adminRoutes)
+- `backend/src/server.js` — mount `adminRoutes`.
+
+### Acceptance Criteria
+
+- Admin có thể xem danh sách Roadmap.
+- Admin có thể thêm Roadmap.
+- Admin có thể sửa Roadmap.
+- Admin có thể xóa Roadmap.
+- Request từ user không có quyền admin bị từ chối.
 
 ---
 
@@ -2655,10 +2676,36 @@ Tạo route GET/POST/PUT/DELETE /api/admin/roadmaps cho CRUD Roadmaps.
 - **Status**: Todo
 - **Dependencies**: M8-T1, M3-T3
 
+### Mục tiêu
+
+Bổ sung API Admin để quản lý Topics thuộc Roadmap.
+
+### Công việc cần thực hiện
+
+1. Bổ sung các handler vào `adminController.js`.
+2. Bổ sung route vào `adminRoutes.js`.
+3. Implement:
+   - `GET /api/admin/topics`
+   - `POST /api/admin/topics`
+   - `PUT /api/admin/topics/:id`
+   - `DELETE /api/admin/topics/:id`
+4. Hỗ trợ lọc Topic theo `roadmap_id`.
+5. CRUD các trường cần thiết của Topic theo schema hiện tại.
+6. Kiểm tra Roadmap tồn tại trước khi tạo hoặc cập nhật Topic.
+7. Chỉ cho phép tài khoản có role `admin`.
+
 ### File cần chỉnh sửa
 
 - `backend/src/controllers/adminController.js`
 - `backend/src/routes/adminRoutes.js`
+
+### Acceptance Criteria
+
+- Admin có thể xem Topics.
+- Admin có thể lọc Topics theo Roadmap.
+- Admin có thể thêm, sửa và xóa Topic.
+- Topic chỉ được gắn với Roadmap hợp lệ.
+- User không có quyền admin không thể gọi API Admin.
 
 ---
 
@@ -2677,10 +2724,36 @@ Tạo route GET/POST/PUT/DELETE /api/admin/roadmaps cho CRUD Roadmaps.
 - **Status**: Todo
 - **Dependencies**: M8-T1, M3-T5
 
+### Mục tiêu
+
+Tạo API Admin để quản lý Vocabulary theo từng từ.
+
+### Công việc cần thực hiện
+
+1. Bổ sung API:
+   - `GET /api/admin/vocabularies`
+   - `POST /api/admin/vocabularies`
+   - `PUT /api/admin/vocabularies/:id`
+   - `DELETE /api/admin/vocabularies/:id`
+2. Hỗ trợ lọc Vocabulary theo `topic_id`.
+3. CRUD các trường Vocabulary theo schema hiện tại.
+4. Kiểm tra Topic tồn tại trước khi tạo hoặc cập nhật Vocabulary.
+5. Hỗ trợ tham chiếu đường dẫn `image` và `audio` của Vocabulary.
+6. Chỉ cho phép tài khoản có role `admin`.
+
 ### File cần chỉnh sửa
 
 - `backend/src/controllers/adminController.js`
 - `backend/src/routes/adminRoutes.js`
+
+### Acceptance Criteria
+
+- Admin có thể xem danh sách Vocabulary.
+- Admin có thể lọc Vocabulary theo Topic.
+- Admin có thể thêm từng Vocabulary.
+- Admin có thể sửa từng Vocabulary.
+- Admin có thể xóa Vocabulary.
+- API không phá vỡ API Vocabulary dành cho user.
 
 ---
 
@@ -2689,7 +2762,7 @@ Tạo route GET/POST/PUT/DELETE /api/admin/roadmaps cho CRUD Roadmaps.
 ### Thông tin
 
 - **ID**: M8-T4
-- **Tên**: Upload File (multer)
+- **Tên**: Admin - Import Vocabulary hàng loạt
 - **Milestone**: M8
 - **User Story**: US-08
 - **Functional Requirement**: FR-047
@@ -2701,13 +2774,84 @@ Tạo route GET/POST/PUT/DELETE /api/admin/roadmaps cho CRUD Roadmaps.
 
 ### Mục tiêu
 
-Cấu hình multer upload ảnh và audio.
+Cho phép Admin chọn một Topic và upload một file dữ liệu để thêm nhiều Vocabulary cùng lúc vào Topic đã chọn.
 
 ### Công việc cần thực hiện
 
-1. Tạo `backend/src/config/upload.js`: storage disk, file filter (JPG/PNG/MP3), size limit (5MB/2MB).
-2. Lưu vào `frontend/public/uploads/images/` và `frontend/public/uploads/audio/`.
-3. Tên file: `{timestamp}-{random}.{ext}`.
+1. Xác định format file import theo thiết kế/database hiện tại.
+2. Tạo API import Vocabulary hàng loạt.
+3. API nhận `topic_id` và file Vocabulary.
+4. Kiểm tra Topic được chọn có tồn tại.
+5. Đọc và validate từng dòng dữ liệu trong file.
+6. Thêm các Vocabulary hợp lệ vào database với `topic_id` đã chọn.
+7. Xử lý các dòng dữ liệu lỗi và trả về thông tin phù hợp.
+8. Không upload hoặc xử lý image/audio trong file import.
+9. Image và audio vẫn được xử lý riêng cho từng Vocabulary sau khi import.
+
+### File cần tạo
+
+- File utility/service xử lý import nếu cần, theo cấu trúc backend hiện tại.
+
+### File cần chỉnh sửa
+
+- `backend/src/controllers/adminController.js`
+- `backend/src/routes/adminRoutes.js`
+
+### Acceptance Criteria
+
+- Admin có thể chọn một Topic trước khi import.
+- Admin có thể upload một file chứa nhiều Vocabulary.
+- Tất cả Vocabulary hợp lệ trong file được gắn với Topic đã chọn.
+- Topic không tồn tại thì import bị từ chối.
+- Dữ liệu không hợp lệ không được thêm sai vào database.
+- Admin nhận được kết quả import và thông tin các dòng lỗi nếu có.
+- File import không yêu cầu image/audio.
+- Không có chức năng import Topic.
+- Không thay đổi logic học từ của user.
+
+---
+
+## Task M8-T5 (Backend)
+
+### Thông tin
+
+- **ID**: M8-T5
+- **Tên**: Admin - Upload Media
+- **Milestone**: M8
+- **User Story**: US-08
+- **Functional Requirement**: FR-047
+- **Module**: Admin
+- **Priority**: P0
+- **Complexity**: M
+- **Status**: Todo
+- **Dependencies**: M8-T1, M8-T2, M8-T3
+
+### Mục tiêu
+
+Cấu hình và xử lý upload image/audio cho các dữ liệu Admin có trường file tương ứng.
+- Roadmap → upload image
+- Topic → upload image 
+- Vocabulary → upload image
+- Vocabulary → upload audio
+
+### Công việc cần thực hiện
+
+1. Tạo `backend/src/config/upload.js`.
+2. Cấu hình disk storage.
+3. Image:
+   - JPG/PNG.
+   - Giới hạn 5MB.
+   - Lưu vào `frontend/public/uploads/images/`.
+4. Audio:
+   - MP3.
+   - Giới hạn 2MB.
+   - Lưu vào `frontend/public/uploads/audio/`.
+5. Tên file:
+   - `{timestamp}-{random}.{ext}`
+6. Thêm multer middleware vào các route upload phù hợp.
+7. Sau khi upload thành công, lưu đường dẫn file vào entity tương ứng.
+8. Chỉ cho phép Admin upload.
+9. Không xử lý image/audio trong file import Vocabulary hàng loạt.
 
 ### File cần tạo
 
@@ -2715,15 +2859,96 @@ Cấu hình multer upload ảnh và audio.
 
 ### File cần chỉnh sửa
 
-- `backend/src/routes/adminRoutes.js` (thêm multer middleware)
+- `backend/src/controllers/adminController.js`
+- `backend/src/routes/adminRoutes.js`
+
+### Acceptance Criteria
+
+- Admin có thể upload image cho một Roadmap.
+- Admin có thể upload image cho một Topic.
+- Admin có thể upload image cho một Vocabulary.
+- Admin có thể upload audio cho một Vocabulary.
+- File sai định dạng bị từ chối.
+- File vượt quá giới hạn bị từ chối.
+- File được lưu đúng thư mục.
+- Đường dẫn file được lưu đúng vào entity tương ứng.
+- Chỉ Admin mới có quyền upload.
+- Import Vocabulary hàng loạt không xử lý image/audio.
 
 ---
 
-## Task M8-T5 (Frontend)
+## Task M8-T6 (Backend)
 
 ### Thông tin
 
-- **ID**: M8-T5
+- **ID**: M8-T6
+- **Tên**: API Admin - CRUD Custom Questions
+- **Milestone**: M8
+- **User Story**: US-08
+- **Functional Requirement**:
+- **Module**: Admin
+- **Priority**: P0
+- **Complexity**: M
+- **Status**: Todo
+- **Dependencies**: M8-T3, M5-T6
+
+### Mục tiêu
+
+Cho phép Admin tạo và quản lý các câu hỏi Quiz Custom cụ thể cho từng Vocabulary.
+
+### Công việc cần thực hiện
+
+1. Sử dụng bảng `quiz_custom_questions` hiện có.
+2. Implement:
+   - `GET /api/admin/custom-questions`
+   - `GET /api/admin/custom-questions/:id`
+   - `POST /api/admin/custom-questions`
+   - `PUT /api/admin/custom-questions/:id`
+   - `DELETE /api/admin/custom-questions/:id`
+3. Hỗ trợ lọc Custom Question theo `vocabulary_id`.
+4. Khi tạo/cập nhật, kiểm tra Vocabulary tồn tại.
+5. Quản lý các trường:
+   - `vocabulary_id`
+   - `question`
+   - `option_a`
+   - `option_b`
+   - `option_c`
+   - `option_d`
+   - `correct_option`
+   - `is_active`
+6. `correct_option` chỉ nhận `A`, `B`, `C` hoặc `D`.
+7. Không tạo question template.
+8. Mỗi Custom Question là một câu hỏi cụ thể gắn với một Vocabulary.
+9. Không thay đổi logic Auto Question của Quiz.
+
+### File cần tạo
+
+- Không 
+
+### File cần chỉnh sửa
+
+- `backend/src/controllers/adminController.js`
+- `backend/src/routes/adminRoutes.js`
+- `backend/src/models/customQuestionModel.js`
+
+### Acceptance Criteria
+
+- Admin có thể xem Custom Questions.
+- Admin có thể lọc theo Vocabulary.
+- Admin có thể thêm câu hỏi cụ thể cho một Vocabulary.
+- Admin có thể sửa và xóa Custom Question.
+- Admin có thể bật/tắt `is_active`.
+- `correct_option` được validate đúng.
+- Custom Question sau khi active có thể được Quiz sử dụng theo logic Quiz hiện tại.
+- Không ảnh hưởng đến Auto Question.
+
+---
+
+## Task M8-T7 (Frontend)
+
+### Thông tin
+
+- **ID**: M8-T7
 - **Tên**: Trang Admin Dashboard - Layout
 - **Milestone**: M8
 - **User Story**: US-07, US-08
@@ -2736,17 +2961,25 @@ Cấu hình multer upload ảnh và audio.
 
 ### Mục tiêu
 
-Tạo layout Admin Dashboard với Bootstrap, tông màu tối.
+Tạo layout Admin Dashboard với Bootstrap và giao diện tông màu tối.
 
 ### Công việc cần thực hiện
 
-1. Tạo `frontend/src/pages/admin/dashboard.html`: sidebar (Roadmaps, Topics, Vocabularies), main content area. Bootstrap 5, tông màu tối.
-2. Tạo `frontend/src/css/admin.css`.
-3. Tạo `frontend/src/js/pages/admin.js`: kiểm tra role admin, load menu, navigation.
+1. Tạo `frontend/src/pages/admin/admin.html`.
+2. Tạo sidebar/menu gồm:
+   - Roadmaps
+   - Topics
+   - Vocabularies
+   - Custom Questions
+3. Tạo main content area.
+4. Sử dụng Bootstrap 5.
+5. Tạo giao diện tông màu tối.
+6. Kiểm tra role Admin trước khi cho phép truy cập.
+7. Navigation giữa 4 section trong cùng `admin.html` bằng JavaScript.
 
 ### File cần tạo
 
-- `frontend/src/pages/admin/dashboard.html`
+- `frontend/src/pages/admin/admin.html`
 - `frontend/src/css/admin.css`
 - `frontend/src/js/pages/admin.js`
 
@@ -2754,37 +2987,178 @@ Tạo layout Admin Dashboard với Bootstrap, tông màu tối.
 
 Không.
 
+### Acceptance Criteria
+
+- Admin có thể truy cập Admin Dashboard.
+- User không có quyền Admin không thể sử dụng Admin Dashboard.
+- Sidebar hiển thị đầy đủ 4 module.
+- Layout hoạt động tốt trên desktop và kích thước màn hình nhỏ.
+- Không ảnh hưởng các trang user hiện tại.
+
 ---
 
-## Task M8-T6 (Frontend)
+## Task M8-T8 (Frontend)
 
 ### Thông tin
 
-- **ID**: M8-T6
-- **Tên**: Trang Admin Dashboard - CRUD Logic
+- **ID**: M8-T8
+- **Tên**: Admin Dashboard - CRUD & Import Logic
 - **Milestone**: M8
 - **User Story**: US-07, US-08
 - **Functional Requirement**: FR-045, FR-046, FR-047, FR-048, FR-049
 - **Module**: Admin
 - **Priority**: P0
-- **Complexity**: M
+- **Complexity**: L
 - **Status**: Todo
-- **Dependencies**: M8-T5, M8-T1, M8-T2, M8-T3
+- **Dependencies**: M8-T7, M8-T1, M8-T2, M8-T3, M8-T4, M8-T5
 
 ### Mục tiêu
 
-Xây dựng giao diện CRUD cho Roadmaps, Topics, Vocabularies.
+Xây dựng giao diện quản lý Roadmaps, Topics và Vocabularies, bao gồm CRUD, upload image/audio cho Vocabulary và import Vocabulary hàng loạt vào Topic đã chọn.
 
 ### Công việc cần thực hiện
 
-1. Trong admin.js: Section Roadmaps (DataTable, modal form, nút xóa), Section Topics (DataTable filter theo roadmap, modal form, nút xóa), Section Vocabularies (DataTable filter theo topic, modal form với upload file).
-2. Gọi API /api/admin/roadmaps, /api/admin/topics, /api/admin/vocabularies.
-3. Upload file dùng FormData + multer.
+1. **Roadmaps**
+   - Hiển thị danh sách Roadmaps bằng DataTable.
+   - Modal thêm Roadmap.
+   - Modal sửa Roadmap.
+   - Nút xóa Roadmap.
+   - Upload image cho Roadmap.
+   - Quản lý các trường theo API.
+
+2. **Topics**
+   - Hiển thị danh sách Topics bằng DataTable.
+   - Filter Topic theo Roadmap.
+   - Modal thêm Topic.
+   - Modal sửa Topic.
+   - Nút xóa Topic.
+   - Upload image cho Topic.
+   - Quản lý các trường theo API.
+
+3. **Vocabularies**
+   - Hiển thị danh sách Vocabularies bằng DataTable.
+   - Filter Vocabulary theo Topic.
+   - Modal thêm Vocabulary.
+   - Modal sửa Vocabulary.
+   - Nút xóa Vocabulary.
+   - Upload image cho từng Vocabulary.
+   - Upload audio cho từng Vocabulary.
+
+4. **Import Vocabulary hàng loạt**
+   - Cho phép Admin mở form Import Vocabulary.
+   - Admin phải chọn Topic trước khi chọn file import.
+   - Gửi `topic_id` cùng file lên API import.
+   - File import chỉ chứa dữ liệu Vocabulary.
+   - Tất cả Vocabulary hợp lệ trong file được gắn với Topic đã chọn.
+   - Không cho phép import Topic thông qua file.
+   - Không yêu cầu image/audio trong file import.
+   - Hiển thị kết quả import sau khi API trả về.
+   - Nếu API trả về các dòng lỗi, hiển thị rõ các dòng không hợp lệ.
+
+5. **Gọi API**
+   - `/api/admin/roadmaps`
+   - `/api/admin/topics`
+   - `/api/admin/vocabularies`
+   - API import Vocabulary hàng loạt theo route được triển khai ở M8-T4.
+
+6. **Upload**
+   - Upload image/audio cho Vocabulary sử dụng `FormData`.
+   - Import Vocabulary sử dụng `FormData`.
+   - Không gửi image/audio trong request import hàng loạt.
+
+7. **Phân quyền**
+   - Chỉ thực hiện các thao tác Admin khi người dùng có quyền Admin.
+   - Không gọi các API Admin nếu user không có quyền.
 
 ### File cần chỉnh sửa
 
 - `frontend/src/js/pages/admin.js`
-- `frontend/src/pages/admin/dashboard.html`
+- `frontend/src/pages/admin/admin.html`
+
+### Acceptance Criteria
+
+- Admin có thể CRUD Roadmap từ giao diện.
+- Admin có thể CRUD Topic từ giao diện.
+- Admin có thể CRUD Vocabulary từ giao diện.
+- Admin có thể filter Topic theo Roadmap.
+- Admin có thể filter Vocabulary theo Topic.
+- Admin có thể upload image cho từng Roadmap.
+- Admin có thể upload image cho từng Topic.
+- Admin có thể upload image cho từng Vocabulary.
+- Admin có thể upload audio cho từng Vocabulary.
+- Admin có thể chọn Topic trước khi import Vocabulary.
+- Admin có thể upload một file chứa nhiều Vocabulary.
+- Các Vocabulary được import được gắn đúng với Topic đã chọn.
+- Không có chức năng import Topic.
+- File import không yêu cầu image/audio.
+- Admin nhận được kết quả import và thông tin lỗi nếu có.
+- Không gọi API Admin khi user không có quyền.
+- Không ảnh hưởng đến các trang và chức năng của user.
+
+---
+
+## Task M8-T9 (Frontend)
+
+### Thông tin
+
+- **ID**: M8-T9
+- **Tên**: Admin Dashboard - Custom Question Management
+- **Milestone**: M8
+- **User Story**: US-08
+- **Functional Requirement**: -
+- **Module**: Admin
+- **Priority**: P0
+- **Complexity**: M
+- **Status**: Todo
+- **Dependencies**: M8-T7, M8-T6
+
+### Mục tiêu
+
+Xây dựng giao diện Admin để quản lý Custom Questions cụ thể cho từng Vocabulary.
+
+### Công việc cần thực hiện
+
+1. Tạo Section Custom Questions trong `admin.js`.
+2. DataTable hiển thị:
+   - Question.
+   - Vocabulary.
+   - Correct option.
+   - Active status.
+3. Filter theo Vocabulary.
+4. Modal thêm Custom Question.
+5. Modal sửa Custom Question.
+6. Nút xóa Custom Question.
+7. Form gồm:
+   - Vocabulary.
+   - Question.
+   - Option A.
+   - Option B.
+   - Option C.
+   - Option D.
+   - Correct Option.
+   - Active status.
+8. Validate `correct_option` là A/B/C/D.
+9. Gọi API:
+   - `/api/admin/custom-questions`
+   - `/api/admin/custom-questions/:id`
+10. Không có chức năng tạo template câu hỏi.
+
+### File cần chỉnh sửa
+
+- `frontend/src/js/pages/admin.js`
+- `frontend/src/pages/admin/admin.html`
+
+### Acceptance Criteria
+
+- Admin có thể xem Custom Questions.
+- Admin có thể lọc theo Vocabulary.
+- Admin có thể thêm câu hỏi.
+- Admin có thể sửa câu hỏi.
+- Admin có thể xóa câu hỏi.
+- Admin có thể bật/tắt câu hỏi.
+- Correct option được hiển thị rõ A/B/C/D.
+- Custom Question được gắn đúng Vocabulary.
+- Sau khi active, Custom Question có thể được Quiz sử dụng.
 
 ---
 
