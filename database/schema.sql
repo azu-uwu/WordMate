@@ -54,7 +54,8 @@ CREATE TABLE users (
 
     CONSTRAINT fk_users_roadmap
         FOREIGN KEY (roadmap_id) REFERENCES roadmaps (id)
-        ON DELETE RESTRICT ON UPDATE CASCADE
+        ON DELETE SET NULL
+        ON UPDATE CASCADE
 ) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_unicode_ci;
 
 -- ============================================================
