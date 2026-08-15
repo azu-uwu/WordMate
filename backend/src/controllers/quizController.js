@@ -217,6 +217,7 @@ const startQuiz = async (req, res) => {
 
         // 3. Chọn vocabulary cần ôn theo Quiz Generation Rules
         const selectedVocabularies = selectVocabularies(userVocabularies);
+        // console.log("[DEBUG startQuiz] selectedVocabularies.length =", selectedVocabularies.length);
 
         // Không có vocabulary phù hợp -> không tạo quiz_attempt
         if (selectedVocabularies.length === 0) {
@@ -282,19 +283,27 @@ const startQuiz = async (req, res) => {
             });
         }
 
-        // 4c. Shuffle thứ tự các câu hỏi trong Quiz (Auto + Custom trộn lẫn).
+        // 4c. Shuffle thứ tự các câu hỏi trong Quiz (Auto + Custom trộn lẫn),
+        // sau đó giới hạn tổng số câu hỏi cuối cùng tối đa 20 câu.
         // Options của Auto vẫn được shuffle bởi buildOptions(), options của Custom giữ nguyên.
-        const shuffledQuestions = shuffle(generated);
+        const shuffledQuestions = shuffle(generated).slice(0, MAX_QUESTIONS);
 
         // 5. Tạo quiz attempt
         const attemptResult = await Quiz.createAttempt(userId);
         const attemptId = attemptResult.insertId;
+        console.log("[DEBUG startQuiz] attemptId =", attemptId);
+        console.log("[DEBUG startQuiz] shuffledQuestions.length =", shuffledQuestions.length);
 
         // 6. Tạo quiz_questions và chuẩn bị response
         const questions = [];
         let questionOrder = 1;
 
         for (const item of shuffledQuestions) {
+            // console.log("[DEBUG startQuiz] preparing question ->", {
+            //     questionType: item.questionType,
+            //     customQuestionId: item.customQuestion ? item.customQuestion.id : null,
+            //     vocabularyId: item.vocabulary.vocabulary_id
+            // });
             const questionResult = await Quiz.createQuestion({
                 quizAttemptId: attemptId,
                 vocabularyId: item.vocabulary.vocabulary_id,
