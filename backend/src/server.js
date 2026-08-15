@@ -28,6 +28,9 @@ const quizRoutes = require("./routes/quizRoutes");
 // notebook
 const notebookRoutes = require("./routes/notebookRoutes");
 
+// admin
+const adminRoutes = require("./routes/adminRoutes");
+
 const app = express();
 
 app.use(cors());
@@ -85,6 +88,9 @@ app.use("/api/quiz", quizRoutes);
 
 // notebook
 app.use("/api/notebook", notebookRoutes);
+
+// admin
+app.use("/api/admin", adminRoutes);
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, async () => {
