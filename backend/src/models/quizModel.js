@@ -13,12 +13,13 @@ const createAttempt = async (userId) => {
 
 /**
  * Tạo mới một câu hỏi thuộc quiz attempt
+ * customQuestionId: ID của quiz_custom_questions nếu là câu hỏi Custom, ngược lại null
  */
-const createQuestion = async ({ quizAttemptId, vocabularyId, questionType, questionOrder }) => {
+const createQuestion = async ({ quizAttemptId, vocabularyId, questionType, questionOrder, customQuestionId = null }) => {
     const [result] = await pool.execute(
-        `INSERT INTO quiz_questions (quiz_attempt_id, vocabulary_id, question_type, question_order)
-         VALUES (?, ?, ?, ?)`,
-        [quizAttemptId, vocabularyId, questionType, questionOrder]
+        `INSERT INTO quiz_questions (quiz_attempt_id, vocabulary_id, question_type, question_order, custom_question_id)
+         VALUES (?, ?, ?, ?, ?)`,
+        [quizAttemptId, vocabularyId, questionType, questionOrder, customQuestionId]
     );
     return result;
 };
@@ -36,12 +37,13 @@ const getQuestionsByAttemptId = async (attemptId) => {
 
 /**
  * Tạo mới một câu trả lời của người dùng trong quiz attempt
+ * questionId: ID của quiz_questions tương ứng (để phân biệt Auto và Custom cùng vocabulary)
  */
-const createAnswer = async ({ quizAttemptId, vocabularyId, userAnswer, correctAnswer, isCorrect }) => {
+const createAnswer = async ({ quizAttemptId, questionId, vocabularyId, userAnswer, correctAnswer, isCorrect }) => {
     const [result] = await pool.execute(
-        `INSERT INTO quiz_answers (quiz_attempt_id, vocabulary_id, user_answer, correct_answer, is_correct)
-         VALUES (?, ?, ?, ?, ?)`,
-        [quizAttemptId, vocabularyId, userAnswer, correctAnswer, isCorrect]
+        `INSERT INTO quiz_answers (quiz_attempt_id, question_id, vocabulary_id, user_answer, correct_answer, is_correct)
+         VALUES (?, ?, ?, ?, ?, ?)`,
+        [quizAttemptId, questionId, vocabularyId, userAnswer, correctAnswer, isCorrect]
     );
     return result;
 };

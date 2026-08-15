@@ -282,6 +282,25 @@ ADD CONSTRAINT fk_quiz_questions_custom
     ON UPDATE CASCADE,
 ADD INDEX idx_quiz_questions_custom_question (custom_question_id);
 
+--   thêm type CUSTOM cho câu hỏi tùy chỉnh
+ALTER TABLE quiz_questions
+MODIFY COLUMN question_type ENUM(
+    'WORD_TO_MEANING',
+    'MEANING_TO_WORD',
+    'FILL_IN_BLANK',
+    'CUSTOM'
+) NOT NULL;
+
+--   thêm lk với quiz_questions để phân biệt câu hỏi đã trả lời (Auto/Custom cùng vocabulary)
+ALTER TABLE quiz_answers
+ADD COLUMN question_id BIGINT UNSIGNED NULL,
+ADD CONSTRAINT fk_quiz_answers_question
+    FOREIGN KEY (question_id)
+    REFERENCES quiz_questions(id)
+    ON DELETE SET NULL
+    ON UPDATE CASCADE,
+ADD INDEX idx_quiz_answers_question_id (question_id);
+
 -- ============================================================
 -- 11. quiz_custom_questions (bổ sung admin có thể thêm câu hỏi custom cho từng từ)
 -- Lưu các câu hỏi tùy chỉnh cho Quiz.

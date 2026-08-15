@@ -1,6 +1,7 @@
 const Quiz = require("../models/quizModel");
 const UserVocabulary = require("../models/userVocabularyModel");
 const Vocabulary = require("../models/vocabularyModel");
+const CustomQuestion = require("../models/customQuestionModel");
 const srsService = require("../services/srsService");
 const { updateStudyStreak } = require("../models/userModel");
 
@@ -163,6 +164,34 @@ function buildOptions(vocabulary, questionType, pool) {
 }
 
 /**
+ * Lấy 4 lựa chọn của Custom Question theo thứ tự CỐ ĐỊNH:
+ * A = option_a, B = option_b, C = option_c, D = option_d.
+ * KHÔNG shuffle options của Custom Question.
+ */
+function buildCustomOptions(customQuestion) {
+    return [
+        customQuestion.option_a,
+        customQuestion.option_b,
+        customQuestion.option_c,
+        customQuestion.option_d
+    ];
+}
+
+/**
+ * Lấy đáp án đúng của Custom Question theo correct_option.
+ * correct_option = 'C' luôn có nghĩa là option_c.
+ */
+function getCustomCorrectAnswer(customQuestion) {
+    const optionMap = {
+        A: customQuestion.option_a,
+        B: customQuestion.option_b,
+        C: customQuestion.option_c,
+        D: customQuestion.option_d
+    };
+    return optionMap[customQuestion.correct_option];
+}
+
+/**
  * API Bắt đầu Quiz
  * POST /api/quiz/start
  */
@@ -200,7 +229,7 @@ const startQuiz = async (req, res) => {
             });
         }
 
-        // 4. Sinh câu hỏi + 4 lựa chọn cho từng vocabulary
+        // 4. Sinh câu hỏi Auto + lựa chọn cho từng vocabulary (giữ nguyên logic hiện tại)
         const generated = [];
         for (const vocabulary of selectedVocabularies) {
             const questionType = pickQuestionType(vocabulary);
@@ -216,6 +245,32 @@ const startQuiz = async (req, res) => {
             });
         }
 
+        // 4b. Lấy tất cả Custom Question active của các vocabulary đã chọn.
+        // Mỗi vocabulary có Custom Question active sẽ có thêm 1 câu hỏi Custom độc lập
+        // bên cạnh câu hỏi Auto. KHÔNG loại bỏ duplicate vocabulary giữa Auto và Custom.
+        const selectedVocabularyIds = selectedVocabularies.map(
+            (v) => v.vocabulary_id
+        );
+        const customQuestions = await CustomQuestion.getActiveByVocabularyIds(
+            selectedVocabularyIds
+        );
+
+        // Custom Question KHÔNG dùng buildOptions(), KHÔNG shuffle options.
+        // Thứ tự luôn cố định: A = option_a, B = option_b, C = option_c, D = option_d.
+        for (const customQuestion of customQuestions) {
+            const vocabulary = selectedVocabularies.find(
+                (v) => v.vocabulary_id === customQuestion.vocabulary_id
+            );
+            if (!vocabulary) continue;
+
+            generated.push({
+                vocabulary,
+                questionType: "CUSTOM",
+                customQuestion,
+                options: buildCustomOptions(customQuestion)
+            });
+        }
+
         // Không tạo được câu hỏi nào -> không tạo quiz_attempt
         if (generated.length === 0) {
             return res.status(200).json({
@@ -227,6 +282,10 @@ const startQuiz = async (req, res) => {
             });
         }
 
+        // 4c. Shuffle thứ tự các câu hỏi trong Quiz (Auto + Custom trộn lẫn).
+        // Options của Auto vẫn được shuffle bởi buildOptions(), options của Custom giữ nguyên.
+        const shuffledQuestions = shuffle(generated);
+
         // 5. Tạo quiz attempt
         const attemptResult = await Quiz.createAttempt(userId);
         const attemptId = attemptResult.insertId;
@@ -235,19 +294,22 @@ const startQuiz = async (req, res) => {
         const questions = [];
         let questionOrder = 1;
 
-        for (const item of generated) {
+        for (const item of shuffledQuestions) {
             const questionResult = await Quiz.createQuestion({
                 quizAttemptId: attemptId,
                 vocabularyId: item.vocabulary.vocabulary_id,
                 questionType: item.questionType,
-                questionOrder
+                questionOrder,
+                customQuestionId: item.customQuestion ? item.customQuestion.id : null
             });
 
             questions.push({
                 id: questionResult.insertId,
                 vocabulary_id: item.vocabulary.vocabulary_id,
                 question_type: item.questionType,
-                question: buildQuestionText(item.vocabulary, item.questionType),
+                question: item.questionType === "CUSTOM"
+                    ? item.customQuestion.question
+                    : buildQuestionText(item.vocabulary, item.questionType),
                 options: item.options
             });
 
@@ -349,11 +411,21 @@ const answerQuestion = async (req, res) => {
             });
         }
 
-        // 5. Kiểm tra câu hỏi đã được trả lời trước đó chưa
+        // 5. Kiểm tra câu hỏi đã được trả lời trước đó chưa.
+        // Phân biệt theo question_id (không theo vocabulary_id) vì cùng một vocabulary
+        // có thể xuất hiện 2 lần: 1 Auto Question + 1 Custom Question (2 câu hỏi độc lập).
+        // Câu trả lời cũ (chưa có question_id — NULL hoặc column chưa tồn tại/undefined)
+        // vẫn kiểm tra theo vocabulary_id cho tương thích.
         const answers = await Quiz.getAnswersByAttemptId(attemptId);
-        const alreadyAnswered = answers.some(
-            (a) => a.vocabulary_id === question.vocabulary_id
-        );
+        const alreadyAnswered = answers.some((a) => {
+            const isLegacyAnswer =
+                a.question_id === null || a.question_id === undefined;
+            return (
+                (isLegacyAnswer &&
+                    a.vocabulary_id === question.vocabulary_id) ||
+                (!isLegacyAnswer && a.question_id === question.id)
+            );
+        });
         if (alreadyAnswered) {
             return res.status(409).json({
                 success: false,
@@ -361,7 +433,7 @@ const answerQuestion = async (req, res) => {
             });
         }
 
-        // 6. Lấy vocabulary tương ứng
+        // 6. Lấy vocabulary tương ứng (cần cho cả Auto và Custom để cập nhật SRS)
         const vocabulary = await Vocabulary.findById(question.vocabulary_id);
         if (!vocabulary) {
             return res.status(404).json({
@@ -371,17 +443,57 @@ const answerQuestion = async (req, res) => {
         }
 
         // 7. Xác định đáp án đúng dựa trên question_type
-        const correctAnswer = getCorrectAnswerValue(vocabulary, question.question_type);
+        let correctAnswer;
+        let isCorrect = false;
 
-        // 8. So sánh userAnswer với đáp án đúng
-        // Bỏ khoảng trắng đầu/cuối, không phân biệt hoa thường (theo convention submitWriting)
-        const normalizedUserAnswer = String(userAnswer).trim().toLowerCase();
-        const normalizedCorrectAnswer = String(correctAnswer).trim().toLowerCase();
-        const isCorrect = normalizedUserAnswer === normalizedCorrectAnswer;
+        if (question.question_type === "CUSTOM") {
+            // Custom Question: đáp án đúng là option tương ứng với correct_option.
+            // correct_option = 'C' luôn có nghĩa là option_c (không shuffle).
+            if (!question.custom_question_id) {
+                return res.status(400).json({
+                    success: false,
+                    message: "Câu hỏi Custom không hợp lệ"
+                });
+            }
+            const customQuestion = await CustomQuestion.findById(
+                question.custom_question_id
+            );
+            if (!customQuestion) {
+                return res.status(404).json({
+                    success: false,
+                    message: "Câu hỏi Custom không tồn tại"
+                });
+            }
+            correctAnswer = getCustomCorrectAnswer(customQuestion);
 
-        // 9. Lưu câu trả lời vào quiz_answers
+            // 8. So sánh userAnswer với đáp án đúng.
+            // Hỗ trợ cả 2 dạng: userAnswer là giá trị option (ví dụ 'Three')
+            // hoặc userAnswer là ký tự option (ví dụ 'C').
+            const normalizedUserAnswer = String(userAnswer).trim().toLowerCase();
+            const normalizedCorrectOption = String(
+                customQuestion.correct_option
+            ).trim().toLowerCase();
+            const normalizedCorrectAnswer = String(correctAnswer)
+                .trim()
+                .toLowerCase();
+
+            isCorrect =
+                normalizedUserAnswer === normalizedCorrectOption ||
+                normalizedUserAnswer === normalizedCorrectAnswer;
+        } else {
+            correctAnswer = getCorrectAnswerValue(vocabulary, question.question_type);
+
+            // 8. So sánh userAnswer với đáp án đúng (logic Auto giữ nguyên)
+            const normalizedUserAnswer = String(userAnswer).trim().toLowerCase();
+            const normalizedCorrectAnswer = String(correctAnswer).trim().toLowerCase();
+            isCorrect = normalizedUserAnswer === normalizedCorrectAnswer;
+        }
+
+        // 9. Lưu câu trả lời vào quiz_answers.
+        // Lưu question_id để phân biệt câu hỏi đã trả lời (Auto/Custom cùng vocabulary độc lập).
         await Quiz.createAnswer({
             quizAttemptId: attemptId,
+            questionId: question.id,
             vocabularyId: question.vocabulary_id,
             userAnswer: String(userAnswer).trim(),
             correctAnswer: String(correctAnswer),
@@ -577,15 +689,28 @@ const continueQuiz = async (req, res) => {
         // 2. Lấy tất cả câu hỏi của attempt (giữ nguyên question_order)
         const questions = await Quiz.getQuestionsByAttemptId(attempt.id);
 
-        // 3. Lấy danh sách câu trả lời của attempt
+        // 3. Lấy danh sách câu trả lời của attempt.
+        // Phân biệt theo question_id (không theo vocabulary_id) vì cùng một vocabulary
+        // có thể xuất hiện cả Auto và Custom (2 câu hỏi độc lập).
         const answers = await Quiz.getAnswersByAttemptId(attempt.id);
-        const answeredVocabularyIds = new Set(
-            answers.map((a) => a.vocabulary_id)
+        const answeredQuestionIds = new Set(
+            answers
+                .filter((a) => a.question_id !== null && a.question_id !== undefined)
+                .map((a) => a.question_id)
+        );
+        // Câu trả lời cũ (chưa có question_id — NULL hoặc undefined)
+        // vẫn lọc theo vocabulary_id cho tương thích
+        const answeredVocabularyIdsLegacy = new Set(
+            answers
+                .filter((a) => a.question_id === null || a.question_id === undefined)
+                .map((a) => a.vocabulary_id)
         );
 
-        // 4. Chỉ giữ các câu hỏi chưa được trả lời
+        // 4. Chỉ giữ các câu hỏi chưa được trả lời (theo question id)
         const unansweredQuestions = questions.filter(
-            (q) => !answeredVocabularyIds.has(q.vocabulary_id)
+            (q) =>
+                !answeredQuestionIds.has(q.id) &&
+                !answeredVocabularyIdsLegacy.has(q.vocabulary_id)
         );
 
         // 5. Lấy pool vocabulary của người dùng để tạo options (cùng cách M5-T2)
@@ -593,20 +718,38 @@ const continueQuiz = async (req, res) => {
 
         // 6. Xây dựng nội dung câu hỏi cho từng câu chưa trả lời.
         // Dùng đúng question_type đã lưu trong quiz_questions để không sinh lại
-        // một câu hỏi khác. Không trả correct_answer.
+        // một câu hỏi khác.
+        // - Auto Question: buildOptions() (options được shuffle như khi tạo Quiz).
+        // - Custom Question: giữ nguyên option_a, option_b, option_c, option_d (KHÔNG shuffle).
         const questionData = [];
         for (const question of unansweredQuestions) {
             const vocabulary = await Vocabulary.findById(question.vocabulary_id);
             if (!vocabulary) continue;
 
-            const options = buildOptions(vocabulary, question.question_type, userVocabularies);
+            let questionText;
+            let options;
+
+            if (question.question_type === "CUSTOM") {
+                if (!question.custom_question_id) continue;
+                const customQuestion = await CustomQuestion.findById(
+                    question.custom_question_id
+                );
+                if (!customQuestion) continue;
+
+                questionText = customQuestion.question;
+                options = buildCustomOptions(customQuestion);
+            } else {
+                options = buildOptions(vocabulary, question.question_type, userVocabularies);
+                questionText = buildQuestionText(vocabulary, question.question_type);
+            }
+
             if (!options) continue;
 
             questionData.push({
                 id: question.id,
                 vocabulary_id: question.vocabulary_id,
                 question_type: question.question_type,
-                question: buildQuestionText(vocabulary, question.question_type),
+                question: questionText,
                 options,
                 question_order: question.question_order
             });
