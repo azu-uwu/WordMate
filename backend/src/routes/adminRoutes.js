@@ -26,4 +26,15 @@ router.delete("/topics/:id", adminController.deleteTopic);
 // Hỗ trợ lọc: GET /topics?roadmap_id=:roadmapId
 // Query params roadmap_id sẽ được truyền qua req.query và sử dụng trong getAllTopics
 
+/**
+ * CRUD Vocabularies
+ */
+router.get("/vocabularies", adminController.getAllVocabularies);
+router.post("/vocabularies", adminController.createVocabulary);
+router.put("/vocabularies/:id", adminController.updateVocabulary);
+router.delete("/vocabularies/:id", adminController.deleteVocabulary);
+
+// Hỗ trợ lọc: GET /vocabularies?topic_id=:topicId
+// Query params topic_id sẽ được truyền qua req.query và sử dụng trong getAllVocabularies
+
 module.exports = router;
