@@ -28,6 +28,9 @@ const quizRoutes = require("./routes/quizRoutes");
 // notebook
 const notebookRoutes = require("./routes/notebookRoutes");
 
+// ai
+const aiRoutes = require("./routes/aiRoutes");
+
 // admin
 const adminRoutes = require("./routes/adminRoutes");
 
@@ -88,6 +91,9 @@ app.use("/api/quiz", quizRoutes);
 
 // notebook
 app.use("/api/notebook", notebookRoutes);
+
+// ai
+app.use("/api/ai", aiRoutes);
 
 // admin
 app.use("/api/admin", adminRoutes);
