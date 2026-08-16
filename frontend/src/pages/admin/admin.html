@@ -271,12 +271,65 @@
 
         <!-- Section: Vocabularies -->
         <section class="admin-section" id="section-vocabularies" data-section="vocabularies" aria-label="Vocabularies">
-            <div class="admin-section-placeholder">
-                <i class="fa-solid fa-book-open placeholder-icon"></i>
-                <h2 class="placeholder-title">Vocabularies</h2>
-                <p class="placeholder-text">
-                    Chức năng quản lý Từ vựng (Vocabularies) sẽ được triển khai ở task tiếp theo.
-                </p>
+            <div class="admin-data-card">
+                <div class="admin-data-toolbar">
+                    <div class="admin-data-toolbar-left">
+                        <h2 class="admin-data-title">Danh sách Từ vựng</h2>
+                        <p class="admin-data-subtitle">Quản lý từ vựng theo từng Topic</p>
+                    </div>
+                    <div class="admin-data-toolbar-right">
+                        <div class="admin-filter-group">
+                            <label class="form-label" for="vocabTopicFilter">Topic</label>
+                            <select id="vocabTopicFilter" class="form-select form-select-sm">
+                                <option value="">Tất cả Topic</option>
+                            </select>
+                        </div>
+                        <div class="btn-group">
+                            <button type="button" class="btn btn-primary admin-btn-primary dropdown-toggle"
+                                    data-bs-toggle="dropdown" aria-expanded="false" id="btnAddVocabulary">
+                                <i class="fa-solid fa-plus"></i>
+                                <span>Thêm từ mới</span>
+                            </button>
+                            <ul class="dropdown-menu dropdown-menu-end admin-dropdown-menu">
+                                <li>
+                                    <button type="button" class="dropdown-item" id="btnAddVocabularyManual">
+                                        <i class="fa-solid fa-keyboard me-2"></i>Nhập thủ công
+                                    </button>
+                                </li>
+                                <li>
+                                    <button type="button" class="dropdown-item" id="btnImportVocabulary">
+                                        <i class="fa-solid fa-file-import me-2"></i>Import file CSV
+                                    </button>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="admin-table-wrapper">
+                    <div class="admin-table-loading d-none" id="vocabulariesTableLoading">
+                        <div class="spinner-border text-warning" role="status"></div>
+                        <span>Đang tải dữ liệu...</span>
+                    </div>
+                    <div class="table-responsive">
+                        <table id="vocabulariesTable" class="table table-hover admin-datatable w-100">
+                            <thead>
+                                <tr>
+                                    <th scope="col" class="admin-col-index">#</th>
+                                    <th scope="col">Từ vựng</th>
+                                    <th scope="col">Phiên âm</th>
+                                    <th scope="col">Loại từ</th>
+                                    <th scope="col">Nghĩa</th>
+                                    <th scope="col">Topic</th>
+                                    <th scope="col">Ảnh</th>
+                                    <th scope="col">Audio</th>
+                                    <th scope="col" class="admin-col-actions">Thao tác</th>
+                                </tr>
+                            </thead>
+                            <tbody></tbody>
+                        </table>
+                    </div>
+                </div>
             </div>
         </section>
 
@@ -446,6 +499,195 @@
                     <button type="button" class="btn btn-primary admin-btn-primary" id="topicSaveBtn">
                         <span class="spinner-border spinner-border-sm d-none me-1" id="topicSaveSpinner" role="status"></span>
                         <span id="topicSaveBtnText">Thêm mới</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== MODAL: Vocabulary (Create / Edit) ===== -->
+    <div class="modal fade" id="vocabularyModal" tabindex="-1" aria-labelledby="vocabularyModalLabel"
+         aria-hidden="true" data-bs-backdrop="static">
+        <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
+            <div class="modal-content admin-modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="vocabularyModalLabel">Thêm từ vựng</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Đóng"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="vocabularyForm" novalidate>
+                        <input type="hidden" id="vocabularyId">
+
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label class="form-label" for="vocabRoadmapId">Roadmap <span class="text-danger">*</span></label>
+                                <select class="form-select" id="vocabRoadmapId" required>
+                                    <option value="">-- Chọn Roadmap --</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label" for="vocabTopicId">Topic <span class="text-danger">*</span></label>
+                                <select class="form-select" id="vocabTopicId" required>
+                                    <option value="">-- Chọn Topic --</option>
+                                </select>
+                                <div class="invalid-feedback">Vui lòng chọn Topic.</div>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label" for="vocabWord">Từ vựng <span class="text-danger">*</span></label>
+                                <input type="text" class="form-control" id="vocabWord"
+                                       placeholder="VD: apple" maxlength="255" required>
+                                <div class="invalid-feedback">Vui lòng nhập từ vựng.</div>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label" for="vocabPronunciation">Phiên âm</label>
+                                <input type="text" class="form-control" id="vocabPronunciation"
+                                       placeholder="VD: /ˈæp.əl/" maxlength="255">
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label" for="vocabPartOfSpeech">Loại từ</label>
+                                <select class="form-select" id="vocabPartOfSpeech">
+                                    <option value="noun">Danh từ (noun)</option>
+                                    <option value="verb">Động từ (verb)</option>
+                                    <option value="adjective">Tính từ (adjective)</option>
+                                    <option value="adverb">Trạng từ (adverb)</option>
+                                    <option value="preposition">Giới từ (preposition)</option>
+                                    <option value="phrasal_verb">Cụm động từ (phrasal verb)</option>
+                                    <option value="idiom">Thành ngữ (idiom)</option>
+                                    <option value="other">Khác (other)</option>
+                                </select>
+                            </div>
+                            <div class="col-12">
+                                <label class="form-label" for="vocabMeaning">Nghĩa <span class="text-danger">*</span></label>
+                                <textarea class="form-control" id="vocabMeaning" rows="2"
+                                          placeholder="Nghĩa của từ (bắt buộc)" required></textarea>
+                                <div class="invalid-feedback">Vui lòng nhập nghĩa của từ.</div>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label" for="vocabExample">Ví dụ</label>
+                                <textarea class="form-control" id="vocabExample" rows="2"
+                                          placeholder="Câu ví dụ (tuỳ chọn)"></textarea>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label" for="vocabExampleMeaning">Nghĩa ví dụ</label>
+                                <textarea class="form-control" id="vocabExampleMeaning" rows="2"
+                                          placeholder="Nghĩa câu ví dụ (tuỳ chọn)"></textarea>
+                            </div>
+                        </div>
+
+                        <!-- Image + Audio uploader -->
+                        <div class="row g-3 mt-1">
+                            <div class="col-md-6">
+                                <label class="form-label d-block">Ảnh minh họa</label>
+                                <div class="admin-image-uploader">
+                                    <div class="admin-image-preview-box admin-image-preview-box-sm" id="vocabImagePreviewBox">
+                                        <img id="vocabImagePreview" class="d-none" alt="Preview ảnh">
+                                        <div id="vocabImagePlaceholder" class="admin-image-placeholder">
+                                            <i class="fa-solid fa-image"></i>
+                                            <span>Ảnh từ vựng</span>
+                                        </div>
+                                    </div>
+                                    <div class="admin-image-uploader-controls">
+                                        <label class="btn btn-sm btn-outline-secondary mb-0">
+                                            <i class="fa-solid fa-upload"></i> Chọn ảnh
+                                            <input type="file" id="vocabImageInput"
+                                                   accept=".jpg,.jpeg,.png,image/jpeg,image/png" hidden>
+                                        </label>
+                                        <span class="text-muted small">JPG, PNG • tối đa 5MB</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label d-block">Audio phát âm</label>
+                                <div class="admin-audio-uploader">
+                                    <div class="admin-audio-preview" id="vocabAudioPreview">
+                                        <i class="fa-solid fa-headphones"></i>
+                                        <span id="vocabAudioName" class="text-muted small">Chưa có audio</span>
+                                    </div>
+                                    <div class="admin-image-uploader-controls">
+                                        <label class="btn btn-sm btn-outline-secondary mb-0">
+                                            <i class="fa-solid fa-upload"></i> Chọn audio
+                                            <input type="file" id="vocabAudioInput" accept=".mp3,audio/mpeg" hidden>
+                                        </label>
+                                        <span class="text-muted small">MP3 • tối đa 2MB</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="alert alert-danger d-none mt-3 mb-0" id="vocabularyFormError" role="alert"></div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Hủy</button>
+                    <button type="button" class="btn btn-primary admin-btn-primary" id="vocabularySaveBtn">
+                        <span class="spinner-border spinner-border-sm d-none me-1" id="vocabularySaveSpinner" role="status"></span>
+                        <span id="vocabularySaveBtnText">Thêm mới</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== MODAL: Import Vocabulary (CSV) ===== -->
+    <div class="modal fade" id="importVocabularyModal" tabindex="-1" aria-labelledby="importVocabularyModalLabel"
+         aria-hidden="true" data-bs-backdrop="static">
+        <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
+            <div class="modal-content admin-modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="importVocabularyModalLabel">Import từ vựng từ CSV</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Đóng"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="importVocabularyForm" novalidate>
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label class="form-label" for="importRoadmapId">Roadmap <span class="text-danger">*</span></label>
+                                <select class="form-select" id="importRoadmapId" required>
+                                    <option value="">-- Chọn Roadmap --</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label" for="importTopicId">Topic <span class="text-danger">*</span></label>
+                                <select class="form-select" id="importTopicId" required>
+                                    <option value="">-- Chọn Topic --</option>
+                                </select>
+                                <div class="invalid-feedback">Vui lòng chọn Topic.</div>
+                            </div>
+                            <div class="col-12">
+                                <label class="form-label" for="importCsvFile">File CSV <span class="text-danger">*</span></label>
+                                <input type="file" class="form-control" id="importCsvFile"
+                                       accept=".csv,text/csv" required>
+                                <div class="form-text">
+                                    CSV có header: word, pronunciation, part_of_speech, meaning, example,
+                                    example_meaning, audio, image. Cột word và meaning bắt buộc.
+                                </div>
+                                <div class="invalid-feedback">Vui lòng chọn file CSV.</div>
+                            </div>
+                        </div>
+
+                        <div class="alert alert-danger d-none mt-3 mb-0" id="importFormError" role="alert"></div>
+                        <div class="alert alert-success d-none mt-3 mb-0" id="importFormSuccess" role="alert"></div>
+                        <div class="d-none mt-3" id="importErrorsWrap">
+                            <h6 class="fw-bold mb-2">Các dòng lỗi:</h6>
+                            <div class="table-responsive">
+                                <table class="table table-sm admin-datatable admin-import-errors">
+                                    <thead>
+                                        <tr>
+                                            <th>Dòng</th>
+                                            <th>Lỗi</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="importErrorsBody"></tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Đóng</button>
+                    <button type="button" class="btn btn-primary admin-btn-primary" id="importVocabularyBtn">
+                        <span class="spinner-border spinner-border-sm d-none me-1" id="importVocabularySpinner" role="status"></span>
+                        Import
                     </button>
                 </div>
             </div>

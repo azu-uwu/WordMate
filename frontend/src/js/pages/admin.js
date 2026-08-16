@@ -22,6 +22,10 @@ const API_BASE_URL = 'http://localhost:5000/api';
 const MAX_IMAGE_SIZE = 5 * 1024 * 1024; // 5MB
 const ALLOWED_IMAGE_TYPES = ['image/jpeg', 'image/png'];
 const ALLOWED_IMAGE_EXT = ['jpg', 'jpeg', 'png'];
+const MAX_AUDIO_SIZE = 2 * 1024 * 1024; // 2MB
+const ALLOWED_AUDIO_TYPES = ['audio/mpeg'];
+const ALLOWED_AUDIO_EXT = ['mp3'];
+const PART_OF_SPEECH = ['noun', 'verb', 'adjective', 'adverb', 'preposition', 'phrasal_verb', 'idiom', 'other'];
 
 // ============================================================
 // DOM ELEMENTS
@@ -77,6 +81,44 @@ const confirmDeleteSpinner = document.getElementById('confirmDeleteSpinner');
 // Topic filter
 const topicsRoadmapFilter = document.getElementById('topicsRoadmapFilter');
 
+// Vocabulary form elements
+const vocabularyModalEl = document.getElementById('vocabularyModal');
+const vocabularyForm = document.getElementById('vocabularyForm');
+const vocabularyIdInput = document.getElementById('vocabularyId');
+const vocabRoadmapIdInput = document.getElementById('vocabRoadmapId');
+const vocabTopicIdInput = document.getElementById('vocabTopicId');
+const vocabWordInput = document.getElementById('vocabWord');
+const vocabPronunciationInput = document.getElementById('vocabPronunciation');
+const vocabPartOfSpeechInput = document.getElementById('vocabPartOfSpeech');
+const vocabMeaningInput = document.getElementById('vocabMeaning');
+const vocabExampleInput = document.getElementById('vocabExample');
+const vocabExampleMeaningInput = document.getElementById('vocabExampleMeaning');
+const vocabImageInput = document.getElementById('vocabImageInput');
+const vocabImagePreview = document.getElementById('vocabImagePreview');
+const vocabImagePlaceholder = document.getElementById('vocabImagePlaceholder');
+const vocabAudioInput = document.getElementById('vocabAudioInput');
+const vocabAudioName = document.getElementById('vocabAudioName');
+const vocabularyFormError = document.getElementById('vocabularyFormError');
+const vocabularySaveBtn = document.getElementById('vocabularySaveBtn');
+const vocabularySaveSpinner = document.getElementById('vocabularySaveSpinner');
+const vocabularySaveBtnText = document.getElementById('vocabularySaveBtnText');
+
+// Vocabulary filter
+const vocabTopicFilter = document.getElementById('vocabTopicFilter');
+
+// Import Vocabulary form elements
+const importVocabularyModalEl = document.getElementById('importVocabularyModal');
+const importVocabularyForm = document.getElementById('importVocabularyForm');
+const importRoadmapIdInput = document.getElementById('importRoadmapId');
+const importTopicIdInput = document.getElementById('importTopicId');
+const importCsvFileInput = document.getElementById('importCsvFile');
+const importFormError = document.getElementById('importFormError');
+const importFormSuccess = document.getElementById('importFormSuccess');
+const importErrorsWrap = document.getElementById('importErrorsWrap');
+const importErrorsBody = document.getElementById('importErrorsBody');
+const importVocabularyBtn = document.getElementById('importVocabularyBtn');
+const importVocabularySpinner = document.getElementById('importVocabularySpinner');
+
 // ============================================================
 // STATE
 // ============================================================
@@ -85,11 +127,18 @@ let roadmaps = [];                // danh sách Roadmap mới nhất từ server
 let roadmapsDataTable = null;
 let topicsDataTable = null;
 let topicsDTData = [];             // data Topics hiện tại trong bảng
+let vocabulariesDataTable = null;  // DataTable Vocabulary
+let vocabulariesDTData = [];       // data Vocabularies hiện tại trong bảng
+let topicsCache = [];              // cache tất cả Topics (để lọc theo roadmap)
 let selectedRoadmapFile = null;    // file mới chọn cho Roadmap
 let selectedTopicFile = null;      // file mới chọn cho Topic
 let currentRoadmapImage = null;    // image path hiện tại khi mở form sửa Roadmap
 let currentTopicImage = null;      // image path hiện tại khi mở form sửa Topic
-let pendingDelete = null;          // { type: 'roadmap'|'topic', id, name }
+let selectedVocabImageFile = null; // file ảnh mới chọn cho Vocabulary
+let selectedVocabAudioFile = null; // file audio mới chọn cho Vocabulary
+let currentVocabImage = null;      // image path hiện tại khi mở form sửa Vocabulary
+let currentVocabAudio = null;      // audio path hiện tại khi mở form sửa Vocabulary
+let pendingDelete = null;          // { type: 'roadmap'|'topic'|'vocabulary', id, name }
 
 // ============================================================
 // SECTION METADATA
@@ -230,6 +279,21 @@ function isImageValid(file) {
     const ext = file.name.split('.').pop().toLowerCase();
     if (!ALLOWED_IMAGE_TYPES.includes(file.type) && !ALLOWED_IMAGE_EXT.includes(ext)) {
         return { valid: false, error: 'Chỉ chấp nhận file ảnh JPG, JPEG, PNG.' };
+    }
+
+    return { valid: true, error: null };
+}
+
+function isAudioValid(file) {
+    if (!file) return { valid: false, error: 'Chưa chọn file.' };
+
+    if (file.size > MAX_AUDIO_SIZE) {
+        return { valid: false, error: 'File audio vượt quá 2MB.' };
+    }
+
+    const ext = file.name.split('.').pop().toLowerCase();
+    if (!ALLOWED_AUDIO_TYPES.includes(file.type) && !ALLOWED_AUDIO_EXT.includes(ext)) {
+        return { valid: false, error: 'Chỉ chấp nhận file audio MP3.' };
     }
 
     return { valid: true, error: null };
@@ -509,6 +573,133 @@ function setupTopicsDatatable() {
     });
 }
 
+function setupVocabulariesTable() {
+    vocabulariesDataTable = $('#vocabulariesTable').DataTable({
+        data: [],
+        columns: [
+            {
+                data: null,
+                className: 'admin-col-index',
+                render: (data, type, row, meta) => {
+                    if (type === 'display') {
+                        return `<span class="text-muted">${meta.row + 1}</span>`;
+                    }
+                    return meta.row + 1;
+                }
+            },
+            { data: 'word', render: (data) => `<strong>${esc(data || '')}</strong>` },
+            {
+                data: 'pronunciation',
+                render: (data) => {
+                    if (!data) return '<span class="text-muted">—</span>';
+                    return `<span class="text-muted">${esc(data)}</span>`;
+                }
+            },
+            {
+                data: 'part_of_speech',
+                render: (data) => {
+                    const label = data || 'other';
+                    return `<span class="badge bg-secondary-subtle text-light">${esc(label)}</span>`;
+                }
+            },
+            {
+                data: 'meaning',
+                render: (data) => {
+                    if (!data) return '<span class="text-muted">—</span>';
+                    return `<span title="${esc(data)}">${esc(truncateText(data))}</span>`;
+                }
+            },
+            {
+                data: null,
+                render: (row) => {
+                    const topic = topicsCache.find((t) => Number(t.id) === Number(row.topic_id));
+                    return topic ? esc(topic.name) : '<span class="text-muted">—</span>';
+                }
+            },
+            {
+                data: 'image',
+                orderable: false,
+                render: (data, type) => {
+                    if (type !== 'display') return data || '';
+                    if (!data) {
+                        return '<div class="admin-thumb admin-thumb-empty"><i class="fa-solid fa-image"></i></div>';
+                    }
+                    const url = getMediaUrl(data);
+                    return `<div class="admin-thumb"><img src="${url}" alt="Ảnh từ vựng" loading="lazy"></div>`;
+                }
+            },
+            {
+                data: 'audio',
+                orderable: false,
+                render: (data, type) => {
+                    if (type !== 'display') return data || '';
+                    if (!data) {
+                        return '<span class="text-muted">—</span>';
+                    }
+                    const url = getMediaUrl(data);
+                    return `<button type="button" class="btn btn-sm btn-outline-secondary admin-audio-play"
+                                    data-src="${url}" title="Phát audio">
+                                <i class="fa-solid fa-play"></i>
+                            </button>`;
+                }
+            },
+            {
+                data: null,
+                orderable: false,
+                searchable: false,
+                render: (data) => {
+                    const id = esc(data.id);
+                    return `
+                        <div class="admin-row-actions">
+                            <button type="button" class="btn btn-sm btn-outline-secondary admin-action-btn"
+                                    data-action="edit" data-id="${id}" title="Sửa">
+                                <i class="fa-solid fa-pen-to-square"></i>
+                            </button>
+                            <button type="button" class="btn btn-sm btn-outline-danger admin-action-btn"
+                                    data-action="delete" data-id="${id}" title="Xóa">
+                                <i class="fa-solid fa-trash-can"></i>
+                            </button>
+                        </div>`;
+                }
+            }
+        ],
+        language: DATATABLE_VI,
+        pageLength: 10,
+        lengthMenu: [5, 10, 25, 50],
+        columnDefs: [
+            { targets: '_all', className: 'align-middle' },
+            { targets: [0, 6, 7, 8], orderable: false }
+        ],
+        order: [[1, 'asc']],
+        initComplete: function () {
+            $('#vocabulariesTable_filter input').addClass('form-control form-control-sm');
+            $('#vocabulariesTable_filter label').addClass('admin-datatable-search');
+        }
+    });
+
+    $('#vocabulariesTable tbody').on('click', '.admin-action-btn', (e) => {
+        const btn = e.currentTarget;
+        const action = btn.dataset.action;
+        const id = Number(btn.dataset.id);
+        const item = vocabulariesDTData.find((v) => Number(v.id) === id);
+        if (!item) return;
+        if (action === 'edit') {
+            openVocabularyModal(item);
+        } else if (action === 'delete') {
+            openConfirmDeleteModal('vocabulary', item);
+        }
+    });
+
+    // Phát audio trong bảng
+    $('#vocabulariesTable tbody').on('click', '.admin-audio-play', (e) => {
+        const btn = e.currentTarget;
+        const src = btn.dataset.src;
+        if (!src) return;
+        const audio = new Audio(src);
+        audio.play().catch(() => showToast('Không thể phát audio.', 'error'));
+    });
+}
+
 // ============================================================
 // LOAD DATA
 // ============================================================
@@ -527,6 +718,8 @@ async function loadRoadmaps() {
 
         populateTopicsRoadmapFilter();
         populateTopicRoadmapModalSelect();
+        populateVocabRoadmapSelect();
+        populateImportRoadmapSelect();
     } catch (error) {
         showToast(error.message || 'Không tải được danh sách Roadmap.', 'error');
     } finally {
@@ -586,6 +779,127 @@ function populateTopicRoadmapModalSelect() {
         topicRoadmapIdInput.appendChild(option);
     });
     topicRoadmapIdInput.value = current;
+}
+
+// ============================================================
+// VOCABULARY — load + filters
+// ============================================================
+
+async function loadAllTopicsForCache() {
+    try {
+        const res = await api.get('/admin/topics');
+        topicsCache = Array.isArray(res.data) ? res.data : [];
+    } catch (error) {
+        topicsCache = [];
+    }
+}
+
+async function loadVocabularies() {
+    const loadingEl = document.getElementById('vocabulariesTableLoading');
+    if (loadingEl) loadingEl.classList.remove('d-none');
+
+    const topicId = vocabTopicFilter.value;
+    const query = topicId ? `?topic_id=${encodeURIComponent(topicId)}` : '';
+    try {
+        const res = await api.get(`/admin/vocabularies${query}`);
+        vocabulariesDTData = Array.isArray(res.data) ? res.data : [];
+
+        vocabulariesDataTable.clear();
+        vocabulariesDataTable.rows.add(vocabulariesDTData);
+        vocabulariesDataTable.draw();
+    } catch (error) {
+        showToast(error.message || 'Không tải được danh sách Từ vựng.', 'error');
+    } finally {
+        if (loadingEl) loadingEl.classList.add('d-none');
+    }
+}
+
+function populateVocabTopicFilter() {
+    if (!vocabTopicFilter) return;
+
+    const current = vocabTopicFilter.value;
+    vocabTopicFilter.innerHTML = '<option value="">Tất cả Topic</option>';
+    topicsCache.forEach((topic) => {
+        const option = document.createElement('option');
+        option.value = topic.id;
+        option.textContent = topic.name;
+        vocabTopicFilter.appendChild(option);
+    });
+    vocabTopicFilter.value = current;
+
+    // Nếu topic đã bị xóa → reset filter về tất cả
+    if (current && !topicsCache.some((t) => String(t.id) === current)) {
+        vocabTopicFilter.value = '';
+        loadVocabularies();
+    }
+}
+
+function populateVocabRoadmapSelect() {
+    if (!vocabRoadmapIdInput) return;
+
+    const current = vocabRoadmapIdInput.value;
+    vocabRoadmapIdInput.innerHTML = '<option value="">-- Chọn Roadmap --</option>';
+    roadmaps.forEach((roadmap) => {
+        const option = document.createElement('option');
+        option.value = roadmap.id;
+        option.textContent = roadmap.name;
+        vocabRoadmapIdInput.appendChild(option);
+    });
+    vocabRoadmapIdInput.value = current;
+}
+
+function populateVocabTopicSelect() {
+    if (!vocabTopicIdInput) return;
+
+    const roadmapId = vocabRoadmapIdInput.value;
+    const current = vocabTopicIdInput.value;
+    vocabTopicIdInput.innerHTML = '<option value="">-- Chọn Topic --</option>';
+
+    const filtered = roadmapId
+        ? topicsCache.filter((t) => String(t.roadmap_id) === String(roadmapId))
+        : topicsCache;
+
+    filtered.forEach((topic) => {
+        const option = document.createElement('option');
+        option.value = topic.id;
+        option.textContent = topic.name;
+        vocabTopicIdInput.appendChild(option);
+    });
+    vocabTopicIdInput.value = current;
+}
+
+function populateImportRoadmapSelect() {
+    if (!importRoadmapIdInput) return;
+
+    const current = importRoadmapIdInput.value;
+    importRoadmapIdInput.innerHTML = '<option value="">-- Chọn Roadmap --</option>';
+    roadmaps.forEach((roadmap) => {
+        const option = document.createElement('option');
+        option.value = roadmap.id;
+        option.textContent = roadmap.name;
+        importRoadmapIdInput.appendChild(option);
+    });
+    importRoadmapIdInput.value = current;
+}
+
+function populateImportTopicSelect() {
+    if (!importTopicIdInput) return;
+
+    const roadmapId = importRoadmapIdInput.value;
+    const current = importTopicIdInput.value;
+    importTopicIdInput.innerHTML = '<option value="">-- Chọn Topic --</option>';
+
+    const filtered = roadmapId
+        ? topicsCache.filter((t) => String(t.roadmap_id) === String(roadmapId))
+        : topicsCache;
+
+    filtered.forEach((topic) => {
+        const option = document.createElement('option');
+        option.value = topic.id;
+        option.textContent = topic.name;
+        importTopicIdInput.appendChild(option);
+    });
+    importTopicIdInput.value = current;
 }
 
 // ============================================================
@@ -904,6 +1218,383 @@ async function uploadImageFile(endpoint, file) {
     return data;
 }
 
+/**
+ * Upload một file (image hoặc audio) qua multipart form-data.
+ * @param {string} endpoint - vd. '/admin/vocabularies/1/image'
+ * @param {string} field - Tên field: 'image' hoặc 'audio'
+ * @param {File} file
+ */
+async function uploadFilePart(endpoint, field, file) {
+    const formData = new FormData();
+    formData.append(field, file);
+
+    const response = await fetch(`${API_BASE_URL}${endpoint}`, {
+        method: 'POST',
+        headers: {
+            'Authorization': `Bearer ${localStorage.getItem('token')}`
+        },
+        body: formData
+    });
+
+    const data = await response.json().catch(() => null);
+
+    if (!response.ok) {
+        const error = new Error((data && data.message) || 'Upload file thất bại');
+        error.status = response.status;
+        throw error;
+    }
+
+    return data;
+}
+
+// ============================================================
+// VOCABULARY MODAL
+// ============================================================
+
+function resetVocabularyModal() {
+    vocabularyForm.reset();
+    vocabularyIdInput.value = '';
+    vocabRoadmapIdInput.classList.remove('is-invalid');
+    vocabTopicIdInput.classList.remove('is-invalid');
+    vocabWordInput.classList.remove('is-invalid');
+    vocabMeaningInput.classList.remove('is-invalid');
+    vocabularyFormError.classList.add('d-none');
+    vocabularyFormError.textContent = '';
+    selectedVocabImageFile = null;
+    selectedVocabAudioFile = null;
+    currentVocabImage = null;
+    currentVocabAudio = null;
+    vocabImageInput.value = '';
+    vocabAudioInput.value = '';
+    vocabImagePreview.classList.add('d-none');
+    vocabImagePreview.src = '';
+    vocabImagePlaceholder.classList.remove('d-none');
+    vocabAudioName.textContent = 'Chưa có audio';
+    vocabAudioName.classList.add('text-muted');
+    vocabAudioName.classList.remove('admin-audio-has');
+    vocabularySaveBtnText.textContent = 'Thêm mới';
+}
+
+function openVocabularyModal(item = null) {
+    resetVocabularyModal();
+    populateVocabRoadmapSelect();
+    populateVocabTopicSelect();
+
+    const modalTitle = document.getElementById('vocabularyModalLabel');
+    if (item) {
+        modalTitle.textContent = 'Sửa từ vựng';
+        vocabularyIdInput.value = item.id;
+        vocabWordInput.value = item.word || '';
+        vocabPronunciationInput.value = item.pronunciation || '';
+        vocabPartOfSpeechInput.value = item.part_of_speech || 'other';
+        vocabMeaningInput.value = item.meaning || '';
+        vocabExampleInput.value = item.example || '';
+        vocabExampleMeaningInput.value = item.example_meaning || '';
+        vocabularySaveBtnText.textContent = 'Lưu thay đổi';
+
+        // Preselect roadmap/topic
+        const topic = topicsCache.find((t) => Number(t.id) === Number(item.topic_id));
+        if (topic) {
+            vocabRoadmapIdInput.value = topic.roadmap_id || '';
+            populateVocabTopicSelect();
+            vocabTopicIdInput.value = item.topic_id || '';
+        } else {
+            vocabTopicIdInput.value = item.topic_id || '';
+        }
+
+        currentVocabImage = item.image || null;
+        if (item.image) {
+            vocabImagePreview.src = getMediaUrl(item.image);
+            vocabImagePreview.classList.remove('d-none');
+            vocabImagePlaceholder.classList.add('d-none');
+        }
+
+        currentVocabAudio = item.audio || null;
+        if (item.audio) {
+            const audioUrl = getMediaUrl(item.audio);
+            vocabAudioName.textContent = audioUrl.split('/').pop() || 'Đã có audio';
+            vocabAudioName.classList.remove('text-muted');
+            vocabAudioName.classList.add('admin-audio-has');
+        }
+    } else {
+        modalTitle.textContent = 'Thêm từ vựng';
+        vocabPartOfSpeechInput.value = 'noun';
+
+        // Preselect roadmap/topic theo filter đang chọn (nếu có)
+        if (vocabTopicFilter.value) {
+            const topic = topicsCache.find((t) => String(t.id) === vocabTopicFilter.value);
+            if (topic) {
+                vocabRoadmapIdInput.value = topic.roadmap_id || '';
+                populateVocabTopicSelect();
+                vocabTopicIdInput.value = topic.id || '';
+            }
+        }
+    }
+
+    const modal = bootstrap.Modal.getOrCreateInstance(vocabularyModalEl);
+    modal.show();
+
+    setTimeout(() => vocabWordInput.focus(), 100);
+}
+
+function handleVocabImageSelect(e) {
+    const file = e.target.files && e.target.files[0];
+    if (!file) {
+        selectedVocabImageFile = null;
+        return;
+    }
+
+    const check = isImageValid(file);
+    if (!check.valid) {
+        showToast(check.error, 'error');
+        e.target.value = '';
+        selectedVocabImageFile = null;
+        return;
+    }
+
+    selectedVocabImageFile = file;
+
+    const reader = new FileReader();
+    reader.onload = (ev) => {
+        vocabImagePreview.src = ev.target.result;
+        vocabImagePreview.classList.remove('d-none');
+        vocabImagePlaceholder.classList.add('d-none');
+    };
+    reader.readAsDataURL(file);
+}
+
+function handleVocabAudioSelect(e) {
+    const file = e.target.files && e.target.files[0];
+    if (!file) {
+        selectedVocabAudioFile = null;
+        return;
+    }
+
+    const check = isAudioValid(file);
+    if (!check.valid) {
+        showToast(check.error, 'error');
+        e.target.value = '';
+        selectedVocabAudioFile = null;
+        return;
+    }
+
+    selectedVocabAudioFile = file;
+    vocabAudioName.textContent = file.name;
+    vocabAudioName.classList.remove('text-muted');
+    vocabAudioName.classList.add('admin-audio-has');
+}
+
+function getVocabularyPayload() {
+    return {
+        topic_id: Number(vocabTopicIdInput.value),
+        word: vocabWordInput.value.trim(),
+        pronunciation: vocabPronunciationInput.value.trim() || null,
+        part_of_speech: vocabPartOfSpeechInput.value || 'other',
+        meaning: vocabMeaningInput.value.trim(),
+        example: vocabExampleInput.value.trim() || null,
+        example_meaning: vocabExampleMeaningInput.value.trim() || null,
+        audio: selectedVocabAudioFile ? null : (currentVocabAudio || null),
+        image: selectedVocabImageFile ? null : (currentVocabImage || null)
+    };
+}
+
+function validateVocabularyForm() {
+    let valid = true;
+
+    if (!vocabWordInput.value.trim()) {
+        vocabWordInput.classList.add('is-invalid');
+        valid = false;
+    } else {
+        vocabWordInput.classList.remove('is-invalid');
+    }
+
+    if (!vocabMeaningInput.value.trim()) {
+        vocabMeaningInput.classList.add('is-invalid');
+        valid = false;
+    } else {
+        vocabMeaningInput.classList.remove('is-invalid');
+    }
+
+    if (!vocabTopicIdInput.value) {
+        vocabTopicIdInput.classList.add('is-invalid');
+        valid = false;
+    } else {
+        vocabTopicIdInput.classList.remove('is-invalid');
+    }
+
+    return valid;
+}
+
+async function handleSaveVocabulary() {
+    if (!validateVocabularyForm()) return;
+
+    setSaveLoading(vocabularySaveBtn, vocabularySaveSpinner, vocabularySaveBtnText, true);
+    hideFormError(vocabularyFormError);
+
+    try {
+        const id = vocabularyIdInput.value ? Number(vocabularyIdInput.value) : null;
+        const payload = getVocabularyPayload();
+
+        let resultId = id;
+        if (!id) {
+            const res = await api.post('/admin/vocabularies', payload);
+            resultId = res.data.id;
+        } else {
+            await api.put(`/admin/vocabularies/${id}`, payload);
+            resultId = id;
+        }
+
+        // Upload ảnh/audio riêng sau khi lưu (nếu có chọn file mới)
+        if (selectedVocabImageFile) {
+            await uploadFilePart(`/admin/vocabularies/${resultId}/image`, 'image', selectedVocabImageFile);
+        }
+        if (selectedVocabAudioFile) {
+            await uploadFilePart(`/admin/vocabularies/${resultId}/audio`, 'audio', selectedVocabAudioFile);
+        }
+
+        const modal = bootstrap.Modal.getInstance(vocabularyModalEl);
+        if (modal) modal.hide();
+
+        showToast(id ? 'Cập nhật Từ vựng thành công.' : 'Tạo Từ vựng thành công.', 'success');
+        await loadVocabularies();
+    } catch (error) {
+        showFormError(vocabularyFormError, error.message || 'Có lỗi xảy ra. Vui lòng thử lại.');
+    } finally {
+        setSaveLoading(vocabularySaveBtn, vocabularySaveSpinner, vocabularySaveBtnText, false);
+    }
+}
+
+// ============================================================
+// IMPORT VOCABULARY MODAL
+// ============================================================
+
+function resetImportModal() {
+    importVocabularyForm.reset();
+    importRoadmapIdInput.classList.remove('is-invalid');
+    importTopicIdInput.classList.remove('is-invalid');
+    importCsvFileInput.classList.remove('is-invalid');
+    importFormError.classList.add('d-none');
+    importFormError.textContent = '';
+    importFormSuccess.classList.add('d-none');
+    importFormSuccess.textContent = '';
+    importErrorsWrap.classList.add('d-none');
+    importErrorsBody.innerHTML = '';
+}
+
+function openImportVocabularyModal() {
+    resetImportModal();
+    populateImportRoadmapSelect();
+    populateImportTopicSelect();
+
+    const modal = bootstrap.Modal.getOrCreateInstance(importVocabularyModalEl);
+    modal.show();
+}
+
+function validateImportForm() {
+    let valid = true;
+
+    if (!importRoadmapIdInput.value) {
+        importRoadmapIdInput.classList.add('is-invalid');
+        valid = false;
+    } else {
+        importRoadmapIdInput.classList.remove('is-invalid');
+    }
+
+    if (!importTopicIdInput.value) {
+        importTopicIdInput.classList.add('is-invalid');
+        valid = false;
+    } else {
+        importTopicIdInput.classList.remove('is-invalid');
+    }
+
+    if (!importCsvFileInput.files || !importCsvFileInput.files[0]) {
+        importCsvFileInput.classList.add('is-invalid');
+        valid = false;
+    } else {
+        importCsvFileInput.classList.remove('is-invalid');
+    }
+
+    return valid;
+}
+
+function renderImportErrors(errors) {
+    importErrorsBody.innerHTML = '';
+    if (!Array.isArray(errors) || errors.length === 0) {
+        importErrorsWrap.classList.add('d-none');
+        return;
+    }
+
+    errors.forEach((err) => {
+        const row = document.createElement('tr');
+        const lineTd = document.createElement('td');
+        const msgTd = document.createElement('td');
+
+        lineTd.textContent = err.line ?? '?';
+        msgTd.textContent = Array.isArray(err.errors) ? err.errors.join(', ') : String(err.errors || '');
+
+        row.appendChild(lineTd);
+        row.appendChild(msgTd);
+        importErrorsBody.appendChild(row);
+    });
+
+    importErrorsWrap.classList.remove('d-none');
+}
+
+async function handleImportVocabulary() {
+    if (!validateImportForm()) return;
+
+    importVocabularyBtn.disabled = true;
+    importVocabularySpinner.classList.remove('d-none');
+    importFormError.classList.add('d-none');
+    importFormError.textContent = '';
+    importFormSuccess.classList.add('d-none');
+    importFormSuccess.textContent = '';
+    importErrorsWrap.classList.add('d-none');
+    importErrorsBody.innerHTML = '';
+
+    try {
+        const formData = new FormData();
+        formData.append('topic_id', importTopicIdInput.value);
+        formData.append('file', importCsvFileInput.files[0]);
+
+        const response = await fetch(`${API_BASE_URL}/admin/vocabularies/import`, {
+            method: 'POST',
+            headers: {
+                'Authorization': `Bearer ${localStorage.getItem('token')}`
+            },
+            body: formData
+        });
+
+        const data = await response.json().catch(() => null);
+
+        if (!response.ok) {
+            const error = new Error((data && data.message) || 'Import thất bại');
+            error.status = response.status;
+            throw error;
+        }
+
+        const importedCount = data && data.data ? (data.data.imported ?? 0) : 0;
+        const errors = data && data.data ? (data.data.errors || []) : [];
+
+        importFormSuccess.textContent = `Import thành công ${importedCount} từ vựng.`;
+        importFormSuccess.classList.remove('d-none');
+
+        if (errors.length > 0) {
+            renderImportErrors(errors);
+        } else {
+            importErrorsWrap.classList.add('d-none');
+        }
+
+        showToast(`Import hoàn tất: ${importedCount} từ.`, 'success');
+        await loadVocabularies();
+    } catch (error) {
+        showFormError(importFormError, error.message || 'Import thất bại. Vui lòng thử lại.');
+    } finally {
+        importVocabularyBtn.disabled = false;
+        importVocabularySpinner.classList.add('d-none');
+    }
+}
+
 // ============================================================
 // DELETE CONFIRM MODAL
 // ============================================================
@@ -914,9 +1605,12 @@ function openConfirmDeleteModal(type, item) {
     if (type === 'roadmap') {
         confirmDeleteText.textContent =
             `Bạn có chắc chắn muốn xóa Roadmap "${item.name || ''}"? Roadmap có chứa Topic/Vocabulary liên quan thì sẽ không thể xóa.`;
-    } else {
+    } else if (type === 'topic') {
         confirmDeleteText.textContent =
             `Bạn có chắc chắn muốn xóa Topic "${item.name || ''}"?`;
+    } else {
+        confirmDeleteText.textContent =
+            `Bạn có chắc chắn muốn xóa từ vựng "${item.word || item.name || ''}"?`;
     }
 
     const modal = bootstrap.Modal.getOrCreateInstance(confirmDeleteModalEl);
@@ -936,10 +1630,14 @@ async function handleConfirmDelete() {
             showToast('Xóa Roadmap thành công.', 'success');
             // Refresh cả Topics vì Topic có thể trỏ tới Roadmap đã bị xóa
             await Promise.all([loadRoadmaps(), loadTopics()]);
-        } else {
+        } else if (type === 'topic') {
             await api.del(`/admin/topics/${id}`);
             showToast('Xóa Topic thành công.', 'success');
             await loadTopics();
+        } else {
+            await api.del(`/admin/vocabularies/${id}`);
+            showToast('Xóa Từ vựng thành công.', 'success');
+            await loadVocabularies();
         }
 
         const modal = bootstrap.Modal.getInstance(confirmDeleteModalEl);
@@ -1013,6 +1711,40 @@ function bindEvents() {
         topicsRoadmapFilter.addEventListener('change', () => loadTopics());
     }
 
+    // Vocabulary: Add dropdown / Import
+    const btnAddVocabularyManual = document.getElementById('btnAddVocabularyManual');
+    if (btnAddVocabularyManual) btnAddVocabularyManual.addEventListener('click', () => openVocabularyModal(null));
+
+    const btnImportVocabularyOption = document.getElementById('btnImportVocabulary');
+    if (btnImportVocabularyOption) btnImportVocabularyOption.addEventListener('click', () => openImportVocabularyModal());
+
+    // Vocabulary form
+    if (vocabularySaveBtn) vocabularySaveBtn.addEventListener('click', handleSaveVocabulary);
+    if (vocabImageInput) vocabImageInput.addEventListener('change', handleVocabImageSelect);
+    if (vocabAudioInput) vocabAudioInput.addEventListener('change', handleVocabAudioSelect);
+    if (vocabRoadmapIdInput) {
+        vocabRoadmapIdInput.addEventListener('change', () => {
+            vocabTopicIdInput.value = '';
+            populateVocabTopicSelect();
+            vocabTopicIdInput.classList.remove('is-invalid');
+        });
+    }
+
+    // Filter theo Topic (Vocabulary)
+    if (vocabTopicFilter) {
+        vocabTopicFilter.addEventListener('change', () => loadVocabularies());
+    }
+
+    // Import form
+    if (importVocabularyBtn) importVocabularyBtn.addEventListener('click', handleImportVocabulary);
+    if (importRoadmapIdInput) {
+        importRoadmapIdInput.addEventListener('change', () => {
+            importTopicIdInput.value = '';
+            populateImportTopicSelect();
+            importTopicIdInput.classList.remove('is-invalid');
+        });
+    }
+
     if (confirmDeleteBtn) confirmDeleteBtn.addEventListener('click', handleConfirmDelete);
 
     // Xóa trạng thái invalid khi đang nhập
@@ -1024,6 +1756,15 @@ function bindEvents() {
     }
     if (topicRoadmapIdInput) {
         topicRoadmapIdInput.addEventListener('change', () => topicRoadmapIdInput.classList.remove('is-invalid'));
+    }
+    if (vocabWordInput) {
+        vocabWordInput.addEventListener('input', () => vocabWordInput.classList.remove('is-invalid'));
+    }
+    if (vocabMeaningInput) {
+        vocabMeaningInput.addEventListener('input', () => vocabMeaningInput.classList.remove('is-invalid'));
+    }
+    if (importCsvFileInput) {
+        importCsvFileInput.addEventListener('change', () => importCsvFileInput.classList.remove('is-invalid'));
     }
 }
 
@@ -1042,11 +1783,16 @@ async function initAdmin() {
     // Khởi tạo DataTable
     setupRoadmapsTable();
     setupTopicsDatatable();
+    setupVocabulariesTable();
 
     bindEvents();
 
     try {
         await loadRoadmaps();
+        await loadAllTopicsForCache();
+        // Sau khi có cache, populate các select Vocabulary/Import
+        populateVocabTopicFilter();
+        await loadVocabularies();
         await loadTopics();
     } catch (err) {
         showToast('Không thể tải dữ liệu trang quản trị.', 'error');
