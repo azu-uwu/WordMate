@@ -1,0 +1,643 @@
+/* ============================================================
+   admin.css — WordMate Admin Dashboard Styles
+   Dark theme (Slate/Dark) built on Bootstrap 5
+   ============================================================ */
+
+/* ============================================================
+   1. CSS VARIABLES (DESIGN TOKENS)
+   ============================================================ */
+
+:root {
+    /* Dark palette — Slate */
+    --admin-bg-page: #0F172A;
+    --admin-bg-sidebar: #1E293B;
+    --admin-bg-card: #1E293B;
+    --admin-bg-hover: #334155;
+    --admin-bg-active: #3B4A63;
+
+    /* Primary accent — Warm Gold (keep WordMate brand) */
+    --admin-primary: #FFC300;
+    --admin-primary-dark: #E6B000;
+    --admin-primary-soft: rgba(255, 195, 0, 0.12);
+
+    /* Text colors */
+    --admin-text-primary: #F1F5F9;
+    --admin-text-secondary: #94A3B8;
+    --admin-text-muted: #64748B;
+
+    /* Borders */
+    --admin-border: #334155;
+    --admin-border-light: #475569;
+
+    /* Semantic colors */
+    --admin-success: #10B981;
+    --admin-warning: #F59E0B;
+    --admin-danger: #F43F5E;
+
+    /* Typography */
+    --admin-font-family: 'Inter', 'Be Vietnam Pro', 'Roboto', system-ui, -apple-system, sans-serif;
+
+    /* Layout */
+    --admin-sidebar-width: 260px;
+    --admin-topbar-height: 56px;
+
+    /* Radius & Shadow */
+    --admin-radius-sm: 8px;
+    --admin-radius-md: 12px;
+    --admin-shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.3);
+    --admin-shadow-md: 0 4px 16px rgba(0, 0, 0, 0.25);
+    --admin-shadow-glow: 0 0 0 4px rgba(255, 195, 0, 0.15);
+
+    /* Transitions */
+    --admin-transition-fast: 150ms ease;
+    --admin-transition-base: 200ms ease;
+}
+
+/* ============================================================
+   2. BASE — Body
+   ============================================================ */
+
+.admin-body {
+    margin: 0;
+    min-height: 100vh;
+    background-color: var(--admin-bg-page);
+    color: var(--admin-text-primary);
+    font-family: var(--admin-font-family);
+    overflow-x: hidden;
+}
+
+.admin-body a {
+    color: inherit;
+    text-decoration: none;
+}
+
+.admin-body button {
+    font-family: inherit;
+}
+
+/* ============================================================
+   3. LAYOUT — Sidebar + Main
+   ============================================================ */
+
+.admin-sidebar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    width: var(--admin-sidebar-width);
+    background-color: var(--admin-bg-sidebar);
+    border-right: 1px solid var(--admin-border);
+    flex-direction: column;
+    z-index: 1040;
+}
+
+.admin-main {
+    margin-left: var(--admin-sidebar-width);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    padding: 1.5rem;
+    transition: margin-left var(--admin-transition-base);
+}
+
+/* ============================================================
+   4. SIDEBAR HEADER — brand
+   ============================================================ */
+
+.admin-sidebar-header {
+    padding: 1.25rem 1.25rem;
+    border-bottom: 1px solid var(--admin-border);
+    flex-shrink: 0;
+}
+
+.admin-brand {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.admin-brand img {
+    flex-shrink: 0;
+}
+
+.admin-brand-text {
+    display: flex;
+    flex-direction: column;
+    line-height: 1.2;
+    overflow: hidden;
+}
+
+.admin-brand-title {
+    font-size: 1.0625rem;
+    font-weight: 800;
+    color: var(--admin-text-primary);
+    letter-spacing: -0.01em;
+}
+
+.admin-brand-subtitle {
+    font-size: 0.75rem;
+    font-weight: 500;
+    color: var(--admin-text-muted);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* ============================================================
+   5. SIDEBAR NAVIGATION
+   ============================================================ */
+
+.admin-sidebar-nav {
+    padding: 1rem 0.75rem;
+    flex: 1;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+}
+
+.admin-nav-label {
+    margin: 0 0 0.5rem 0.5rem;
+    font-size: 0.6875rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--admin-text-muted);
+}
+
+.admin-nav-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+}
+
+.admin-nav-item {
+    margin: 0;
+}
+
+.admin-nav-link {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    width: 100%;
+    padding: 0.6875rem 0.875rem;
+    background: transparent;
+    border: none;
+    border-radius: var(--admin-radius-sm);
+    color: var(--admin-text-secondary);
+    font-size: 0.9375rem;
+    font-weight: 500;
+    text-align: left;
+    cursor: pointer;
+    transition: background-color var(--admin-transition-fast),
+                color var(--admin-transition-fast);
+}
+
+.admin-nav-link i {
+    width: 1.25rem;
+    text-align: center;
+    font-size: 1rem;
+    flex-shrink: 0;
+}
+
+.admin-nav-link:hover {
+    background-color: var(--admin-bg-hover);
+    color: var(--admin-text-primary);
+}
+
+.admin-nav-link.active {
+    background-color: var(--admin-primary-soft);
+    color: var(--admin-primary);
+    font-weight: 600;
+    box-shadow: inset 3px 0 0 var(--admin-primary);
+}
+
+.admin-nav-link:focus-visible {
+    outline: 2px solid var(--admin-primary);
+    outline-offset: 2px;
+}
+
+/* ============================================================
+   6. SIDEBAR FOOTER
+   ============================================================ */
+
+.admin-sidebar-footer {
+    padding: 1rem 0.75rem;
+    border-top: 1px solid var(--admin-border);
+    display: flex;
+    flex-direction: column;
+    gap: 0.375rem;
+    flex-shrink: 0;
+}
+
+.admin-back-link,
+.admin-logout-btn {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    width: 100%;
+    padding: 0.625rem 0.875rem;
+    background: transparent;
+    border: none;
+    border-radius: var(--admin-radius-sm);
+    color: var(--admin-text-secondary);
+    font-size: 0.875rem;
+    font-weight: 500;
+    text-align: left;
+    cursor: pointer;
+    transition: background-color var(--admin-transition-fast),
+                color var(--admin-transition-fast);
+}
+
+.admin-back-link i,
+.admin-logout-btn i {
+    width: 1.25rem;
+    text-align: center;
+    flex-shrink: 0;
+}
+
+.admin-back-link:hover {
+    background-color: var(--admin-bg-hover);
+    color: var(--admin-text-primary);
+}
+
+.admin-logout-btn:hover {
+    background-color: rgba(244, 63, 94, 0.12);
+    color: var(--admin-danger);
+}
+
+.admin-back-link:focus-visible,
+.admin-logout-btn:focus-visible {
+    outline: 2px solid var(--admin-primary);
+    outline-offset: 2px;
+}
+
+/* ============================================================
+   7. MOBILE TOPBAR
+   ============================================================ */
+
+.admin-topbar {
+    position: sticky;
+    top: 0;
+    z-index: 1035;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    height: var(--admin-topbar-height);
+    padding: 0 1rem;
+    background-color: var(--admin-bg-sidebar);
+    border-bottom: 1px solid var(--admin-border);
+}
+
+.admin-topbar-toggle {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    padding: 0;
+    border: 1px solid var(--admin-border);
+    color: var(--admin-text-secondary);
+    background: transparent;
+    border-radius: var(--admin-radius-sm);
+    transition: background-color var(--admin-transition-fast),
+                color var(--admin-transition-fast);
+}
+
+.admin-topbar-toggle:hover {
+    background-color: var(--admin-bg-hover);
+    color: var(--admin-text-primary);
+}
+
+.admin-topbar-brand {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--admin-text-primary);
+}
+
+/* ============================================================
+   8. OFFCAVAS (Mobile Sidebar)
+   ============================================================ */
+
+.admin-sidebar-canvas {
+    background-color: var(--admin-bg-sidebar);
+    color: var(--admin-text-primary);
+    width: min(300px, 85vw);
+}
+
+.admin-sidebar-canvas-header {
+    border-bottom: 1px solid var(--admin-border);
+}
+
+.admin-sidebar-canvas .btn-close {
+    filter: invert(1) grayscale(1) brightness(0.8);
+}
+
+.admin-sidebar-canvas-body {
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+}
+
+.admin-sidebar-canvas-footer {
+    padding: 1rem 0.75rem;
+    border-top: 1px solid var(--admin-border);
+    display: flex;
+    flex-direction: column;
+    gap: 0.375rem;
+}
+
+/* ============================================================
+   9. MAIN HEADER
+   ============================================================ */
+
+.admin-main-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 1rem;
+    margin-bottom: 1.75rem;
+    animation: adminFadeInDown 0.4s ease forwards;
+}
+
+.admin-main-heading {
+    min-width: 0;
+}
+
+.admin-main-title {
+    margin: 0 0 0.375rem 0;
+    font-size: 1.75rem;
+    font-weight: 800;
+    color: var(--admin-text-primary);
+    letter-spacing: -0.02em;
+    line-height: 1.2;
+}
+
+.admin-main-subtitle {
+    margin: 0;
+    font-size: 0.9375rem;
+    color: var(--admin-text-secondary);
+    line-height: 1.5;
+}
+
+/* User chip */
+.admin-user-chip {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.5rem 0.875rem;
+    background-color: var(--admin-bg-card);
+    border: 1px solid var(--admin-border);
+    border-radius: var(--admin-radius-md);
+    box-shadow: var(--admin-shadow-sm);
+}
+
+.admin-user-avatar {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 38px;
+    height: 38px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--admin-primary) 0%, var(--admin-primary-dark) 100%);
+    color: #0F172A;
+    font-size: 1rem;
+    flex-shrink: 0;
+}
+
+.admin-user-info {
+    display: flex;
+    flex-direction: column;
+    line-height: 1.2;
+}
+
+.admin-user-name {
+    font-size: 0.9375rem;
+    font-weight: 700;
+    color: var(--admin-text-primary);
+}
+
+.admin-user-role {
+    font-size: 0.75rem;
+    color: var(--admin-text-muted);
+}
+
+/* ============================================================
+   10. SECTIONS
+   ============================================================ */
+
+.admin-section {
+    display: none;
+    animation: adminFadeInUp 0.4s ease forwards;
+}
+
+.admin-section.active {
+    display: block;
+}
+
+/* ============================================================
+   11. PLACEHOLDER — empty section state
+   ============================================================ */
+
+.admin-section-placeholder {
+    min-height: 55vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 3rem 1.5rem;
+    background-color: var(--admin-bg-card);
+    border: 1px dashed var(--admin-border-light);
+    border-radius: var(--admin-radius-md);
+    animation: adminFadeInUp 0.5s ease forwards;
+}
+
+.placeholder-icon {
+    font-size: 3.5rem;
+    color: var(--admin-primary);
+    margin-bottom: 1.25rem;
+    opacity: 0.85;
+}
+
+.placeholder-title {
+    margin: 0 0 0.75rem 0;
+    font-size: 1.375rem;
+    font-weight: 700;
+    color: var(--admin-text-primary);
+}
+
+.placeholder-text {
+    margin: 0;
+    max-width: 420px;
+    font-size: 0.9375rem;
+    line-height: 1.7;
+    color: var(--admin-text-secondary);
+}
+
+/* ============================================================
+   12. TOAST CONTAINER
+   ============================================================ */
+
+.admin-toast-container {
+    position: fixed;
+    top: 1rem;
+    right: 1rem;
+    z-index: 1090;
+    display: flex;
+    flex-direction: column;
+    gap: 0.625rem;
+    max-width: 400px;
+    width: calc(100% - 2rem);
+    pointer-events: none;
+}
+
+/* ============================================================
+   13. ANIMATIONS
+   ============================================================ */
+
+@keyframes adminFadeInDown {
+    0% {
+        opacity: 0;
+        transform: translateY(-12px);
+    }
+    100% {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes adminFadeInUp {
+    0% {
+        opacity: 0;
+        transform: translateY(16px);
+    }
+    100% {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* ============================================================
+   14. RESPONSIVE
+   ============================================================ */
+
+/* === Desktop (lg ≥ 992px) — sidebar visible, main offset === */
+@media (min-width: 992px) {
+    .admin-main {
+        margin-left: var(--admin-sidebar-width);
+    }
+
+    /* Hide desktop sidebar below lg via Bootstrap d-none d-lg-flex */
+}
+
+/* === Tablet / Mobile (< 992px) — topbar + offcanvas === */
+@media (max-width: 991.98px) {
+    .admin-main {
+        margin-left: 0;
+        padding: 1.25rem 1rem;
+    }
+
+    .admin-main-header {
+        margin-bottom: 1.25rem;
+    }
+
+    .admin-main-title {
+        font-size: 1.5rem;
+    }
+
+    .admin-main-subtitle {
+        font-size: 0.875rem;
+    }
+}
+
+/* === Small Mobile (≤ 576px) === */
+@media (max-width: 576px) {
+    .admin-main {
+        padding: 1rem 0.75rem;
+    }
+
+    .admin-main-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.75rem;
+        margin-bottom: 1rem;
+    }
+
+    .admin-main-title {
+        font-size: 1.375rem;
+    }
+
+    .admin-main-subtitle {
+        font-size: 0.8125rem;
+    }
+
+    .admin-user-chip {
+        padding: 0.4375rem 0.75rem;
+    }
+
+    .admin-user-avatar {
+        width: 34px;
+        height: 34px;
+    }
+
+    .admin-user-name {
+        font-size: 0.875rem;
+    }
+
+    .admin-user-role {
+        font-size: 0.6875rem;
+    }
+
+    .admin-section-placeholder {
+        min-height: 45vh;
+        padding: 2.5rem 1.25rem;
+    }
+
+    .placeholder-icon {
+        font-size: 3rem;
+        margin-bottom: 1rem;
+    }
+
+    .placeholder-title {
+        font-size: 1.25rem;
+    }
+
+    .placeholder-text {
+        font-size: 0.875rem;
+    }
+
+    .admin-toast-container {
+        top: 0.75rem;
+        right: 0.75rem;
+        width: calc(100% - 1.5rem);
+    }
+}
+
+/* === Very Small Mobile (≤ 360px) === */
+@media (max-width: 360px) {
+    .admin-main {
+        padding: 0.875rem 0.625rem;
+    }
+
+    .admin-main-title {
+        font-size: 1.25rem;
+    }
+
+    .admin-user-chip {
+        width: 100%;
+    }
+
+    .admin-topbar-brand {
+        font-size: 0.9375rem;
+    }
+}
+
+/* ============================================================
+   END OF admin.css
+   ============================================================ */
