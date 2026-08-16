@@ -251,7 +251,8 @@ function renderFlashcard(vocabulary) {
 
     // Image
     if (vocabulary.image) {
-        flashcardImage.src = vocabulary.image;
+        // flashcardImage.src = vocabulary.image;
+        flashcardImage.src = api.getMediaUrl(vocabulary.image);
         flashcardImage.hidden = false;
     } else {
         flashcardImage.removeAttribute('src');

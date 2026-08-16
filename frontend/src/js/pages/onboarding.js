@@ -11,7 +11,7 @@
  * 5. Error (401) → Redirect to login.html
  */
 
-import { get, put } from '../../services/api.js';
+import { get, put, getMediaUrl } from '../../services/api.js';
 
 // ============================================================
 // DOM ELEMENTS
@@ -111,7 +111,7 @@ function createRoadmapCard(roadmap) {
     
     if (roadmap.image) {
         const img = document.createElement('img');
-        img.src = roadmap.image;
+        img.src = getMediaUrl(roadmap.image);
         img.alt = roadmap.name;
         img.loading = 'lazy';
         imageDiv.appendChild(img);

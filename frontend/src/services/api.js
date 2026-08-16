@@ -5,6 +5,7 @@
  */
 
 const BASE_URL = 'http://localhost:5000/api';
+const MEDIA_BASE_URL = 'http://localhost:5000';
 
 /**
  * Get the stored JWT token from localStorage.
@@ -27,6 +28,28 @@ function setToken(token) {
  */
 function removeToken() {
   localStorage.removeItem('token');
+}
+
+/**
+ * Convert relative media path from API to full backend URL.
+ * Example:
+ * "/uploads/images/example.png"
+ * -> "http://localhost:5000/uploads/images/example.png"
+ */
+function getMediaUrl(path) {
+  if (!path) return null;
+
+  // Nếu đã là URL đầy đủ thì giữ nguyên
+  if (path.startsWith('http://') || path.startsWith('https://')) {
+    return path;
+  }
+
+  // Nếu là đường dẫn tương đối từ backend
+  if (path.startsWith('/uploads/')) {
+    return `${MEDIA_BASE_URL}${path}`;
+  }
+
+  return path;
 }
 
 /**
@@ -150,5 +173,5 @@ function del(endpoint, options = {}) {
   return request(endpoint, { ...options, method: 'DELETE' });
 }
 
-export { get, post, put, patch, del };
-export default { get, post, put, patch, del };
+export { get, post, put, patch, del, getMediaUrl };
+export default { get, post, put, patch, del, getMediaUrl };

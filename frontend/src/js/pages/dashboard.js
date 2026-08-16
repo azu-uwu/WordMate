@@ -167,7 +167,8 @@ function createTopicCard(topic) {
 
     if (topic.image) {
         const img = document.createElement('img');
-        img.src = topic.image;
+        // img.src = topic.image;
+        img.src = api.getMediaUrl(topic.image);
         img.alt = topic.name;
         img.loading = 'lazy';
         imageDiv.appendChild(img);
