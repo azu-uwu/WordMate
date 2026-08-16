@@ -127,7 +127,6 @@ const customQuestionForm = document.getElementById('customQuestionForm');
 const customQuestionIdInput = document.getElementById('customQuestionId');
 const cqRoadmapIdInput = document.getElementById('cqRoadmapId');
 const cqTopicIdInput = document.getElementById('cqTopicId');
-const cqVocabularySearchInput = document.getElementById('cqVocabularySearch');
 const cqVocabularyIdInput = document.getElementById('cqVocabularyId');
 const cqQuestionInput = document.getElementById('cqQuestion');
 const cqOptionAInput = document.getElementById('cqOptionA');
@@ -425,12 +424,8 @@ function setupRoadmapsTable() {
             {
                 data: null,
                 className: 'admin-col-index',
-                render: (data, type, row, meta) => {
-                    if (type === 'display') {
-                        return `<span class="text-muted">${meta.row + 1}</span>`;
-                    }
-                    return meta.row + 1;
-                }
+                // STT được đánh lại trong sự kiện 'draw' bên dưới, không dùng meta.row.
+                render: () => ''
             },
             {
                 data: 'image',
@@ -491,6 +486,15 @@ function setupRoadmapsTable() {
         }
     });
 
+    // Đánh lại STT từ 1 theo đúng thứ tự dòng đang hiển thị trên từng trang.
+    // 'draw' kích hoạt sau mỗi lần load dữ liệu, sort, filter, chuyển trang, redraw.
+    roadmapsDataTable.on('draw', () => {
+        const pageInfo = roadmapsDataTable.page.info();
+        $('#roadmapsTable tbody tr').each(function (index) {
+            $(this).find('td.admin-col-index').html(`<span class="text-muted">${pageInfo.start + index + 1}</span>`);
+        });
+    });
+
     $('#roadmapsTable tbody').on('click', '.admin-action-btn', (e) => {
         const btn = e.currentTarget;
         const action = btn.dataset.action;
@@ -512,15 +516,8 @@ function setupTopicsDatatable() {
             {
                 data: null,
                 className: 'admin-col-index',
-                // render: (data, type, meta) => {
-                //     if (type === 'display') {
-                //         return `<span class="text-muted">${meta.row + 1}</span>`;
-                //     }
-                //     return meta.row + 1;
-                // }
-                render: function (data, type, row, meta) {
-                    return `<span class="text-muted">${meta.row + 1}</span>`;
-                }       
+                // STT được đánh lại trong sự kiện 'draw' bên dưới, không dùng meta.row.
+                render: () => ''
             },
             {
                 data: 'image',
@@ -586,6 +583,15 @@ function setupTopicsDatatable() {
             $('#topicsTable_filter input').addClass('form-control form-control-sm');
             $('#topicsTable_filter label').addClass('admin-datatable-search');
         }
+    });
+
+    // Đánh lại STT từ 1 theo đúng thứ tự dòng đang hiển thị trên từng trang.
+    // 'draw' kích hoạt sau mỗi lần load dữ liệu, sort, filter, chuyển trang, redraw.
+    topicsDataTable.on('draw', () => {
+        const pageInfo = topicsDataTable.page.info();
+        $('#topicsTable tbody tr').each(function (index) {
+            $(this).find('td.admin-col-index').html(`<span class="text-muted">${pageInfo.start + index + 1}</span>`);
+        });
     });
 
     $('#topicsTable tbody').on('click', '.admin-action-btn', (e) => {
@@ -1781,6 +1787,7 @@ function resetCustomQuestionForm() {
     cqRoadmapIdInput.classList.remove('is-invalid');
     cqTopicIdInput.classList.remove('is-invalid');
     cqVocabularyIdInput.classList.remove('is-invalid');
+    cqVocabularyIdInput.disabled = true;
     cqQuestionInput.classList.remove('is-invalid');
     cqOptionAInput.classList.remove('is-invalid');
     cqOptionBInput.classList.remove('is-invalid');
@@ -1791,7 +1798,6 @@ function resetCustomQuestionForm() {
     customQuestionFormError.textContent = '';
     cqIsActiveInput.checked = true;
     updateActiveLabel(cqIsActiveInput, cqIsActiveLabel);
-    cqVocabularySearchInput.value = '';
     customQuestionSaveBtnText.textContent = 'Thêm mới';
     customQuestionSaveBtnText.dataset.default = 'Thêm mới';
 }
@@ -1799,16 +1805,24 @@ function resetCustomQuestionForm() {
 function filterCqVocabularyOptions() {
     if (!cqVocabularyIdInput) return;
 
-    const keyword = (cqVocabularySearchInput.value || '').trim().toLowerCase();
     const selected = cqVocabularyIdInput.value;
-    cqVocabularyIdInput.innerHTML = '<option value="">-- Chọn Từ vựng --</option>';
+    cqVocabularyIdInput.innerHTML = '<option value="">-- Chọn Từ Vựng --</option>';
+
+    // Chưa chọn Topic → disabled, chỉ hiển thị option mặc định
+    if (!cqTopicIdInput.value) {
+        cqVocabularyIdInput.disabled = true;
+        cqVocabularyIdInput.value = '';
+        return;
+    }
+
+    // Đã chọn Topic → enabled, chỉ hiển thị Vocabulary thuộc Topic đó
+    cqVocabularyIdInput.disabled = false;
 
     const filtered = vocabulariesCache.filter((v) => {
         const topic = topicsCache.find((t) => Number(t.id) === Number(v.topic_id));
         const roadmapMatch = !cqRoadmapIdInput.value || (topic && String(topic.roadmap_id) === String(cqRoadmapIdInput.value));
         const topicMatch = !cqTopicIdInput.value || (topic && String(topic.id) === String(cqTopicIdInput.value));
-        const wordMatch = !keyword || String(v.word || '').toLowerCase().includes(keyword);
-        return roadmapMatch && topicMatch && wordMatch;
+        return roadmapMatch && topicMatch;
     });
 
     filtered.forEach((vocab) => {
@@ -2195,6 +2209,7 @@ function bindEvents() {
     if (cqRoadmapIdInput) {
         cqRoadmapIdInput.addEventListener('change', () => {
             cqTopicIdInput.value = '';
+            cqVocabularyIdInput.value = '';
             populateCqTopicSelect();
             filterCqVocabularyOptions();
             cqRoadmapIdInput.classList.remove('is-invalid');
@@ -2206,9 +2221,6 @@ function bindEvents() {
             filterCqVocabularyOptions();
             cqTopicIdInput.classList.remove('is-invalid');
         });
-    }
-    if (cqVocabularySearchInput) {
-        cqVocabularySearchInput.addEventListener('input', () => filterCqVocabularyOptions());
     }
     if (cqVocabularyIdInput) {
         cqVocabularyIdInput.addEventListener('change', () => cqVocabularyIdInput.classList.remove('is-invalid'));

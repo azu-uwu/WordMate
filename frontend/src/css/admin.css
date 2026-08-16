@@ -1212,24 +1212,6 @@
     height: 78px;
 }
 
-/* Searchable vocabulary select (Custom Question modal) */
-.admin-modal-content .admin-searchable-select {
-    background-color: var(--admin-bg-page);
-    border-color: var(--admin-border);
-    color: var(--admin-text-primary);
-}
-
-.admin-modal-content .admin-searchable-select:focus {
-    border-color: var(--admin-primary);
-    box-shadow: var(--admin-shadow-glow);
-    color: var(--admin-text-primary);
-}
-
-.admin-modal-content .admin-searchable-select option {
-    background-color: var(--admin-bg-card);
-    color: var(--admin-text-primary);
-}
-
 /* ============================================================
    25. IMPORT ERRORS TABLE
    ============================================================ */
