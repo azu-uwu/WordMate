@@ -2718,8 +2718,7 @@ Tạo JavaScript điều khiển toàn bộ hoạt động của AI Chat, quản
 2. Load component AI Chat trên các trang người học.
 3. Quản lý trạng thái popup:
    - Mở.
-   - Đóng.
-   - Thu nhỏ về icon.
+   - Đóng / Thu nhỏ về icon.
 4. Quản lý `currentConversationId`.
 5. Khi người dùng bắt đầu một phiên đăng nhập mới, không tiếp tục conversation hiện tại của phiên trước; khi mở AI lần đầu trong phiên đăng nhập, tạo conversation mới nếu chưa có conversation hiện tại.
 6. Lưu `currentConversationId` để conversation hiện tại được giữ khi user chuyển giữa các trang MPA.
