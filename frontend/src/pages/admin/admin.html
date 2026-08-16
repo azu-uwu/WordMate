@@ -19,6 +19,9 @@
     <!-- Font Awesome 6 (Free) -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 
+    <!-- DataTables (Bootstrap 5 theme) -->
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.13.8/css/dataTables.bootstrap5.min.css">
+
     <!-- Admin Dashboard CSS -->
     <link rel="stylesheet" href="../../css/admin.css">
 </head>
@@ -181,23 +184,88 @@
 
         <!-- Section: Roadmaps -->
         <section class="admin-section active" id="section-roadmaps" data-section="roadmaps" aria-label="Roadmaps">
-            <div class="admin-section-placeholder">
-                <i class="fa-solid fa-map placeholder-icon"></i>
-                <h2 class="placeholder-title">Roadmaps</h2>
-                <p class="placeholder-text">
-                    Chức năng quản lý Lộ trình (Roadmaps) sẽ được triển khai tại đây.
-                </p>
+            <div class="admin-data-card">
+                <div class="admin-data-toolbar">
+                    <div class="admin-data-toolbar-left">
+                        <h2 class="admin-data-title">Danh sách Roadmap</h2>
+                        <p class="admin-data-subtitle">Quản lý lộ trình học tập trong hệ thống</p>
+                    </div>
+                    <button type="button" class="btn btn-primary admin-btn-primary" id="btnAddRoadmap">
+                        <i class="fa-solid fa-plus"></i>
+                        <span>Thêm Roadmap</span>
+                    </button>
+                </div>
+
+                <div class="admin-table-wrapper">
+                    <div class="admin-table-loading d-none" id="roadmapsTableLoading">
+                        <div class="spinner-border text-warning" role="status"></div>
+                        <span>Đang tải dữ liệu...</span>
+                    </div>
+                    <div class="table-responsive">
+                        <table id="roadmapsTable" class="table table-hover admin-datatable w-100">
+                            <thead>
+                                <tr>
+                                    <th scope="col" class="admin-col-index">#</th>
+                                    <th scope="col">Ảnh</th>
+                                    <th scope="col">Tên Roadmap</th>
+                                    <th scope="col">Mô tả</th>
+                                    <th scope="col">Thứ tự</th>
+                                    <th scope="col">Trạng thái</th>
+                                    <th scope="col" class="admin-col-actions">Thao tác</th>
+                                </tr>
+                            </thead>
+                            <tbody></tbody>
+                        </table>
+                    </div>
+                </div>
             </div>
         </section>
 
         <!-- Section: Topics -->
         <section class="admin-section" id="section-topics" data-section="topics" aria-label="Topics">
-            <div class="admin-section-placeholder">
-                <i class="fa-solid fa-folder-tree placeholder-icon"></i>
-                <h2 class="placeholder-title">Topics</h2>
-                <p class="placeholder-text">
-                    Chức năng quản lý Chủ đề (Topics) sẽ được triển khai tại đây.
-                </p>
+            <div class="admin-data-card">
+                <div class="admin-data-toolbar">
+                    <div class="admin-data-toolbar-left">
+                        <h2 class="admin-data-title">Danh sách Topic</h2>
+                        <p class="admin-data-subtitle">Quản lý chủ đề từ vựng theo từng Roadmap</p>
+                    </div>
+                    <div class="admin-data-toolbar-right">
+                        <div class="admin-filter-group">
+                            <label class="form-label" for="topicsRoadmapFilter">Roadmap</label>
+                            <select id="topicsRoadmapFilter" class="form-select form-select-sm">
+                                <option value="">Tất cả Roadmap</option>
+                            </select>
+                        </div>
+                        <button type="button" class="btn btn-primary admin-btn-primary" id="btnAddTopic">
+                            <i class="fa-solid fa-plus"></i>
+                            <span>Thêm Topic</span>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="admin-table-wrapper">
+                    <div class="admin-table-loading d-none" id="topicsTableLoading">
+                        <div class="spinner-border text-warning" role="status"></div>
+                        <span>Đang tải dữ liệu...</span>
+                    </div>
+                    <div class="table-responsive">
+                        <table id="topicsTable" class="table table-hover admin-datatable w-100">
+                            <thead>
+                                <tr>
+                                    <th scope="col" class="admin-col-index">#</th>
+                                    <th scope="col">Ảnh</th>
+                                    <th scope="col">Tên Topic</th>
+                                    <th scope="col">Roadmap</th>
+                                    <th scope="col">Mô tả</th>
+                                    <th scope="col">Thứ tự</th>
+                                    <th scope="col">Trạng thái</th>
+                                    <th scope="col" class="admin-col-actions">Thao tác</th>
+                                </tr>
+                            </thead>
+                            <tbody></tbody>
+                        </table>
+                    </div>
+                </div>
             </div>
         </section>
 
@@ -207,7 +275,7 @@
                 <i class="fa-solid fa-book-open placeholder-icon"></i>
                 <h2 class="placeholder-title">Vocabularies</h2>
                 <p class="placeholder-text">
-                    Chức năng quản lý Từ vựng (Vocabularies) sẽ được triển khai tại đây.
+                    Chức năng quản lý Từ vựng (Vocabularies) sẽ được triển khai ở task tiếp theo.
                 </p>
             </div>
         </section>
@@ -218,21 +286,212 @@
                 <i class="fa-solid fa-circle-question placeholder-icon"></i>
                 <h2 class="placeholder-title">Custom Questions</h2>
                 <p class="placeholder-text">
-                    Chức năng quản lý Câu hỏi tùy chỉnh (Custom Questions) sẽ được triển khai tại đây.
+                    Chức năng quản lý Câu hỏi tùy chỉnh (Custom Questions) sẽ được triển khai ở task tiếp theo.
                 </p>
             </div>
         </section>
 
     </main>
 
+    <!-- ===== MODAL: Roadmap (Create / Edit) ===== -->
+    <div class="modal fade" id="roadmapModal" tabindex="-1" aria-labelledby="roadmapModalLabel"
+         aria-hidden="true" data-bs-backdrop="static">
+        <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
+            <div class="modal-content admin-modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="roadmapModalLabel">Thêm Roadmap</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Đóng"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="roadmapForm" novalidate>
+                        <input type="hidden" id="roadmapId">
+
+                        <!-- Image uploader -->
+                        <div class="admin-image-uploader mb-4">
+                            <div class="admin-image-preview-box" id="roadmapImagePreviewBox">
+                                <img id="roadmapImagePreview" src="" alt="Preview ảnh" class="d-none">
+                                <div id="roadmapImagePlaceholder" class="admin-image-placeholder">
+                                    <i class="fa-solid fa-cloud-arrow-up"></i>
+                                    <span>Ảnh đại diện Roadmap</span>
+                                </div>
+                            </div>
+                            <div class="admin-image-uploader-controls">
+                                <label class="btn btn-sm btn-outline-secondary mb-0">
+                                    <i class="fa-solid fa-upload"></i> Chọn ảnh
+                                    <input type="file" id="roadmapImageInput"
+                                           accept=".jpg,.jpeg,.png,image/jpeg,image/png" hidden>
+                                </label>
+                                <span class="text-muted small">JPG, PNG • tối đa 5MB</span>
+                            </div>
+                        </div>
+
+                        <div class="row g-3">
+                            <div class="col-12">
+                                <label class="form-label" for="roadmapName">Tên Roadmap <span class="text-danger">*</span></label>
+                                <input type="text" class="form-control" id="roadmapName"
+                                       placeholder="VD: Lộ trình IELTS 6.0" maxlength="255" required>
+                                <div class="invalid-feedback" id="roadmapNameError">Vui lòng nhập tên Roadmap.</div>
+                            </div>
+                            <div class="col-12">
+                                <label class="form-label" for="roadmapDescription">Mô tả</label>
+                                <textarea class="form-control" id="roadmapDescription" rows="3"
+                                          placeholder="Mô tả ngắn về lộ trình này (tuỳ chọn)"></textarea>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label" for="roadmapSortOrder">Thứ tự hiển thị</label>
+                                <input type="number" class="form-control" id="roadmapSortOrder" min="0" step="1" value="0">
+                                <div class="form-text">Giá trị nhỏ hơn hiển thị trước.</div>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label d-block">Trạng thái</label>
+                                <div class="form-check form-switch admin-form-switch mt-1">
+                                    <input class="form-check-input" type="checkbox" role="switch"
+                                           id="roadmapIsActive" checked>
+                                    <label class="form-check-label" for="roadmapIsActive" id="roadmapIsActiveLabel">
+                                        Đang hoạt động
+                                    </label>
+                                </div>
+                                <div class="form-text">Bật để hiển thị trên trang học viên.</div>
+                            </div>
+                        </div>
+
+                        <div class="alert alert-danger d-none mt-3 mb-0" id="roadmapFormError" role="alert"></div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Hủy</button>
+                    <button type="button" class="btn btn-primary admin-btn-primary" id="roadmapSaveBtn">
+                        <span class="spinner-border spinner-border-sm d-none me-1" id="roadmapSaveSpinner" role="status"></span>
+                        <span id="roadmapSaveBtnText">Thêm mới</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== MODAL: Topic (Create / Edit) ===== -->
+    <div class="modal fade" id="topicModal" tabindex="-1" aria-labelledby="topicModalLabel"
+         aria-hidden="true" data-bs-backdrop="static">
+        <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
+            <div class="modal-content admin-modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="topicModalLabel">Thêm Topic</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Đóng"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="topicForm" novalidate>
+                        <input type="hidden" id="topicId">
+
+                        <!-- Image uploader -->
+                        <div class="admin-image-uploader mb-4">
+                            <div class="admin-image-preview-box" id="topicImagePreviewBox">
+                                <img id="topicImagePreview" class="d-none" alt="Preview ảnh">
+                                <div id="topicImagePlaceholder" class="admin-image-placeholder">
+                                    <i class="fa-solid fa-cloud-arrow-up"></i>
+                                    <span>Ảnh đại diện Topic</span>
+                                </div>
+                            </div>
+                            <div class="admin-image-uploader-controls">
+                                <label class="btn btn-sm btn-outline-secondary mb-0">
+                                    <i class="fa-solid fa-upload"></i> Chọn ảnh
+                                    <input type="file" id="topicImageInput"
+                                           accept=".jpg,.jpeg,.png,image/jpeg,image/png" hidden>
+                                </label>
+                                <span class="text-muted small">JPG, PNG • tối đa 5MB</span>
+                            </div>
+                        </div>
+
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label class="form-label" for="topicRoadmapId">Roadmap <span class="text-danger">*</span></label>
+                                <select class="form-select" id="topicRoadmapId" required>
+                                    <option value="">-- Chọn Roadmap --</option>
+                                </select>
+                                <div class="invalid-feedback">Vui lòng chọn Roadmap.</div>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label" for="topicName">Tên Topic <span class="text-danger">*</span></label>
+                                <input type="text" class="form-control" id="topicName"
+                                       placeholder="VD: Basic Vocabulary" maxlength="255" required>
+                                <div class="invalid-feedback">Vui lòng nhập tên Topic.</div>
+                            </div>
+                            <div class="col-12">
+                                <label class="form-label" for="topicDescription">Mô tả</label>
+                                <textarea class="form-control" id="topicDescription" rows="3"
+                                          placeholder="Mô tả ngắn về chủ đề này (tuỳ chọn)"></textarea>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label" for="topicSortOrder">Thứ tự hiển thị</label>
+                                <input type="number" class="form-control" id="topicSortOrder" min="0" step="1" value="0">
+                                <div class="form-text">Số nhỏ hơn hiển thị trước trong Roadmap.</div>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label d-block">Trạng thái</label>
+                                <div class="form-check form-switch admin-form-switch mt-1">
+                                    <input class="form-check-input" type="checkbox" role="switch"
+                                           id="topicIsActive" checked>
+                                    <label class="form-check-label" for="topicIsActive" id="topicIsActiveLabel">
+                                        Đang hoạt động
+                                    </label>
+                                </div>
+                                <div class="form-text">Bật để hiển thị trên trang học viên.</div>
+                            </div>
+                        </div>
+
+                        <div class="alert alert-danger d-none mt-3 mb-0" id="topicFormError" role="alert"></div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Hủy</button>
+                    <button type="button" class="btn btn-primary admin-btn-primary" id="topicSaveBtn">
+                        <span class="spinner-border spinner-border-sm d-none me-1" id="topicSaveSpinner" role="status"></span>
+                        <span id="topicSaveBtnText">Thêm mới</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== MODAL: Confirm Delete ===== -->
+    <div class="modal fade" id="confirmDeleteModal" tabindex="-1" aria-labelledby="confirmDeleteModalLabel"
+         aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-sm">
+            <div class="modal-content admin-modal-content">
+                <div class="modal-body text-center p-4">
+                    <div class="admin-confirm-delete-icon mb-3">
+                        <i class="fa-solid fa-triangle-exclamation"></i>
+                    </div>
+                    <h5 class="fw-bold mb-2">Xác nhận xóa</h5>
+                    <p class="text-secondary mb-0" id="confirmDeleteText">
+                        Bạn có chắc chắn muốn xóa bản ghi này? Hành động không thể hoàn tác.
+                    </p>
+                </div>
+                <div class="modal-footer justify-content-center border-0 pb-4">
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Hủy</button>
+                    <button type="button" class="btn btn-danger" id="confirmDeleteBtn">
+                        <span class="spinner-border spinner-border-sm d-none me-1" id="confirmDeleteSpinner" role="status"></span>
+                        Xóa
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Toast notification container -->
     <div id="toast-container" class="admin-toast-container" aria-live="polite" aria-atomic="true"></div>
 
     <!-- ===== SCRIPTS ===== -->
 
+    <!-- jQuery (bắt buộc cho DataTables) -->
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+
     <!-- Bootstrap 5 JS Bundle (includes Offcanvas) -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js">
     </script>
+
+    <!-- DataTables -->
+    <script src="https://cdn.datatables.net/1.13.8/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdn.datatables.net/1.13.8/js/dataTables.bootstrap5.min.js"></script>
 
     <!-- Admin Dashboard Page Script -->
     <script type="module" src="../../js/pages/admin.js"></script>

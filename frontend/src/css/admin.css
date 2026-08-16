@@ -639,5 +639,539 @@
 }
 
 /* ============================================================
+   15. ADMIN DATA CARD — toolbar + table wrapper
+   ============================================================ */
+
+.admin-data-card {
+    background-color: var(--admin-bg-card);
+    border: 1px solid var(--admin-border);
+    border-radius: var(--admin-radius-md);
+    padding: 1.5rem;
+    box-shadow: var(--admin-shadow-sm);
+    animation: adminFadeInUp 0.5s ease forwards;
+}
+
+.admin-data-toolbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 1rem;
+    margin-bottom: 1.25rem;
+}
+
+.admin-data-toolbar-left {
+    min-width: 0;
+}
+
+.admin-data-title {
+    margin: 0 0 0.25rem 0;
+    font-size: 1.125rem;
+    font-weight: 700;
+    color: var(--admin-text-primary);
+    letter-spacing: -0.01em;
+}
+
+.admin-data-subtitle {
+    margin: 0;
+    font-size: 0.8125rem;
+    color: var(--admin-text-muted);
+}
+
+.admin-data-toolbar-right {
+    display: flex;
+    align-items: flex-end;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+}
+
+.admin-filter-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+}
+
+.admin-filter-group .form-label {
+    margin: 0;
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--admin-text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+}
+
+.admin-filter-group .form-select {
+    min-width: 200px;
+    background-color: var(--admin-bg-page);
+    border-color: var(--admin-border);
+    color: var(--admin-text-primary);
+}
+
+.admin-filter-group .form-select:focus {
+    border-color: var(--admin-primary);
+    box-shadow: var(--admin-shadow-glow);
+}
+
+.admin-table-wrapper {
+    position: relative;
+}
+
+.admin-table-loading {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.75rem;
+    padding: 3rem 1rem;
+    color: var(--admin-text-secondary);
+    font-size: 0.9375rem;
+}
+
+/* ============================================================
+   16. PRIMARY BUTTON (gold)
+   ============================================================ */
+
+.admin-btn-primary {
+    background-color: var(--admin-primary);
+    border-color: var(--admin-primary);
+    color: #0F172A;
+    font-weight: 600;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.admin-btn-primary:hover,
+.admin-btn-primary:focus {
+    background-color: var(--admin-primary-dark);
+    border-color: var(--admin-primary-dark);
+    color: #0F172A;
+}
+
+.admin-btn-primary:disabled {
+    background-color: var(--admin-primary);
+    border-color: var(--admin-primary);
+    color: #0F172A;
+    opacity: 0.65;
+}
+
+/* ============================================================
+   17. DATATABLES — dark theme
+   ============================================================ */
+
+.admin-datatable {
+    color: var(--admin-text-primary);
+    margin-bottom: 0 !important;
+}
+
+.admin-datatable thead th {
+    background-color: var(--admin-bg-page);
+    color: var(--admin-text-secondary);
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    border-bottom: 1px solid var(--admin-border) !important;
+    white-space: nowrap;
+    padding: 0.75rem 0.625rem;
+}
+
+.admin-datatable tbody td {
+    padding: 0.625rem;
+    border-bottom: 1px solid var(--admin-border);
+    vertical-align: middle;
+    font-size: 0.875rem;
+}
+
+.admin-datatable tbody tr:hover td {
+    background-color: rgba(51, 65, 85, 0.35);
+}
+
+.admin-datatable .admin-col-index {
+    width: 48px;
+    text-align: center;
+}
+
+.admin-datatable .admin-col-actions {
+    min-width: 110px;
+    text-align: right;
+}
+
+.admin-datatable-search {
+    color: var(--admin-text-muted);
+}
+
+.admin-datatable-search input {
+    background-color: var(--admin-bg-page);
+    border-color: var(--admin-border);
+    color: var(--admin-text-primary);
+}
+
+.admin-datatable-search input:focus {
+    border-color: var(--admin-primary);
+    box-shadow: var(--admin-shadow-glow);
+    color: var(--admin-text-primary);
+}
+
+/* Length menu */
+.admin-datatable + .dataTables_wrapper .dataTables_length select {
+    background-color: var(--admin-bg-page);
+    border-color: var(--admin-border);
+    color: var(--admin-text-primary);
+}
+
+/* Info, pagination */
+.admin-datatable + .dataTables_wrapper .dataTables_info {
+    color: var(--admin-text-muted);
+    font-size: 0.8125rem;
+    padding-top: 0.9rem;
+}
+
+.admin-datatable + .dataTables_wrapper .dataTables_paginate {
+    padding-top: 0.9rem;
+}
+
+.admin-datatable + .dataTables_wrapper .pagination .page-link {
+    background-color: var(--admin-bg-page);
+    border-color: var(--admin-border);
+    color: var(--admin-text-secondary);
+}
+
+.admin-datatable + .dataTables_wrapper .pagination .page-link:hover {
+    background-color: var(--admin-bg-hover);
+    color: var(--admin-text-primary);
+}
+
+.admin-datatable + .dataTables_wrapper .pagination .page-item.active .page-link {
+    background-color: var(--admin-primary);
+    border-color: var(--admin-primary);
+    color: #0F172A;
+}
+
+/* ============================================================
+   18. ROW ACTIONS / THUMBNAIL / BADGES
+   ============================================================ */
+
+.admin-row-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 0.375rem;
+}
+
+.admin-action-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    padding: 0;
+    border-radius: var(--admin-radius-sm);
+}
+
+.admin-action-btn:focus-visible {
+    outline: 2px solid var(--admin-primary);
+    outline-offset: 2px;
+}
+
+.admin-thumb {
+    width: 56px;
+    height: 40px;
+    border-radius: var(--admin-radius-sm);
+    overflow: hidden;
+    background-color: var(--admin-bg-page);
+    border: 1px solid var(--admin-border);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.admin-thumb img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+}
+
+.admin-thumb-empty {
+    color: var(--admin-text-muted);
+    font-size: 1rem;
+}
+
+.admin-badge-success {
+    background-color: rgba(16, 185, 129, 0.15);
+    color: #34D399;
+    font-weight: 600;
+    font-size: 0.75rem;
+    padding: 0.4em 0.65em;
+    border: 1px solid rgba(16, 185, 129, 0.35);
+    border-radius: 999px;
+}
+
+.admin-badge-muted {
+    background-color: rgba(100, 116, 139, 0.15);
+    color: #94A3B8;
+    font-weight: 600;
+    font-size: 0.75rem;
+    padding: 0.4em 0.65em;
+    border: 1px solid rgba(100, 116, 139, 0.35);
+    border-radius: 999px;
+}
+
+/* ============================================================
+   19. MODAL — dark theme
+   ============================================================ */
+
+.admin-modal-content {
+    background-color: var(--admin-bg-card);
+    color: var(--admin-text-primary);
+    border: 1px solid var(--admin-border);
+    border-radius: var(--admin-radius-md);
+}
+
+.admin-modal-content .modal-header {
+    border-bottom: 1px solid var(--admin-border);
+}
+
+.admin-modal-content .modal-title {
+    font-weight: 700;
+    color: var(--admin-text-primary);
+}
+
+.admin-modal-content .btn-close {
+    filter: invert(1) grayscale(1) brightness(0.8);
+}
+
+.admin-modal-content .modal-footer {
+    border-top: 1px solid var(--admin-border);
+}
+
+/* Form controls inside modal */
+.admin-modal-content .form-label {
+    font-size: 0.8125rem;
+    font-weight: 600;
+    color: var(--admin-text-secondary);
+}
+
+.admin-modal-content .form-control,
+.admin-modal-content .form-select {
+    background-color: var(--admin-bg-page);
+    border-color: var(--admin-border);
+    color: var(--admin-text-primary);
+}
+
+.admin-modal-content .form-control:focus,
+.admin-modal-content .form-select:focus {
+    border-color: var(--admin-primary);
+    box-shadow: var(--admin-shadow-glow);
+    color: var(--admin-text-primary);
+}
+
+.admin-modal-content .form-control::placeholder {
+    color: var(--admin-text-muted);
+}
+
+.admin-modal-content .form-text {
+    color: var(--admin-text-muted);
+}
+
+.admin-form-switch .form-check-input {
+    width: 2.5em;
+    height: 1.25em;
+    cursor: pointer;
+}
+
+.admin-form-switch .form-check-input:checked {
+    background-color: var(--admin-success);
+    border-color: var(--admin-success);
+}
+
+.admin-form-switch .form-check-input:focus {
+    box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.15);
+}
+
+.admin-form-switch .form-check-label {
+    font-weight: 600;
+    color: var(--admin-text-primary);
+    cursor: pointer;
+}
+
+/* Error alert */
+.admin-modal-content .alert-danger {
+    background-color: rgba(244, 63, 94, 0.12);
+    border: 1px solid rgba(244, 63, 94, 0.35);
+    color: #FDA4AF;
+    border-radius: var(--admin-radius-sm);
+}
+
+/* ============================================================
+   20. IMAGE UPLOADER
+   ============================================================ */
+
+.admin-image-uploader {
+    display: flex;
+    align-items: flex-start;
+    gap: 1rem;
+    flex-wrap: wrap;
+}
+
+.admin-image-preview-box {
+    width: 140px;
+    height: 100px;
+    border: 2px dashed var(--admin-border-light);
+    border-radius: var(--admin-radius-md);
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: var(--admin-bg-page);
+    flex-shrink: 0;
+    cursor: pointer;
+    transition: border-color var(--admin-transition-fast);
+}
+
+.admin-image-preview-box:hover {
+    border-color: var(--admin-primary);
+}
+
+.admin-image-preview-box img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+}
+
+.admin-image-placeholder {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.375rem;
+    color: var(--admin-text-muted);
+    font-size: 0.75rem;
+    text-align: center;
+    padding: 0.5rem;
+}
+
+.admin-image-placeholder i {
+    font-size: 1.75rem;
+    color: var(--admin-primary);
+    opacity: 0.85;
+}
+
+.admin-image-uploader-controls {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.375rem;
+    padding-top: 0.125rem;
+}
+
+/* ============================================================
+   21. CONFIRM DELETE MODAL
+   ============================================================ */
+
+.admin-confirm-delete-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 64px;
+    height: 64px;
+    margin-inline: auto;
+    border-radius: 50%;
+    background-color: rgba(244, 63, 94, 0.12);
+    color: var(--admin-danger);
+    font-size: 1.75rem;
+}
+
+/* ============================================================
+   22. CUSTOM TOAST (nâng cấp cho type success/error)
+   ============================================================ */
+
+.admin-toast {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.625rem;
+    padding: 0.875rem 1rem;
+    border-radius: var(--admin-radius-sm);
+    background-color: var(--admin-bg-card);
+    border: 1px solid var(--admin-border);
+    border-left-width: 4px;
+    color: var(--admin-text-primary);
+    font-size: 0.875rem;
+    line-height: 1.5;
+    box-shadow: var(--admin-shadow-md);
+    animation: adminFadeInDown 0.3s ease forwards;
+    max-width: 100%;
+}
+
+.admin-toast i {
+    flex-shrink: 0;
+    margin-top: 0.125rem;
+}
+
+.admin-toast.toast-success {
+    border-left-color: var(--admin-success);
+}
+
+.admin-toast.toast-success i {
+    color: var(--admin-success);
+}
+
+.admin-toast.toast-error {
+    border-left-color: var(--admin-danger);
+}
+
+.admin-toast.toast-error i {
+    color: var(--admin-danger);
+}
+
+.admin-toast.toast-info {
+    border-left-color: var(--admin-primary);
+}
+
+.admin-toast.toast-info i {
+    color: var(--admin-primary);
+}
+
+/* ============================================================
+   23. RESPONSIVE — data card & toolbar
+   ============================================================ */
+
+@media (max-width: 576px) {
+    .admin-data-card {
+        padding: 1rem;
+    }
+
+    .admin-data-toolbar {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 0.75rem;
+    }
+
+    .admin-data-toolbar-right {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 0.625rem;
+    }
+
+    .admin-filter-group .form-select {
+        min-width: 100%;
+    }
+
+    .admin-data-toolbar .btn {
+        width: 100%;
+        justify-content: center;
+    }
+
+    .admin-image-uploader {
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+    }
+
+    .admin-image-uploader-controls {
+        align-items: center;
+    }
+}
+
+/* ============================================================
    END OF admin.css
    ============================================================ */
