@@ -2427,16 +2427,31 @@ Cập nhật Dashboard frontend: hiển thị streak từ API.
 
 ### Mục tiêu
 
-Tạo model cho ai_conversations và ai_messages.
+Tạo model để quản lý conversation và message của AI Assistant thông qua hai bảng `ai_conversations` và `ai_messages`.
 
 ### Công việc cần thực hiện
 
 1. Tạo file `backend/src/models/aiModel.js`.
-2. Hàm: `createConversation(userId)`, `getConversationsByUser(userId)`, `createMessage({ conversationId, role, content })`, `getMessagesByConversation(conversationId, limit)`, `getConversationById(conversationId)`.
+2. Tạo hàm `createConversation(userId)`.
+3. Tạo hàm `getConversationsByUser(userId, limit)` để lấy các conversation gần nhất của user.
+4. Tạo hàm `createMessage({ conversationId, role, content })`.
+5. Tạo hàm `getMessagesByConversation(conversationId, limit)` để lấy các message gần nhất trong conversation.
+6. Tạo hàm `getConversationById(conversationId)`.
+7. Đảm bảo conversation chỉ được truy cập bởi đúng user sở hữu conversation.
 
 ### File cần tạo
 
 - `backend/src/models/aiModel.js`
+
+### Acceptance Criteria
+
+- Tạo được conversation mới cho user.
+- Lấy được danh sách conversation gần nhất của user theo `limit`.
+- Tạo và lưu được message với `role = 'user'` hoặc `role = 'assistant'`.
+- Lấy được các message gần nhất của một conversation theo `limit`.
+- Lấy được conversation theo `conversationId`.
+- Không cho phép user truy cập conversation thuộc user khác.
+- Sử dụng Prepared Statements cho các truy vấn database.
 
 ---
 
@@ -2445,7 +2460,7 @@ Tạo model cho ai_conversations và ai_messages.
 ### Thông tin
 
 - **ID**: M7-T2
-- **Tên**: API Tạo/Nhận Hội thoại
+- **Tên**: API Tạo và Lấy Hội thoại
 - **Milestone**: M7
 - **User Story**: US-06
 - **Functional Requirement**: FR-040
@@ -2457,11 +2472,16 @@ Tạo model cho ai_conversations và ai_messages.
 
 ### Mục tiêu
 
-Tạo route POST /api/ai/conversations (tạo mới) và GET /api/ai/conversations (lấy danh sách).
+Tạo API để Frontend tạo conversation mới và lấy danh sách các conversation gần nhất của user để hiển thị dưới dạng các bubble bên cạnh popup AI.
 
 ### Công việc cần thực hiện
 
-1. Tạo file `backend/src/controllers/aiController.js`, `backend/src/routes/aiRoutes.js`.
+1. Tạo route `POST /api/ai/conversations` để tạo conversation mới.
+2. Tạo route `GET /api/ai/conversations` để lấy danh sách conversation của user.
+3. Sử dụng `authMiddleware` cho cả hai route.
+4. `GET /api/ai/conversations` chỉ trả về các conversation thuộc user hiện tại.
+5. Giới hạn danh sách conversation trả về tối đa 5 conversation gần nhất.
+6. Không xóa các conversation cũ khỏi database khi chúng không còn nằm trong danh sách 5 conversation gần nhất.
 
 ### File cần tạo
 
@@ -2470,7 +2490,15 @@ Tạo route POST /api/ai/conversations (tạo mới) và GET /api/ai/conversatio
 
 ### File cần chỉnh sửa
 
-- `backend/src/server.js` (mount aiRoutes)
+- `backend/src/server.js`
+
+### Acceptance Criteria
+
+- `POST /api/ai/conversations` tạo thành công conversation mới và trả về `conversation_id`.
+- `GET /api/ai/conversations` trả về tối đa 5 conversation gần nhất của user.
+- User không thể lấy conversation của user khác.
+- Conversation cũ không bị xóa chỉ vì không còn nằm trong 5 conversation gần nhất.
+- Request chưa đăng nhập bị từ chối theo cơ chế authentication hiện có.
 
 ---
 
@@ -2491,16 +2519,49 @@ Tạo route POST /api/ai/conversations (tạo mới) và GET /api/ai/conversatio
 
 ### Mục tiêu
 
-Tạo aiService.js: gọi Gemini API, ghép prompt, lưu messages, xử lý lỗi.
+Tạo AI Service sử dụng Gemini API để xử lý câu hỏi, duy trì ngữ cảnh hội thoại, sử dụng context học tập hiện tại và kiểm soát phạm vi câu hỏi của AI Assistant.
 
 ### Công việc cần thực hiện
 
 1. Tạo file `backend/src/services/aiService.js`.
-2. Hàm `chat({ userId, message, conversationId, context })`: lấy 10 tin nhắn gần nhất, ghép system prompt + context + history + user message, gọi Gemini API, lưu messages, trả về reply.
+2. Tạo hàm:
+   `chat({ userId, message, conversationId, context })`.
+3. Kiểm tra conversation tồn tại và thuộc user hiện tại.
+4. Lấy tối đa 10 message gần nhất của conversation.
+5. Sử dụng context học tập hiện tại nếu Frontend cung cấp, ví dụ:
+   - `page`
+   - `topic_id`
+   - `vocabulary_id`
+   - thông tin câu hỏi/quiz hiện tại nếu có.
+6. Ghép prompt gồm:
+   - system prompt;
+   - context hiện tại;
+   - history tối đa 10 message gần nhất;
+   - câu hỏi hiện tại của user.
+7. Gọi Gemini API thông qua Backend.
+8. Phân loại/kiểm tra câu hỏi để giới hạn AI trong phạm vi trợ lý học tập WordMate.
+9. Nếu câu hỏi ngoài phạm vi, không gọi Gemini để trả lời nội dung ngoài phạm vi.
+10. Trả về thông báo từ chối thân thiện và cho phép Frontend hiển thị lại các câu hỏi gợi ý.
+11. Nếu câu hỏi hợp lệ, gọi Gemini và lấy câu trả lời.
+12. Lưu message của user và assistant vào `ai_messages`.
+13. Xử lý lỗi API, timeout hoặc response không hợp lệ.
+14. Không để API key của Gemini xuất hiện ở Frontend.
 
 ### File cần tạo
 
 - `backend/src/services/aiService.js`
+
+### Acceptance Criteria
+
+- AI được gọi thông qua Backend.
+- AI nhận được context học tập hiện tại khi context được cung cấp.
+- AI sử dụng tối đa 10 message gần nhất để duy trì ngữ cảnh hội thoại.
+- AI có thể trả lời các câu hỏi liên quan đến học tiếng Anh, từ vựng, ngữ pháp, ví dụ và nội dung học tập của WordMate.
+- Khi user hỏi ngoài phạm vi, hệ thống từ chối thân thiện thay vì trả lời nội dung ngoài phạm vi.
+- Khi câu hỏi ngoài phạm vi, hệ thống trả về trạng thái/thông tin để Frontend hiển thị suggestion phù hợp.
+- Câu hỏi và câu trả lời hợp lệ được lưu vào `ai_messages`.
+- Lỗi Gemini API hoặc timeout được xử lý và trả về lỗi phù hợp cho Controller.
+- API key chỉ được sử dụng ở Backend.
 
 ---
 
@@ -2521,13 +2582,52 @@ Tạo aiService.js: gọi Gemini API, ghép prompt, lưu messages, xử lý lỗ
 
 ### Mục tiêu
 
-Tạo route POST /api/ai/chat + controller. Gọi aiService.chat().
+Tạo API Chat AI để Frontend gửi câu hỏi, context học tập và conversation hiện tại tới Backend.
+
+### Công việc cần thực hiện
+
+1. Bổ sung `POST /api/ai/chat` vào `aiRoutes.js`.
+2. Bổ sung controller xử lý request chat trong `aiController.js`.
+3. Kiểm tra authentication.
+4. Nhận input:
+   - `message`
+   - `conversation_id` (optional)
+   - `context` (optional)
+5. `context` có thể chứa thông tin trang và dữ liệu học tập hiện tại, ví dụ:
+   - `page`
+   - `topic_id`
+   - `vocabulary_id`
+   - thông tin quiz hiện tại nếu có.
+6. Gọi `aiService.chat()`.
+7. Trả response theo format:
+
+```json
+{
+  "success": true,
+  "data": {
+    "conversation_id": 1,
+    "reply": "string",
+    "role": "assistant"
+  }
+}
+```
+8. Trả lỗi phù hợp khi AI Service gặp lỗi.
+9. Không gọi Gemini trực tiếp từ Controller hoặc Frontend.
 
 ### File cần chỉnh sửa
 
 - `backend/src/controllers/aiController.js`
 - `backend/src/routes/aiRoutes.js`
 
+### Acceptance Criteria
+- POST /api/ai/chat nhận được message từ user.
+- API xử lý được conversation_id.
+- API nhận và truyền được context học tập tới AI Service.
+- API trả về conversation_id và reply.
+- Message user và assistant được lưu thông qua AI Service.
+- Câu hỏi ngoài phạm vi được trả về theo cơ chế từ chối của AI Service.
+- Lỗi AI API/timeout trả về response phù hợp.
+- User chưa đăng nhập không thể sử dụng API.
 ---
 
 ## Task M7-T5 (Frontend)
@@ -2547,12 +2647,29 @@ Tạo route POST /api/ai/chat + controller. Gọi aiService.chat().
 
 ### Mục tiêu
 
-Tạo component AI Chat: icon bong bóng cố định góc dưới phải, popup chat.
+Tạo giao diện AI Assistant dạng popup cố định ở góc dưới màn hình và khu vực conversation bubble nằm bên cạnh popup.
 
 ### Công việc cần thực hiện
 
-1. Tạo `frontend/src/components/ai-chat.html`: icon bong bóng, popup (header, message list, input, nút gửi), nút "Hội thoại mới".
-2. Tạo `frontend/src/css/components/ai-chat.css`: position fixed, bottom right, scrollable messages.
+1. Tạo `frontend/src/components/ai-chat.html`.
+2. Tạo `frontend/src/css/components/ai-chat.css`.
+3. Tạo icon AI cố định ở góc dưới bên phải.
+4. Khi bấm icon AI, hiển thị popup chat.
+5. Popup gồm:
+- header;
+- icon/tên WordMate AI;
+- nút tạo "Hội thoại mới";
+- nút đóng popup;
+- khu vực hiển thị message;
+- input;
+- nút gửi.
+6. Tạo khu vực conversation bubbles nằm dọc bên cạnh popup.
+7. Mỗi bubble đại diện cho một conversation, không đại diện cho một message.
+8. Bubble có thể sử dụng icon robot/AI.
+9. Bubble hiện tại phải có trạng thái active để người dùng nhận biết.
+10. ó khu vực hiển thị tối đa 5 conversation gần nhất.
+11. Popup và conversation bubbles phải phù hợp với giao diện MPA của WordMate.
+12. Thiết kế message list có thể scroll khi conversation dài.
 
 ### File cần tạo
 
@@ -2563,6 +2680,17 @@ Tạo component AI Chat: icon bong bóng cố định góc dưới phải, popup
 
 Không.
 
+### Acceptance Criteria
+- Icon AI hiển thị cố định ở góc dưới bên phải.
+- Bấm icon → popup AI mở ra.
+- Popup có đầy đủ header, message list, input và nút gửi.
+- Conversation bubbles xuất hiện bên cạnh popup.
+- Tối đa 5 conversation bubble được hiển thị.
+- Conversation hiện tại có trạng thái active.
+- Có nút "Hội thoại mới".
+- Popup có thể đóng và thu nhỏ về icon.
+- Giao diện không che khuất nghiêm trọng nội dung chính của các trang học.
+
 ---
 
 ## Task M7-T6 (Frontend)
@@ -2570,7 +2698,7 @@ Không.
 ### Thông tin
 
 - **ID**: M7-T6
-- **Tên**: Component AI Chat - JavaScript
+- **Tên**: Component AI Chat - JavaScript & Logic
 - **Milestone**: M7
 - **User Story**: US-06
 - **Functional Requirement**: FR-037, FR-038, FR-040, FR-042
@@ -2582,12 +2710,65 @@ Không.
 
 ### Mục tiêu
 
-Tạo JavaScript cho AI Chat.
+Tạo JavaScript điều khiển toàn bộ hoạt động của AI Chat, quản lý conversation hiện tại, chuyển đổi conversation, context học tập theo từng trang và câu hỏi gợi ý.
 
 ### Công việc cần thực hiện
 
-1. Tạo `frontend/src/js/components/ai-chat.js`: load component HTML, gọi GET /api/ai/conversations, xử lý gửi tin nhắn (POST /api/ai/chat), nút "Hội thoại mới" (POST /api/ai/conversations), lỗi AI → thông báo thân thiện.
-2. Tích hợp vào dashboard, learn, quiz, notebook, profile pages.
+1. Tạo `frontend/src/js/components/ai-chat.js`.
+2. Load component AI Chat trên các trang người học.
+3. Quản lý trạng thái popup:
+   - Mở.
+   - Đóng.
+   - Thu nhỏ về icon.
+4. Quản lý `currentConversationId`.
+5. Khi người dùng bắt đầu một phiên đăng nhập mới, không tiếp tục conversation hiện tại của phiên trước; khi mở AI lần đầu trong phiên đăng nhập, tạo conversation mới nếu chưa có conversation hiện tại.
+6. Lưu `currentConversationId` để conversation hiện tại được giữ khi user chuyển giữa các trang MPA.
+7. Gọi `GET /api/ai/conversations` để lấy tối đa 5 conversation gần nhất.
+8. Hiển thị các conversation dưới dạng bubble dọc bên cạnh popup.
+9. Khi user bấm một conversation bubble:
+   - Chuyển sang conversation tương ứng.
+   - Load các message của conversation đó.
+   - Cập nhật trạng thái active.
+10. Khi user bấm "Hội thoại mới":
+    - Gọi `POST /api/ai/conversations`.
+    - Chuyển sang conversation mới.
+    - Cập nhật current conversation.
+    - Hiển thị lại suggestion.
+11. Gửi câu hỏi bằng `POST /api/ai/chat`.
+12. Gửi kèm context của trang hiện tại.
+13. Context phải thay đổi theo trang người dùng đang đứng.
+14. Context ở trang Learn:
+    - `topic` hiện tại nếu có.
+    - `vocabulary` đang học nếu có.
+15. Context ở trang Quiz:
+    - Câu hỏi/quiz hiện tại nếu có.
+    - Vocabulary liên quan nếu có.
+16. Context ở trang Dashboard:
+    - Context trang hiện tại.
+    - Topic hiện tại nếu user đang thao tác với topic.
+17. Context ở trang Notebook:
+    - Sử dụng context chung của Notebook vì danh sách từ không bắt buộc phải chọn một từ.
+    - AI vẫn cho phép user tự hỏi về bất kỳ từ vựng hoặc ngữ pháp nào.
+18. Context ở trang Profile:
+    - Sử dụng context chung của Profile.
+19. Khi conversation mới được mở:
+    - Hiển thị các câu hỏi gợi ý phù hợp với trang hiện tại.
+20. Sau khi user gửi câu hỏi đầu tiên:
+    - Ẩn suggestion.
+    - Không tự động hiển thị lại khi user chuyển trang trong cùng conversation.
+21. Khi AI từ chối câu hỏi ngoài phạm vi:
+    - Hiển thị thông báo từ chối thân thiện.
+    - Hiển thị lại các câu hỏi gợi ý phù hợp với trang hiện tại.
+22. Không hiển thị suggestion sau mỗi message hợp lệ.
+23. Hiển thị trạng thái loading khi chờ AI phản hồi.
+24. Xử lý lỗi API/timeout bằng thông báo thân thiện.
+25. Không làm mất lịch sử message khi user chuyển giữa Dashboard, Learn, Quiz, Notebook và Profile.
+26. Tích hợp AI Chat vào:
+    - `frontend/src/pages/dashboard/dashboard.html`
+    - `frontend/src/pages/learn/learn.html`
+    - `frontend/src/pages/quiz/quiz.html`
+    - `frontend/src/pages/notebook/notebook.html`
+    - `frontend/src/pages/profile/profile.html`
 
 ### File cần tạo
 
@@ -2600,6 +2781,27 @@ Tạo JavaScript cho AI Chat.
 - `frontend/src/pages/quiz/quiz.html`
 - `frontend/src/pages/notebook/notebook.html`
 - `frontend/src/pages/profile/profile.html`
+
+### Acceptance Criteria
+
+- AI Chat hoạt động trên tất cả các trang người học.
+- Conversation hiện tại được giữ khi user chuyển giữa các trang MPA.
+- Khi bắt đầu phiên đăng nhập mới, user có conversation mới mặc định.
+- User vẫn có thể chọn lại các conversation cũ thông qua các bubble.
+- Tối đa 5 conversation gần nhất được hiển thị nhanh.
+- Conversation cũ không bị mất khỏi database chỉ vì không còn nằm trong 5 bubble.
+- Bấm bubble → hiển thị đúng conversation tương ứng.
+- Bấm "Hội thoại mới" → tạo và chuyển sang conversation mới.
+- Conversation mới hiển thị suggestion ban đầu.
+- Suggestion biến mất sau câu hỏi đầu tiên hợp lệ.
+- Suggestion không tự xuất hiện lại khi chuyển trang trong cùng conversation.
+- Nếu AI từ chối câu hỏi ngoài phạm vi → hiển thị thông báo từ chối và suggestion.
+- Trang Learn gửi được vocabulary/topic hiện tại làm context.
+- Trang Quiz gửi được context của quiz/câu hỏi hiện tại khi có.
+- Trang Notebook không cần chọn một từ cụ thể nhưng AI vẫn có thể trả lời câu hỏi về từ vựng hoặc ngữ pháp do user nhập.
+- User có thể tiếp tục conversation sau khi chuyển trang.
+- Lỗi AI/timeout → hiển thị thông báo thân thiện.
+- Message user và AI được hiển thị đúng trong popup.
 
 ---
 
