@@ -2,6 +2,7 @@ const Roadmap = require("../models/roadmapModel");
 const Topic = require("../models/topicModel");
 const Vocabulary = require("../models/vocabularyModel");
 const pool = require("../../config/db");
+const { uploadImage, uploadAudio } = require("../../config/upload");
 
 /**
  * Lấy danh sách tất cả Roadmap (bao gồm cả is_active = 0) cho Admin
@@ -1008,6 +1009,238 @@ const deleteVocabulary = async (req, res) => {
     }
 };
 
+/**
+ * Upload image cho Roadmap
+ * POST /api/admin/roadmaps/:id/image
+ * File: image (JPG/JPEG/PNG, tối đa 5MB)
+ */
+const uploadRoadmapImage = async (req, res) => {
+    try {
+        const { id } = req.params;
+
+        // Validate id là số nguyên dương
+        const parsedId = Number(id);
+        if (!Number.isInteger(parsedId) || parsedId <= 0) {
+            return res.status(400).json({
+                success: false,
+                message: "Roadmap ID không hợp lệ"
+            });
+        }
+
+        // Kiểm tra Roadmap tồn tại
+        const existing = await Roadmap.findById(parsedId);
+        if (!existing) {
+            return res.status(404).json({
+                success: false,
+                message: "Roadmap không tồn tại"
+            });
+        }
+
+        // Kiểm tra file đã được upload
+        if (!req.file) {
+            return res.status(400).json({
+                success: false,
+                message: "Không có file nào được tải lên"
+            });
+        }
+
+        // Cập nhật đường dẫn file vào database
+        const filePath = `/uploads/images/${req.file.filename}`;
+        await Roadmap.updateImage(parsedId, filePath);
+
+        const updated = await Roadmap.findById(parsedId);
+
+        return res.status(200).json({
+            success: true,
+            message: "Upload ảnh thành công",
+            data: {
+                image: filePath,
+                roadmap: updated
+            }
+        });
+    } catch (err) {
+        console.error(err);
+        return res.status(500).json({
+            success: false,
+            message: "Lỗi máy chủ"
+        });
+    }
+};
+
+/**
+ * Upload image cho Topic
+ * POST /api/admin/topics/:id/image
+ * File: image (JPG/JPEG/PNG, tối đa 5MB)
+ */
+const uploadTopicImage = async (req, res) => {
+    try {
+        const { id } = req.params;
+
+        // Validate id là số nguyên dương
+        const parsedId = Number(id);
+        if (!Number.isInteger(parsedId) || parsedId <= 0) {
+            return res.status(400).json({
+                success: false,
+                message: "Topic ID không hợp lệ"
+            });
+        }
+
+        // Kiểm tra Topic tồn tại
+        const existing = await Topic.findById(parsedId);
+        if (!existing) {
+            return res.status(404).json({
+                success: false,
+                message: "Topic không tồn tại"
+            });
+        }
+
+        // Kiểm tra file đã được upload
+        if (!req.file) {
+            return res.status(400).json({
+                success: false,
+                message: "Không có file nào được tải lên"
+            });
+        }
+
+        // Cập nhật đường dẫn file vào database
+        const filePath = `/uploads/images/${req.file.filename}`;
+        await Topic.updateImage(parsedId, filePath);
+
+        const updated = await Topic.findById(parsedId);
+
+        return res.status(200).json({
+            success: true,
+            message: "Upload ảnh thành công",
+            data: {
+                image: filePath,
+                topic: updated
+            }
+        });
+    } catch (err) {
+        console.error(err);
+        return res.status(500).json({
+            success: false,
+            message: "Lỗi máy chủ"
+        });
+    }
+};
+
+/**
+ * Upload image cho Vocabulary
+ * POST /api/admin/vocabularies/:id/image
+ * File: image (JPG/JPEG/PNG, tối đa 5MB)
+ */
+const uploadVocabularyImage = async (req, res) => {
+    try {
+        const { id } = req.params;
+
+        // Validate id là số nguyên dương
+        const parsedId = Number(id);
+        if (!Number.isInteger(parsedId) || parsedId <= 0) {
+            return res.status(400).json({
+                success: false,
+                message: "Vocabulary ID không hợp lệ"
+            });
+        }
+
+        // Kiểm tra Vocabulary tồn tại
+        const existing = await Vocabulary.findByIdForAdmin(parsedId);
+        if (!existing) {
+            return res.status(404).json({
+                success: false,
+                message: "Vocabulary không tồn tại"
+            });
+        }
+
+        // Kiểm tra file đã được upload
+        if (!req.file) {
+            return res.status(400).json({
+                success: false,
+                message: "Không có file nào được tải lên"
+            });
+        }
+
+        // Cập nhật đường dẫn file vào database
+        const filePath = `/uploads/images/${req.file.filename}`;
+        await Vocabulary.updateImage(parsedId, filePath);
+
+        const updated = await Vocabulary.findByIdForAdmin(parsedId);
+
+        return res.status(200).json({
+            success: true,
+            message: "Upload ảnh thành công",
+            data: {
+                image: filePath,
+                vocabulary: updated
+            }
+        });
+    } catch (err) {
+        console.error(err);
+        return res.status(500).json({
+            success: false,
+            message: "Lỗi máy chủ"
+        });
+    }
+};
+
+/**
+ * Upload audio cho Vocabulary
+ * POST /api/admin/vocabularies/:id/audio
+ * File: audio (MP3, tối đa 2MB)
+ */
+const uploadVocabularyAudio = async (req, res) => {
+    try {
+        const { id } = req.params;
+
+        // Validate id là số nguyên dương
+        const parsedId = Number(id);
+        if (!Number.isInteger(parsedId) || parsedId <= 0) {
+            return res.status(400).json({
+                success: false,
+                message: "Vocabulary ID không hợp lệ"
+            });
+        }
+
+        // Kiểm tra Vocabulary tồn tại
+        const existing = await Vocabulary.findByIdForAdmin(parsedId);
+        if (!existing) {
+            return res.status(404).json({
+                success: false,
+                message: "Vocabulary không tồn tại"
+            });
+        }
+
+        // Kiểm tra file đã được upload
+        if (!req.file) {
+            return res.status(400).json({
+                success: false,
+                message: "Không có file nào được tải lên"
+            });
+        }
+
+        // Cập nhật đường dẫn file vào database
+        const filePath = `/uploads/audio/${req.file.filename}`;
+        await Vocabulary.updateAudio(parsedId, filePath);
+
+        const updated = await Vocabulary.findByIdForAdmin(parsedId);
+
+        return res.status(200).json({
+            success: true,
+            message: "Upload âm thanh thành công",
+            data: {
+                audio: filePath,
+                vocabulary: updated
+            }
+        });
+    } catch (err) {
+        console.error(err);
+        return res.status(500).json({
+            success: false,
+            message: "Lỗi máy chủ"
+        });
+    }
+};
+
 module.exports = {
     getAllRoadmaps,
     createRoadmap,
@@ -1020,5 +1253,9 @@ module.exports = {
     getAllVocabularies,
     createVocabulary,
     updateVocabulary,
-    deleteVocabulary
+    deleteVocabulary,
+    uploadRoadmapImage,
+    uploadTopicImage,
+    uploadVocabularyImage,
+    uploadVocabularyAudio
 };

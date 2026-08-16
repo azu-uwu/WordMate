@@ -144,6 +144,19 @@ const update = async (id, { roadmap_id, name, description, image, sort_order, is
 };
 
 /**
+ * Cập nhật image cho Topic theo id
+ * @param {number} id - ID Topic
+ * @param {string} imagePath - Đường dẫn file ảnh
+ */
+const updateImage = async (id, imagePath) => {
+    const [result] = await pool.execute(
+        "UPDATE topics SET image = ? WHERE id = ?",
+        [imagePath, id]
+    );
+    return result;
+};
+
+/**
  * Xóa Topic theo id (soft delete bằng is_active = 0)
  * @param {number} id - ID Topic
  * @returns {object} Kết quả delete
@@ -164,5 +177,6 @@ module.exports = {
     findByName,
     create,
     update,
+    updateImage,
     remove,
 };

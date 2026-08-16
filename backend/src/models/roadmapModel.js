@@ -83,6 +83,19 @@ const update = async (id, { name, description, image, is_active, sort_order }) =
 };
 
 /**
+ * Cập nhật image cho Roadmap theo id
+ * @param {number} id - ID Roadmap
+ * @param {string} imagePath - Đường dẫn file ảnh
+ */
+const updateImage = async (id, imagePath) => {
+    const [result] = await pool.execute(
+        "UPDATE roadmaps SET image = ? WHERE id = ?",
+        [imagePath, id]
+    );
+    return result;
+};
+
+/**
  * Xóa Roadmap theo id
  */
 const remove = async (id) => {
@@ -101,5 +114,6 @@ module.exports = {
     findByNameExceptId,
     create,
     update,
+    updateImage,
     remove,
 };

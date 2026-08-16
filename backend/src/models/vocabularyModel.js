@@ -126,6 +126,32 @@ const update = async (id, { topic_id, word, pronunciation, part_of_speech, meani
 };
 
 /**
+ * Cập nhật image cho Vocabulary theo id
+ * @param {number} id - ID Vocabulary
+ * @param {string} imagePath - Đường dẫn file ảnh
+ */
+const updateImage = async (id, imagePath) => {
+    const [result] = await pool.execute(
+        "UPDATE vocabularies SET image = ? WHERE id = ?",
+        [imagePath, id]
+    );
+    return result;
+};
+
+/**
+ * Cập nhật audio cho Vocabulary theo id
+ * @param {number} id - ID Vocabulary
+ * @param {string} audioPath - Đường dẫn file âm thanh
+ */
+const updateAudio = async (id, audioPath) => {
+    const [result] = await pool.execute(
+        "UPDATE vocabularies SET audio = ? WHERE id = ?",
+        [audioPath, id]
+    );
+    return result;
+};
+
+/**
  * Xóa Vocabulary theo id
  * @param {number} id - ID Vocabulary
  * @returns {object} Kết quả delete
@@ -146,7 +172,7 @@ module.exports = {
     findByTopicAndWord,
     create,
     update,
+    updateImage,
+    updateAudio,
     remove
 };
-
-
