@@ -10,7 +10,7 @@
  * 5. Roadmap CRUD (DataTable + modal + upload image).
  * 6. Topic CRUD (DataTable + filter by roadmap + modal + upload image).
  * 7. Vocabulary CRUD (DataTable + filter by topic + modal + upload image/audio + CSV import).
- * 8. Custom Question CRUD (DataTable + filter by vocabulary + modal with cascade selects).
+ * 8. Custom Question CRUD (DataTable + cascade filters Roadmap → Topic → Vocabulary + modal with cascade selects).
  */
 
 import * as authService from '../../services/authService.js';
@@ -141,7 +141,9 @@ const customQuestionSaveBtn = document.getElementById('customQuestionSaveBtn');
 const customQuestionSaveSpinner = document.getElementById('customQuestionSaveSpinner');
 const customQuestionSaveBtnText = document.getElementById('customQuestionSaveBtnText');
 
-// Custom Question filter
+// Custom Question filters (cascade: Roadmap → Topic → Vocabulary)
+const customQuestionsRoadmapFilter = document.getElementById('customQuestionsRoadmapFilter');
+const customQuestionsTopicFilter = document.getElementById('customQuestionsTopicFilter');
 const customQuestionsVocabularyFilter = document.getElementById('customQuestionsVocabularyFilter');
 
 // ============================================================
@@ -849,6 +851,7 @@ async function loadRoadmaps() {
         populateTopicRoadmapModalSelect();
         populateVocabRoadmapSelect();
         populateImportRoadmapSelect();
+        populateCustomQuestionsRoadmapFilter();
     } catch (error) {
         showToast(error.message || 'Không tải được danh sách Roadmap.', 'error');
     } finally {
@@ -1048,11 +1051,11 @@ async function loadCustomQuestions() {
     const loadingEl = document.getElementById('customQuestionsTableLoading');
     if (loadingEl) loadingEl.classList.remove('d-none');
 
-    const vocabularyId = customQuestionsVocabularyFilter.value;
-    const query = vocabularyId ? `?vocabulary_id=${encodeURIComponent(vocabularyId)}` : '';
     try {
-        const res = await api.get(`/admin/custom-questions${query}`);
-        customQuestionsDTData = Array.isArray(res.data) ? res.data : [];
+        // Lấy toàn bộ Custom Questions rồi lọc client-side theo cascade Roadmap → Topic → Vocabulary
+        const res = await api.get('/admin/custom-questions');
+        const allQuestions = Array.isArray(res.data) ? res.data : [];
+        customQuestionsDTData = filterCustomQuestions(allQuestions);
 
         customQuestionsDataTable.clear();
         customQuestionsDataTable.rows.add(customQuestionsDTData);
@@ -1064,12 +1067,94 @@ async function loadCustomQuestions() {
     }
 }
 
+/**
+ * Lọc Custom Questions theo bộ lọc cascade Roadmap → Topic → Vocabulary.
+ * Không chọn filter nào → hiển thị tất cả.
+ */
+function filterCustomQuestions(questions) {
+    const roadmapId = customQuestionsRoadmapFilter.value;
+    const topicId = customQuestionsTopicFilter.value;
+    const vocabularyId = customQuestionsVocabularyFilter.value;
+
+    return questions.filter((q) => {
+        const vocab = vocabulariesCache.find((v) => Number(v.id) === Number(q.vocabulary_id));
+        if (!vocab) return false;
+
+        const topic = topicsCache.find((t) => Number(t.id) === Number(vocab.topic_id));
+
+        const roadmapMatch = !roadmapId || (topic && String(topic.roadmap_id) === String(roadmapId));
+        const topicMatch = !topicId || String(vocab.topic_id) === String(topicId);
+        const vocabMatch = !vocabularyId || String(q.vocabulary_id) === String(vocabularyId);
+
+        return roadmapMatch && topicMatch && vocabMatch;
+    });
+}
+
+function populateCustomQuestionsRoadmapFilter() {
+    if (!customQuestionsRoadmapFilter) return;
+
+    const current = customQuestionsRoadmapFilter.value;
+    customQuestionsRoadmapFilter.innerHTML = '<option value="">Tất cả Roadmaps</option>';
+    roadmaps.forEach((roadmap) => {
+        const option = document.createElement('option');
+        option.value = roadmap.id;
+        option.textContent = roadmap.name;
+        customQuestionsRoadmapFilter.appendChild(option);
+    });
+    customQuestionsRoadmapFilter.value = current;
+
+    // Nếu roadmap đã bị xóa → reset filter về tất cả
+    if (current && !roadmaps.some((r) => String(r.id) === current)) {
+        customQuestionsRoadmapFilter.value = '';
+        populateCustomQuestionsTopicFilter();
+        populateCustomQuestionsVocabularyFilter();
+        loadCustomQuestions();
+    }
+}
+
+function populateCustomQuestionsTopicFilter() {
+    if (!customQuestionsTopicFilter) return;
+
+    const roadmapId = customQuestionsRoadmapFilter.value;
+    const current = customQuestionsTopicFilter.value;
+    customQuestionsTopicFilter.innerHTML = '<option value="">Tất cả Topics</option>';
+
+    const filtered = roadmapId
+        ? topicsCache.filter((t) => String(t.roadmap_id) === String(roadmapId))
+        : topicsCache;
+
+    filtered.forEach((topic) => {
+        const option = document.createElement('option');
+        option.value = topic.id;
+        option.textContent = topic.name;
+        customQuestionsTopicFilter.appendChild(option);
+    });
+    customQuestionsTopicFilter.value = current;
+
+    // Nếu topic đã bị xóa → reset filter về tất cả
+    if (current && !filtered.some((t) => String(t.id) === current)) {
+        customQuestionsTopicFilter.value = '';
+        populateCustomQuestionsVocabularyFilter();
+        loadCustomQuestions();
+    }
+}
+
 function populateCustomQuestionsVocabularyFilter() {
     if (!customQuestionsVocabularyFilter) return;
 
+    const roadmapId = customQuestionsRoadmapFilter.value;
+    const topicId = customQuestionsTopicFilter.value;
     const current = customQuestionsVocabularyFilter.value;
     customQuestionsVocabularyFilter.innerHTML = '<option value="">Tất cả từ vựng</option>';
-    vocabulariesCache.forEach((vocab) => {
+
+    const filtered = vocabulariesCache.filter((v) => {
+        const topic = topicsCache.find((t) => Number(t.id) === Number(v.topic_id));
+        const roadmapMatch = !roadmapId || (topic && String(topic.roadmap_id) === String(roadmapId));
+        const topicMatch = !topicId || String(v.topic_id) === String(topicId);
+        return roadmapMatch && topicMatch;
+    });
+
+    filtered.forEach((vocab) => {
         const option = document.createElement('option');
         option.value = vocab.id;
         option.textContent = vocab.word;
@@ -1078,7 +1163,7 @@ function populateCustomQuestionsVocabularyFilter() {
     customQuestionsVocabularyFilter.value = current;
 
     // Nếu vocabulary đã bị xóa → reset filter về tất cả
-    if (current && !vocabulariesCache.some((v) => String(v.id) === current)) {
+    if (current && !filtered.some((v) => String(v.id) === current)) {
         customQuestionsVocabularyFilter.value = '';
         loadCustomQuestions();
     }
@@ -1910,7 +1995,7 @@ function openCustomQuestionModal(item = null) {
     } else {
         modalTitle.textContent = 'Thêm câu hỏi tùy chỉnh';
 
-        // Preselect roadmap/topic theo filter đang chọn (nếu có)
+        // Preselect roadmap/topic/vocabulary theo các filter đang chọn (nếu có)
         if (customQuestionsVocabularyFilter.value) {
             const vocab = vocabulariesCache.find((v) => String(v.id) === customQuestionsVocabularyFilter.value);
             if (vocab) {
@@ -1923,6 +2008,18 @@ function openCustomQuestionModal(item = null) {
                 filterCqVocabularyOptions();
                 cqVocabularyIdInput.value = vocab.id || '';
             }
+        } else if (customQuestionsTopicFilter.value) {
+            const topic = topicsCache.find((t) => String(t.id) === customQuestionsTopicFilter.value);
+            if (topic) {
+                cqRoadmapIdInput.value = topic.roadmap_id || '';
+                populateCqTopicSelect();
+                cqTopicIdInput.value = topic.id || '';
+            }
+            filterCqVocabularyOptions();
+        } else if (customQuestionsRoadmapFilter.value) {
+            cqRoadmapIdInput.value = customQuestionsRoadmapFilter.value;
+            populateCqTopicSelect();
+            filterCqVocabularyOptions();
         }
     }
 
@@ -2231,7 +2328,23 @@ function bindEvents() {
         cqIsActiveInput.addEventListener('change', () => updateActiveLabel(cqIsActiveInput, cqIsActiveLabel));
     }
 
-    // Filter theo Vocabulary (Custom Question)
+    // Filter cascade (Custom Question): Roadmap → Topic → Vocabulary
+    if (customQuestionsRoadmapFilter) {
+        customQuestionsRoadmapFilter.addEventListener('change', () => {
+            customQuestionsTopicFilter.value = '';
+            customQuestionsVocabularyFilter.value = '';
+            populateCustomQuestionsTopicFilter();
+            populateCustomQuestionsVocabularyFilter();
+            loadCustomQuestions();
+        });
+    }
+    if (customQuestionsTopicFilter) {
+        customQuestionsTopicFilter.addEventListener('change', () => {
+            customQuestionsVocabularyFilter.value = '';
+            populateCustomQuestionsVocabularyFilter();
+            loadCustomQuestions();
+        });
+    }
     if (customQuestionsVocabularyFilter) {
         customQuestionsVocabularyFilter.addEventListener('change', () => loadCustomQuestions());
     }
@@ -2305,6 +2418,8 @@ async function initAdmin() {
         await loadAllVocabulariesForCache();
         // Sau khi có cache, populate các select Vocabulary/Import
         populateVocabTopicFilter();
+        populateCustomQuestionsRoadmapFilter();
+        populateCustomQuestionsTopicFilter();
         populateCustomQuestionsVocabularyFilter();
         await loadVocabularies();
         await loadTopics();
