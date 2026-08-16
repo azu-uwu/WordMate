@@ -110,6 +110,41 @@ const create = async ({ topic_id, word, pronunciation, part_of_speech, meaning, 
 };
 
 /**
+ * Tạo nhiều Vocabulary cùng lúc (dùng cho import hàng loạt)
+ * @param {Array<object>} rows - Mảng các object { topic_id, word, pronunciation, part_of_speech, meaning, example, example_meaning, audio, image }
+ * @returns {object} Kết quả insert
+ */
+const createMany = async (rows) => {
+    if (!rows || rows.length === 0) {
+        return { affectedRows: 0 };
+    }
+
+    const placeholders = [];
+    const values = [];
+
+    for (const row of rows) {
+        placeholders.push("(?, ?, ?, ?, ?, ?, ?, ?, ?)");
+        values.push(
+            row.topic_id,
+            row.word,
+            row.pronunciation,
+            row.part_of_speech,
+            row.meaning,
+            row.example,
+            row.example_meaning,
+            row.audio,
+            row.image
+        );
+    }
+
+    const sql = `INSERT INTO vocabularies (topic_id, word, pronunciation, part_of_speech, meaning, example, example_meaning, audio, image)
+                 VALUES ${placeholders.join(", ")}`;
+
+    const [result] = await pool.execute(sql, values);
+    return result;
+};
+
+/**
  * Cập nhật Vocabulary theo id
  * @param {number} id - ID Vocabulary
  * @param {object} data - { topic_id, word, pronunciation, part_of_speech, meaning, example, example_meaning, audio, image }
@@ -171,6 +206,7 @@ module.exports = {
     findByIdForAdmin,
     findByTopicAndWord,
     create,
+    createMany,
     update,
     updateImage,
     updateAudio,

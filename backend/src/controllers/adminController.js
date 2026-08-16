@@ -3,6 +3,7 @@ const Topic = require("../models/topicModel");
 const Vocabulary = require("../models/vocabularyModel");
 const pool = require("../../config/db");
 const { uploadImage, uploadAudio } = require("../../config/upload");
+const { parse } = require("csv-parse/sync");
 
 /**
  * Lấy danh sách tất cả Roadmap (bao gồm cả is_active = 0) cho Admin
@@ -1010,6 +1011,174 @@ const deleteVocabulary = async (req, res) => {
 };
 
 /**
+ * Import Vocabulary hàng loạt từ file CSV
+ * POST /api/admin/vocabularies/import
+ * Multipart/form-data: topic_id (text), file (CSV)
+ * CSV có header: word, pronunciation, part_of_speech, meaning, example, example_meaning, audio, image
+ * - word, meaning bắt buộc
+ * - image, audio tùy chọn, chỉ lưu đường dẫn string (không upload/kiểm tra file)
+ * - Dòng không hợp lệ sẽ bị bỏ qua và được báo lỗi theo số dòng
+ */
+const importVocabularies = async (req, res) => {
+    try {
+        const { topic_id } = req.body;
+
+        // Validate topic_id (bắt buộc)
+        if (topic_id === undefined || topic_id === null || topic_id === "") {
+            return res.status(400).json({
+                success: false,
+                message: "Thiếu topic_id"
+            });
+        }
+
+        const parsedTopicId = Number(topic_id);
+        if (!Number.isInteger(parsedTopicId) || parsedTopicId <= 0) {
+            return res.status(400).json({
+                success: false,
+                message: "topic_id không hợp lệ"
+            });
+        }
+
+        // Kiểm tra Topic tồn tại
+        const topic = await Topic.findById(parsedTopicId);
+        if (!topic) {
+            return res.status(400).json({
+                success: false,
+                message: "Topic không tồn tại"
+            });
+        }
+
+        // Kiểm tra file CSV đã được upload
+        if (!req.file) {
+            return res.status(400).json({
+                success: false,
+                message: "Không có file CSV nào được tải lên"
+            });
+        }
+
+        // Parse CSV (header là dòng đầu tiên)
+        let records;
+        try {
+            records = parse(req.file.buffer.toString("utf8"), {
+                columns: true,
+                skip_empty_lines: true,
+                trim: true
+            });
+        } catch (err) {
+            return res.status(400).json({
+                success: false,
+                message: "File CSV không hợp lệ"
+            });
+        }
+
+        const validPos = ['noun', 'verb', 'adjective', 'adverb', 'preposition', 'phrasal_verb', 'idiom', 'other'];
+        const validRows = [];
+        const errors = [];
+        const seenWords = new Set();
+
+        for (let i = 0; i < records.length; i++) {
+            const row = records[i];
+            const lineNumber = i + 2; // Dòng 1 là header
+            const rowErrors = [];
+
+            // word (bắt buộc)
+            const word = row.word !== undefined && row.word !== null ? String(row.word).trim() : "";
+            if (!word) {
+                rowErrors.push("Thiếu word");
+            }
+
+            // meaning (bắt buộc)
+            const meaning = row.meaning !== undefined && row.meaning !== null ? String(row.meaning).trim() : "";
+            if (!meaning) {
+                rowErrors.push("Thiếu meaning");
+            }
+
+            // part_of_speech (tùy chọn, mặc định 'other')
+            let pos = "other";
+            if (row.part_of_speech !== undefined && row.part_of_speech !== null && String(row.part_of_speech).trim() !== "") {
+                const rawPos = String(row.part_of_speech).trim();
+                if (!validPos.includes(rawPos)) {
+                    rowErrors.push("part_of_speech không hợp lệ");
+                } else {
+                    pos = rawPos;
+                }
+            }
+
+            // Các trường tùy chọn: chỉ lưu đường dẫn string, rỗng -> null
+            const pronunciation = row.pronunciation !== undefined && row.pronunciation !== null && String(row.pronunciation).trim() !== ""
+                ? String(row.pronunciation).trim()
+                : null;
+            const example = row.example !== undefined && row.example !== null && String(row.example).trim() !== ""
+                ? String(row.example).trim()
+                : null;
+            const example_meaning = row.example_meaning !== undefined && row.example_meaning !== null && String(row.example_meaning).trim() !== ""
+                ? String(row.example_meaning).trim()
+                : null;
+            const audio = row.audio !== undefined && row.audio !== null && String(row.audio).trim() !== ""
+                ? String(row.audio).trim()
+                : null;
+            const image = row.image !== undefined && row.image !== null && String(row.image).trim() !== ""
+                ? String(row.image).trim()
+                : null;
+
+            // Kiểm tra trùng word trong cùng topic (unique index: topic_id + word)
+            if (word) {
+                if (seenWords.has(word)) {
+                    rowErrors.push("Từ vựng trùng lặp trong file CSV");
+                } else {
+                    const existing = await Vocabulary.findByTopicAndWord(parsedTopicId, word);
+                    if (existing) {
+                        rowErrors.push("Từ vựng đã tồn tại trong Topic này");
+                    }
+                }
+            }
+
+            if (rowErrors.length > 0) {
+                errors.push({
+                    line: lineNumber,
+                    errors: rowErrors
+                });
+            } else {
+                seenWords.add(word);
+                validRows.push({
+                    topic_id: parsedTopicId,
+                    word,
+                    pronunciation,
+                    part_of_speech: pos,
+                    meaning,
+                    example,
+                    example_meaning,
+                    audio,
+                    image
+                });
+            }
+        }
+
+        // Import tất cả dòng hợp lệ
+        let importedCount = 0;
+        if (validRows.length > 0) {
+            const result = await Vocabulary.createMany(validRows);
+            importedCount = result.affectedRows;
+        }
+
+        return res.status(200).json({
+            success: true,
+            message: "Import hoàn tất",
+            data: {
+                imported: importedCount,
+                errors
+            }
+        });
+    } catch (err) {
+        console.error(err);
+        return res.status(500).json({
+            success: false,
+            message: "Lỗi máy chủ"
+        });
+    }
+};
+
+/**
  * Upload image cho Roadmap
  * POST /api/admin/roadmaps/:id/image
  * File: image (JPG/JPEG/PNG, tối đa 5MB)
@@ -1254,6 +1423,7 @@ module.exports = {
     createVocabulary,
     updateVocabulary,
     deleteVocabulary,
+    importVocabularies,
     uploadRoadmapImage,
     uploadTopicImage,
     uploadVocabularyImage,

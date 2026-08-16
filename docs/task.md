@@ -2786,6 +2786,13 @@ Cho phép Admin chọn một Topic và upload một file dữ liệu để thêm
 6. Thêm các Vocabulary hợp lệ vào database với `topic_id` đã chọn.
 7. Xử lý các dòng dữ liệu lỗi và trả về thông tin phù hợp.
 8. Không upload hoặc xử lý image/audio trong file import.
+- Cho phép file import chứa các cột image và audio tùy chọn.
+- image và audio chỉ là đường dẫn file, không phải file binary.
+- Không upload file image/audio thông qua file import.
+- Nếu cột không có giá trị thì lưu NULL.
+- Nếu có giá trị thì lưu nguyên đường dẫn vào database.
+- Không bắt buộc kiểm tra file image/audio tồn tại khi import.
+- Image/audio vẫn có thể được thay đổi riêng thông qua chức năng CRUD/upload của Vocabulary.
 9. Image và audio vẫn được xử lý riêng cho từng Vocabulary sau khi import.
 
 ### File cần tạo
@@ -2836,7 +2843,7 @@ Cấu hình và xử lý upload image/audio cho các dữ liệu Admin có trư�
 
 ### Công việc cần thực hiện
 
-1. Tạo `backend/src/config/upload.js`.
+1. Tạo `backend/config/upload.js`.
 2. Cấu hình disk storage.
 3. Image:
    - JPG/PNG.
