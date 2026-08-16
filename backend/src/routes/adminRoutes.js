@@ -78,4 +78,16 @@ router.post("/vocabularies/:id/audio", uploadAudio.single("audio"), handleUpload
 // Hỗ trợ lọc: GET /vocabularies?topic_id=:topicId
 // Query params topic_id sẽ được truyền qua req.query và sử dụng trong getAllVocabularies
 
+/**
+ * CRUD Custom Questions
+ */
+router.get("/custom-questions", adminController.getAllCustomQuestions);
+router.get("/custom-questions/:id", adminController.getCustomQuestionById);
+router.post("/custom-questions", adminController.createCustomQuestion);
+router.put("/custom-questions/:id", adminController.updateCustomQuestion);
+router.delete("/custom-questions/:id", adminController.deleteCustomQuestion);
+
+// Hỗ trợ lọc: GET /custom-questions?vocabulary_id=:vocabularyId
+// Query params vocabulary_id sẽ được truyền qua req.query và sử dụng trong getAllCustomQuestions
+
 module.exports = router;

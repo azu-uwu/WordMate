@@ -1,6 +1,7 @@
 const Roadmap = require("../models/roadmapModel");
 const Topic = require("../models/topicModel");
 const Vocabulary = require("../models/vocabularyModel");
+const CustomQuestion = require("../models/customQuestionModel");
 const pool = require("../../config/db");
 const { uploadImage, uploadAudio } = require("../../config/upload");
 const { parse } = require("csv-parse/sync");
@@ -1410,6 +1411,462 @@ const uploadVocabularyAudio = async (req, res) => {
     }
 };
 
+/**
+ * Lấy danh sách tất cả Custom Question cho Admin
+ * Hỗ trợ lọc theo vocabulary_id
+ * GET /api/admin/custom-questions
+ * Query: vocabulary_id (optional)
+ */
+const getAllCustomQuestions = async (req, res) => {
+    try {
+        const { vocabulary_id } = req.query;
+
+        let vocabularyId = null;
+
+        if (vocabulary_id !== undefined) {
+            vocabularyId = Number(vocabulary_id);
+
+            if (!Number.isInteger(vocabularyId) || vocabularyId <= 0) {
+                return res.status(400).json({
+                    success: false,
+                    message: "vocabulary_id không hợp lệ"
+                });
+            }
+        }
+
+        const customQuestions = await CustomQuestion.getAllForAdmin(vocabularyId);
+
+        return res.status(200).json({
+            success: true,
+            data: customQuestions
+        });
+    } catch (err) {
+        console.error(err);
+        return res.status(500).json({
+            success: false,
+            message: "Lỗi máy chủ"
+        });
+    }
+};
+
+/**
+ * Lấy Custom Question theo id cho Admin
+ * GET /api/admin/custom-questions/:id
+ */
+const getCustomQuestionById = async (req, res) => {
+    try {
+        const { id } = req.params;
+
+        // Validate id là số nguyên dương
+        const parsedId = Number(id);
+        if (!Number.isInteger(parsedId) || parsedId <= 0) {
+            return res.status(400).json({
+                success: false,
+                message: "Custom Question ID không hợp lệ"
+            });
+        }
+
+        // Kiểm tra Custom Question tồn tại
+        const customQuestion = await CustomQuestion.findByIdForAdmin(parsedId);
+        if (!customQuestion) {
+            return res.status(404).json({
+                success: false,
+                message: "Custom Question không tồn tại"
+            });
+        }
+
+        return res.status(200).json({
+            success: true,
+            data: customQuestion
+        });
+    } catch (err) {
+        console.error(err);
+        return res.status(500).json({
+            success: false,
+            message: "Lỗi máy chủ"
+        });
+    }
+};
+
+/**
+ * Tạo Custom Question mới
+ * POST /api/admin/custom-questions
+ * Body: { vocabulary_id, question, option_a, option_b, option_c, option_d, correct_option, is_active }
+ */
+const createCustomQuestion = async (req, res) => {
+    try {
+        const { vocabulary_id, question, option_a, option_b, option_c, option_d, correct_option, is_active } = req.body;
+
+        // Validate vocabulary_id (bắt buộc)
+        if (vocabulary_id === undefined || vocabulary_id === null || vocabulary_id === "") {
+            return res.status(400).json({
+                success: false,
+                message: "Thiếu vocabulary_id"
+            });
+        }
+
+        const parsedVocabularyId = Number(vocabulary_id);
+        if (!Number.isInteger(parsedVocabularyId) || parsedVocabularyId <= 0) {
+            return res.status(400).json({
+                success: false,
+                message: "vocabulary_id không hợp lệ"
+            });
+        }
+
+        // Kiểm tra Vocabulary tồn tại
+        const vocabulary = await Vocabulary.findByIdForAdmin(parsedVocabularyId);
+        if (!vocabulary) {
+            return res.status(400).json({
+                success: false,
+                message: "Vocabulary không tồn tại"
+            });
+        }
+
+        // Validate question (bắt buộc)
+        if (question === undefined || question === null || typeof question !== "string" || question.trim() === "") {
+            return res.status(400).json({
+                success: false,
+                message: "Thiếu question"
+            });
+        }
+
+        const trimmedQuestion = question.trim();
+
+        // Validate option_a (bắt buộc)
+        if (option_a === undefined || option_a === null || typeof option_a !== "string" || option_a.trim() === "") {
+            return res.status(400).json({
+                success: false,
+                message: "Thiếu option_a"
+            });
+        }
+
+        const trimmedOptionA = option_a.trim();
+
+        // Validate option_b (bắt buộc)
+        if (option_b === undefined || option_b === null || typeof option_b !== "string" || option_b.trim() === "") {
+            return res.status(400).json({
+                success: false,
+                message: "Thiếu option_b"
+            });
+        }
+
+        const trimmedOptionB = option_b.trim();
+
+        // Validate option_c (bắt buộc)
+        if (option_c === undefined || option_c === null || typeof option_c !== "string" || option_c.trim() === "") {
+            return res.status(400).json({
+                success: false,
+                message: "Thiếu option_c"
+            });
+        }
+
+        const trimmedOptionC = option_c.trim();
+
+        // Validate option_d (bắt buộc)
+        if (option_d === undefined || option_d === null || typeof option_d !== "string" || option_d.trim() === "") {
+            return res.status(400).json({
+                success: false,
+                message: "Thiếu option_d"
+            });
+        }
+
+        const trimmedOptionD = option_d.trim();
+
+        // Validate correct_option (bắt buộc, chỉ nhận A/B/C/D)
+        if (correct_option === undefined || correct_option === null || correct_option === "") {
+            return res.status(400).json({
+                success: false,
+                message: "Thiếu correct_option"
+            });
+        }
+
+        const normalizedCorrectOption = String(correct_option).trim().toUpperCase();
+        if (!["A", "B", "C", "D"].includes(normalizedCorrectOption)) {
+            return res.status(400).json({
+                success: false,
+                message: "correct_option chỉ nhận A, B, C hoặc D"
+            });
+        }
+
+        // Validate is_active (nếu có)
+        let active = 1;
+        if (is_active !== undefined && is_active !== null) {
+            if (typeof is_active === "boolean") {
+                active = is_active ? 1 : 0;
+            } else if (is_active === 0 || is_active === 1) {
+                active = is_active;
+            } else {
+                return res.status(400).json({
+                    success: false,
+                    message: "is_active phải là boolean (true/false) hoặc 0/1"
+                });
+            }
+        }
+
+        // Gọi Model để tạo dữ liệu
+        const result = await CustomQuestion.create({
+            vocabulary_id: parsedVocabularyId,
+            question: trimmedQuestion,
+            option_a: trimmedOptionA,
+            option_b: trimmedOptionB,
+            option_c: trimmedOptionC,
+            option_d: trimmedOptionD,
+            correct_option: normalizedCorrectOption,
+            is_active: active
+        });
+
+        const newCustomQuestion = await CustomQuestion.findByIdForAdmin(result.insertId);
+
+        return res.status(201).json({
+            success: true,
+            message: "Tạo Custom Question thành công",
+            data: newCustomQuestion
+        });
+    } catch (err) {
+        console.error(err);
+        return res.status(500).json({
+            success: false,
+            message: "Lỗi máy chủ"
+        });
+    }
+};
+
+/**
+ * Cập nhật Custom Question theo id
+ * PUT /api/admin/custom-questions/:id
+ * Body: { vocabulary_id, question, option_a, option_b, option_c, option_d, correct_option, is_active }
+ * Hỗ trợ partial update: giữ nguyên giá trị cũ nếu field không được gửi
+ */
+const updateCustomQuestion = async (req, res) => {
+    try {
+        const { id } = req.params;
+
+        // Validate id là số nguyên dương
+        const parsedId = Number(id);
+        if (!Number.isInteger(parsedId) || parsedId <= 0) {
+            return res.status(400).json({
+                success: false,
+                message: "Custom Question ID không hợp lệ"
+            });
+        }
+
+        // Kiểm tra Custom Question tồn tại
+        const existing = await CustomQuestion.findByIdForAdmin(parsedId);
+        if (!existing) {
+            return res.status(404).json({
+                success: false,
+                message: "Custom Question không tồn tại"
+            });
+        }
+
+        const { vocabulary_id, question, option_a, option_b, option_c, option_d, correct_option, is_active } = req.body;
+
+        // Validate vocabulary_id (nếu có)
+        let updatedVocabularyId = existing.vocabulary_id;
+        if (vocabulary_id !== undefined) {
+            if (vocabulary_id === null || vocabulary_id === "") {
+                return res.status(400).json({
+                    success: false,
+                    message: "vocabulary_id không được để null"
+                });
+            }
+            const parsedNewVocabularyId = Number(vocabulary_id);
+            if (!Number.isInteger(parsedNewVocabularyId) || parsedNewVocabularyId <= 0) {
+                return res.status(400).json({
+                    success: false,
+                    message: "vocabulary_id không hợp lệ"
+                });
+            }
+            // Kiểm tra Vocabulary mới tồn tại
+            const vocabulary = await Vocabulary.findByIdForAdmin(parsedNewVocabularyId);
+            if (!vocabulary) {
+                return res.status(400).json({
+                    success: false,
+                    message: "Vocabulary không tồn tại"
+                });
+            }
+            updatedVocabularyId = parsedNewVocabularyId;
+        }
+
+        // Validate question (nếu có)
+        let updatedQuestion = existing.question;
+        if (question !== undefined) {
+            if (question === null || typeof question !== "string" || question.trim() === "") {
+                return res.status(400).json({
+                    success: false,
+                    message: "question phải là chuỗi không rỗng"
+                });
+            }
+            updatedQuestion = question.trim();
+        }
+
+        // Validate option_a (nếu có)
+        let updatedOptionA = existing.option_a;
+        if (option_a !== undefined) {
+            if (option_a === null || typeof option_a !== "string" || option_a.trim() === "") {
+                return res.status(400).json({
+                    success: false,
+                    message: "option_a phải là chuỗi không rỗng"
+                });
+            }
+            updatedOptionA = option_a.trim();
+        }
+
+        // Validate option_b (nếu có)
+        let updatedOptionB = existing.option_b;
+        if (option_b !== undefined) {
+            if (option_b === null || typeof option_b !== "string" || option_b.trim() === "") {
+                return res.status(400).json({
+                    success: false,
+                    message: "option_b phải là chuỗi không rỗng"
+                });
+            }
+            updatedOptionB = option_b.trim();
+        }
+
+        // Validate option_c (nếu có)
+        let updatedOptionC = existing.option_c;
+        if (option_c !== undefined) {
+            if (option_c === null || typeof option_c !== "string" || option_c.trim() === "") {
+                return res.status(400).json({
+                    success: false,
+                    message: "option_c phải là chuỗi không rỗng"
+                });
+            }
+            updatedOptionC = option_c.trim();
+        }
+
+        // Validate option_d (nếu có)
+        let updatedOptionD = existing.option_d;
+        if (option_d !== undefined) {
+            if (option_d === null || typeof option_d !== "string" || option_d.trim() === "") {
+                return res.status(400).json({
+                    success: false,
+                    message: "option_d phải là chuỗi không rỗng"
+                });
+            }
+            updatedOptionD = option_d.trim();
+        }
+
+        // Validate correct_option (nếu có, chỉ nhận A/B/C/D)
+        let updatedCorrectOption = existing.correct_option;
+        if (correct_option !== undefined) {
+            if (correct_option === null || correct_option === "") {
+                return res.status(400).json({
+                    success: false,
+                    message: "correct_option không được để null"
+                });
+            }
+            const normalizedCorrectOption = String(correct_option).trim().toUpperCase();
+            if (!["A", "B", "C", "D"].includes(normalizedCorrectOption)) {
+                return res.status(400).json({
+                    success: false,
+                    message: "correct_option chỉ nhận A, B, C hoặc D"
+                });
+            }
+            updatedCorrectOption = normalizedCorrectOption;
+        }
+
+        // Validate is_active (nếu có)
+        let updatedActive = existing.is_active;
+        if (is_active !== undefined && is_active !== null) {
+            if (typeof is_active === "boolean") {
+                updatedActive = is_active ? 1 : 0;
+            } else if (is_active === 0 || is_active === 1) {
+                updatedActive = is_active;
+            } else {
+                return res.status(400).json({
+                    success: false,
+                    message: "is_active phải là boolean (true/false) hoặc 0/1"
+                });
+            }
+        }
+
+        // Gọi Model để cập nhật
+        await CustomQuestion.update(parsedId, {
+            vocabulary_id: updatedVocabularyId,
+            question: updatedQuestion,
+            option_a: updatedOptionA,
+            option_b: updatedOptionB,
+            option_c: updatedOptionC,
+            option_d: updatedOptionD,
+            correct_option: updatedCorrectOption,
+            is_active: updatedActive
+        });
+
+        const updatedCustomQuestion = await CustomQuestion.findByIdForAdmin(parsedId);
+
+        return res.status(200).json({
+            success: true,
+            message: "Cập nhật Custom Question thành công",
+            data: updatedCustomQuestion
+        });
+    } catch (err) {
+        console.error(err);
+        return res.status(500).json({
+            success: false,
+            message: "Lỗi máy chủ"
+        });
+    }
+};
+
+/**
+ * Xóa Custom Question theo id
+ * DELETE /api/admin/custom-questions/:id
+ */
+const deleteCustomQuestion = async (req, res) => {
+    try {
+        const { id } = req.params;
+
+        // Validate id là số nguyên dương
+        const parsedId = Number(id);
+        if (!Number.isInteger(parsedId) || parsedId <= 0) {
+            return res.status(400).json({
+                success: false,
+                message: "Custom Question ID không hợp lệ"
+            });
+        }
+
+        // Kiểm tra Custom Question tồn tại
+        const existing = await CustomQuestion.findByIdForAdmin(parsedId);
+        if (!existing) {
+            return res.status(404).json({
+                success: false,
+                message: "Custom Question không tồn tại"
+            });
+        }
+
+        // Gọi Model để xóa
+        const result = await CustomQuestion.remove(parsedId);
+
+        if (result.affectedRows === 0) {
+            return res.status(404).json({
+                success: false,
+                message: "Custom Question không tồn tại"
+            });
+        }
+
+        return res.status(200).json({
+            success: true,
+            message: "Xóa Custom Question thành công"
+        });
+    } catch (err) {
+        // Nếu có lỗi ràng buộc khóa ngoại (VD: đã được gắn vào Quiz)
+        if (err.code === "ER_ROW_IS_REFERENCED_2" || err.code === "ER_ROW_IS_REFERENCED") {
+            return res.status(400).json({
+                success: false,
+                message: "Không thể xóa Custom Question vì đang có dữ liệu liên quan"
+            });
+        }
+
+        console.error(err);
+        return res.status(500).json({
+            success: false,
+            message: "Lỗi máy chủ"
+        });
+    }
+};
+
 module.exports = {
     getAllRoadmaps,
     createRoadmap,
@@ -1427,5 +1884,10 @@ module.exports = {
     uploadRoadmapImage,
     uploadTopicImage,
     uploadVocabularyImage,
-    uploadVocabularyAudio
+    uploadVocabularyAudio,
+    getAllCustomQuestions,
+    getCustomQuestionById,
+    createCustomQuestion,
+    updateCustomQuestion,
+    deleteCustomQuestion
 };
