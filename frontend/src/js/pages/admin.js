@@ -609,12 +609,8 @@ function setupVocabulariesTable() {
             {
                 data: null,
                 className: 'admin-col-index',
-                render: (data, type, row, meta) => {
-                    if (type === 'display') {
-                        return `<span class="text-muted">${meta.row + 1}</span>`;
-                    }
-                    return meta.row + 1;
-                }
+                // STT được đánh lại trong sự kiện 'draw' bên dưới, không dùng meta.row.
+                render: () => ''
             },
             { data: 'word', render: (data) => `<strong>${esc(data || '')}</strong>` },
             {
@@ -706,6 +702,15 @@ function setupVocabulariesTable() {
         }
     });
 
+    // Đánh lại STT từ 1 theo đúng thứ tự dòng đang hiển thị trên từng trang.
+    // 'draw' kích hoạt sau mỗi lần load dữ liệu, sort, filter, chuyển trang, redraw.
+    vocabulariesDataTable.on('draw', () => {
+        const pageInfo = vocabulariesDataTable.page.info();
+        $('#vocabulariesTable tbody tr').each(function (index) {
+            $(this).find('td.admin-col-index').html(`<span class="text-muted">${pageInfo.start + index + 1}</span>`);
+        });
+    });
+
     $('#vocabulariesTable tbody').on('click', '.admin-action-btn', (e) => {
         const btn = e.currentTarget;
         const action = btn.dataset.action;
@@ -736,12 +741,8 @@ function setupCustomQuestionsTable() {
             {
                 data: null,
                 className: 'admin-col-index',
-                render: (data, type, row, meta) => {
-                    if (type === 'display') {
-                        return `<span class="text-muted">${meta.row + 1}</span>`;
-                    }
-                    return meta.row + 1;
-                }
+                // STT được đánh lại trong sự kiện 'draw' bên dưới, không dùng meta.row.
+                render: () => ''
             },
             {
                 data: 'question',
@@ -797,6 +798,15 @@ function setupCustomQuestionsTable() {
             $('#customQuestionsTable_filter input').addClass('form-control form-control-sm');
             $('#customQuestionsTable_filter label').addClass('admin-datatable-search');
         }
+    });
+
+    // Đánh lại STT từ 1 theo đúng thứ tự dòng đang hiển thị trên từng trang.
+    // 'draw' được gọi sau khi load dữ liệu, sort, filter, chuyển trang, redraw.
+    customQuestionsDataTable.on('draw', () => {
+        const pageInfo = customQuestionsDataTable.page.info();
+        $('#customQuestionsTable tbody tr').each(function (index) {
+            $(this).find('td.admin-col-index').html(`<span class="text-muted">${pageInfo.start + index + 1}</span>`);
+        });
     });
 
     $('#customQuestionsTable tbody').on('click', '.admin-action-btn', (e) => {
