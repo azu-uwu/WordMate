@@ -50,8 +50,10 @@ document.addEventListener('DOMContentLoaded', () => {
             // authService already saved token and user to localStorage
             const user = response.user;
 
-            // Redirect based on roadmap_id
-            if (user.roadmap_id === null || user.roadmap_id === undefined) {
+            // Redirect based on role first, then roadmap_id
+            if (user.role === 'admin') {
+                window.location.href = '../admin/admin.html';
+            } else if (user.roadmap_id === null || user.roadmap_id === undefined) {
                 window.location.href = '../dashboard/onboarding.html';
             } else {
                 window.location.href = '../dashboard/dashboard.html';
