@@ -1,0 +1,392 @@
+/* ============================================================
+   ai-chat.css — WordMate AI Chat Component
+   Design System: #FFC300 primary, Inter font
+   ============================================================ */
+
+/* ============================================================
+   1. CSS VARIABLES (DESIGN TOKENS)
+   ============================================================ */
+
+:root {
+    /* Primary palette — Warm Gold */
+    --wm-primary: #FFC300;
+    --wm-primary-dark: #E6B000;
+    --wm-primary-light: #FFD633;
+    --wm-primary-bg: #FFF8E1;
+
+    /* Semantic colors */
+    --wm-success: #10B981;
+    --wm-warning: #F59E0B;
+    --wm-error: #F43F5E;
+
+    /* Neutral palette */
+    --wm-text-primary: #1E293B;
+    --wm-text-secondary: #64748B;
+    --wm-text-muted: #94A3B8;
+    --wm-bg-page: #F8FAFC;
+    --wm-bg-card: #FFFFFF;
+    --wm-border: #E2E8F0;
+    --wm-border-focus: #FFC300;
+
+    /* Typography */
+    --wm-font-family: 'Inter', 'Roboto', system-ui, -apple-system, sans-serif;
+
+    /* Spacing */
+    --wm-radius-sm: 8px;
+    --wm-radius-md: 12px;
+    --wm-radius-lg: 20px;
+    --wm-radius-card: 16px;
+    --wm-shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.05);
+    --wm-shadow-md: 0 4px 12px rgba(0, 0, 0, 0.08);
+    --wm-shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.12);
+
+    /* Transitions */
+    --wm-transition-fast: 150ms ease;
+    --wm-transition-base: 200ms ease;
+    --wm-transition-slow: 300ms ease;
+}
+
+/* ============================================================
+   2. AI-CHAT COMPONENT — .ai-chat
+   ============================================================ */
+
+.ai-chat {
+    position: fixed;
+    bottom: 1.5rem;
+    right: 1.5rem;
+    z-index: 999;
+    font-family: var(--wm-font-family);
+}
+
+/* Toggle Button */
+.ai-chat__toggle {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 3.5rem;
+    height: 3.5rem;
+    border: none;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--wm-primary) 0%, var(--wm-primary-dark) 100%);
+    color: #fff;
+    font-size: 1.25rem;
+    cursor: pointer;
+    box-shadow: 0 4px 16px rgba(255, 195, 0, 0.35);
+    transition: transform var(--wm-transition-fast), box-shadow var(--wm-transition-fast);
+}
+
+.ai-chat__toggle:hover {
+    transform: scale(1.05);
+    box-shadow: 0 6px 20px rgba(255, 195, 0, 0.45);
+}
+
+/* ============================================================
+   3. AI CHAT POPUP
+   ============================================================ */
+
+.ai-chat__popup {
+    position: fixed;
+    bottom: 5.5rem;
+    right: 1.5rem;
+    width: 23rem;
+    max-width: calc(100vw - 2rem);
+    background: var(--wm-bg-card);
+    border: 1px solid var(--wm-border);
+    border-radius: var(--wm-radius-card);
+    box-shadow: var(--wm-shadow-lg);
+    overflow: hidden;
+
+    display: flex;
+    flex-direction: column;
+    max-height: 32rem;
+}
+
+/* Hidden state */
+.ai-chat__popup[hidden] {
+    display: none;
+}
+
+/* Popup Header */
+.ai-chat__header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+    padding: 0.875rem 1.25rem;
+    background: var(--wm-bg-card);
+    border-bottom: 1px solid var(--wm-border);
+}
+
+.ai-chat__header-left {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.ai-chat__header-left i {
+    font-size: 1.25rem;
+    color: var(--wm-primary);
+}
+
+.ai-chat__title {
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--wm-text-primary);
+}
+
+.ai-chat__header-right {
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+}
+
+.ai-chat__new-chat,
+.ai-chat__close {
+    display: flex;
+    align-items: center;
+    gap: 0.375rem;
+    padding: 0.375rem 0.75rem;
+    background: transparent;
+    border: 1px solid transparent;
+    border-radius: var(--wm-radius-sm);
+    font-size: 0.875rem;
+    color: var(--wm-text-secondary);
+    cursor: pointer;
+    transition: all var(--wm-transition-fast);
+}
+
+.ai-chat__new-chat:hover,
+.ai-chat__close:hover {
+    background: var(--wm-bg-page);
+    border-color: var(--wm-border);
+    color: var(--wm-text-primary);
+}
+
+.ai-chat__new-chat i,
+.ai-chat__close i {
+    font-size: 0.875rem;
+}
+
+.ai-chat__new-chat-label {
+    font-size: 0.8125rem;
+    font-weight: 500;
+}
+
+/* ============================================================
+   4. CONVERSATION BUBBLES
+   ============================================================ */
+
+.ai-chat__conversations {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    padding: 0.875rem;
+    border-bottom: 1px solid var(--wm-border);
+    overflow-x: auto;
+    max-width: 100%;
+}
+
+.ai-chat__conversation {
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 3.25rem;
+    height: 3.25rem;
+    border: 2px solid var(--wm-border);
+    border-radius: 50%;
+    background: var(--wm-bg-card);
+    color: var(--wm-text-secondary);
+    cursor: pointer;
+    transition: all var(--wm-transition-fast);
+}
+
+.ai-chat__conversation:hover {
+    border-color: var(--wm-primary);
+    color: var(--wm-primary);
+    transform: translateY(-2px);
+}
+
+.ai-chat__conversation--active {
+    background: var(--wm-primary);
+    border-color: var(--wm-primary);
+    color: #fff;
+    box-shadow: 0 4px 12px rgba(255, 195, 0, 0.3);
+}
+
+.ai-chat__conversation i {
+    font-size: 1.25rem;
+}
+
+/* ============================================================
+   5. MESSAGE LIST
+   ============================================================ */
+
+.ai-chat__messages {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    padding: 1rem 1.25rem;
+    overflow-y: auto;
+    flex: 1;
+}
+
+.ai-chat__message {
+    display: flex;
+    flex-direction: column;
+    max-width: 85%;
+}
+
+.ai-chat__message--user {
+    align-self: flex-end;
+    align-items: flex-end;
+}
+
+.ai-chat__message--assistant {
+    align-self: flex-start;
+    align-items: flex-start;
+}
+
+.ai-chat__message-bubble {
+    padding: 0.625rem 1rem;
+    border-radius: var(--wm-radius-lg);
+    font-size: 0.9375rem;
+    line-height: 1.5;
+    word-break: break-word;
+}
+
+.ai-chat__message--user .ai-chat__message-bubble {
+    background: var(--wm-primary);
+    color: #fff;
+    border-bottom-right-radius: 4px;
+}
+
+.ai-chat__message--assistant .ai-chat__message-bubble {
+    background: var(--wm-bg-page);
+    border: 1px solid var(--wm-border);
+    color: var(--wm-text-primary);
+    border-bottom-left-radius: 4px;
+}
+
+/* ============================================================
+   6. MESSAGE INPUT AREA
+   ============================================================ */
+
+.ai-chat__input-area {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.875rem 1.25rem;
+    border-top: 1px solid var(--wm-border);
+    background: var(--wm-bg-card);
+}
+
+.ai-chat__input {
+    flex: 1;
+    padding: 0.75rem 1rem;
+    font-size: 0.9375rem;
+    font-family: inherit;
+    color: var(--wm-text-primary);
+    background: var(--wm-bg-page);
+    border: 1px solid var(--wm-border);
+    border-radius: var(--wm-radius-md);
+    outline: none;
+    transition: border-color var(--wm-transition-fast), box-shadow var(--wm-transition-fast);
+}
+
+.ai-chat__input::placeholder {
+    color: var(--wm-text-muted);
+}
+
+.ai-chat__input:focus {
+    border-color: var(--wm-primary);
+    box-shadow: 0 0 0 3px rgba(255, 195, 0, 0.15);
+}
+
+.ai-chat__send {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 2.75rem;
+    height: 2.75rem;
+    border: none;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--wm-primary) 0%, var(--wm-primary-dark) 100%);
+    color: #fff;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: transform var(--wm-transition-fast), box-shadow var(--wm-transition-fast);
+    flex-shrink: 0;
+}
+
+.ai-chat__send:hover {
+    transform: scale(1.05);
+    box-shadow: 0 4px 16px rgba(255, 195, 0, 0.35);
+}
+
+.ai-chat__send i {
+    font-size: 1rem;
+}
+
+/* ============================================================
+   7. RESPONSIVE
+   ============================================================ */
+
+@media (max-width: 768px) {
+    .ai-chat__popup {
+        width: 21rem;
+        bottom: 5rem;
+        right: 1rem;
+        max-height: 28rem;
+    }
+
+    .ai-chat__toggle {
+        width: 3rem;
+        height: 3rem;
+        font-size: 1.125rem;
+    }
+
+    .ai-chat__new-chat-label {
+        display: none;
+    }
+
+    .ai-chat__new-chat {
+        padding: 0.375rem 0.5rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .ai-chat__popup {
+        width: calc(100vw - 1.5rem);
+        right: 0.75rem;
+        bottom: 4.75rem;
+    }
+
+    .ai-chat__toggle {
+        width: 2.75rem;
+        height: 2.75rem;
+        font-size: 1rem;
+    }
+
+    .ai-chat__header {
+        padding: 0.75rem 1rem;
+    }
+
+    .ai-chat__title {
+        font-size: 0.9375rem;
+    }
+}
+
+/* ============================================================
+   8. UTILITIES
+   ============================================================ */
+
+/* Focus visible for accessibility */
+.ai-chat__toggle:focus-visible {
+    outline: 2px solid var(--wm-primary);
+    outline-offset: 2px;
+}
+
+/* ============================================================
+      END OF ai-chat.css
+   ============================================================ */

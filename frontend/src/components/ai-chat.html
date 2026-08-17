@@ -1,0 +1,79 @@
+<!-- AI Chat Component -->
+<div id="aiChat" class="ai-chat">
+
+    <!-- AI Chat Toggle -->
+    <button id="aiChatToggle" class="ai-chat__toggle" type="button" aria-label="Mở hội thoại AI" aria-expanded="false">
+        <i class="fa-solid fa-robot" aria-hidden="true"></i>
+    </button>
+
+    <!-- AI Chat Widget Group: bubbles (right) + popup (left) -->
+    <div id="aiChatWidget" class="ai-chat__widget" hidden>
+
+        <!-- Conversation Bubbles (max 5, one active) -->
+        <aside class="ai-chat__conversations" aria-label="Danh sách hội thoại">
+            <button class="ai-chat__conversation ai-chat__conversation--active" type="button" title="Hội thoại 5 — hiện tại" aria-label="Hội thoại 5 — hiện tại">
+                <i class="fa-solid fa-robot" aria-hidden="true"></i>
+            </button>
+            <button class="ai-chat__conversation" type="button" title="Hội thoại 4" aria-label="Hội thoại 4">
+                <i class="fa-solid fa-robot" aria-hidden="true"></i>
+            </button>
+            <button class="ai-chat__conversation" type="button" title="Hội thoại 3" aria-label="Hội thoại 3">
+                <i class="fa-solid fa-robot" aria-hidden="true"></i>
+            </button>
+            <button class="ai-chat__conversation" type="button" title="Hội thoại 2" aria-label="Hội thoại 2">
+                <i class="fa-solid fa-robot" aria-hidden="true"></i>
+            </button>
+            <button class="ai-chat__conversation" type="button" title="Hội thoại 1" aria-label="Hội thoại 1">
+                <i class="fa-solid fa-robot" aria-hidden="true"></i>
+            </button>
+        </aside>
+
+        <!-- AI Chat Popup -->
+        <div id="aiChatPopup" class="ai-chat__popup">
+            <!-- Header -->
+            <header class="ai-chat__header">
+                <div class="ai-chat__header-left">
+                    <i class="fa-solid fa-robot" aria-hidden="true"></i>
+                    <span class="ai-chat__title">WordMate AI</span>
+                </div>
+                <div class="ai-chat__header-right">
+                    <button class="ai-chat__new-chat" type="button" aria-label="Hội thoại mới">
+                        <i class="fa-solid fa-pen-to-square" aria-hidden="true"></i>
+                        <span class="ai-chat__new-chat-label">Hội thoại mới</span>
+                    </button>
+                    <button id="aiChatClose" class="ai-chat__close" type="button" aria-label="Đóng hội thoại">
+                        <i class="fa-solid fa-minus" aria-hidden="true"></i>
+                    </button>
+                </div>
+            </header>
+
+            <!-- Message List -->
+            <div class="ai-chat__messages" role="log" aria-label="Tin nhắn chat">
+                <div class="ai-chat__message ai-chat__message--assistant">
+                    <div class="ai-chat__message-bubble">
+                        Xin chào! Mình là WordMate AI. Mình có thể giúp gì cho bạn hôm nay?
+                    </div>
+                </div>
+                <div class="ai-chat__message ai-chat__message--user">
+                    <div class="ai-chat__message-bubble">
+                        Giải thích cách dùng từ "improve" giúp mình nhé.
+                    </div>
+                </div>
+                <div class="ai-chat__message ai-chat__message--assistant">
+                    <div class="ai-chat__message-bubble">
+                        "Improve" là động từ, nghĩa là cải thiện. Ví dụ: "I want to improve my English."
+                    </div>
+                </div>
+            </div>
+
+            <!-- Message Input Area -->
+            <div class="ai-chat__input-area">
+                <input type="text" class="ai-chat__input" placeholder="Nhập tin nhắn..." aria-label="Nhập tin nhắn" />
+                <button class="ai-chat__send" type="button" aria-label="Gửi tin nhắn">
+                    <i class="fa-solid fa-paper-plane" aria-hidden="true"></i>
+                </button>
+            </div>
+        </div>
+
+    </div>
+</div>
