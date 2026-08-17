@@ -32,6 +32,8 @@ let isSending = false;
 let hasSentValidMessage = false;
 let conversations = [];
 let historyRequestSeq = 0;
+// Lưu conversationId đã load history trên trang hiện tại để tránh load lặp lại
+let loadedHistoryForConversationId = null;
 
 // ============================================================
 // DOM ELEMENTS
@@ -108,7 +110,7 @@ function saveHasSentFlag() {
 // POPUP MANAGEMENT
 // ============================================================
 
-function openAIChat() {
+async function openAIChat() {
     if (!widget || !toggleBtn) return;
 
     widget.hidden = false;
@@ -116,15 +118,20 @@ function openAIChat() {
     toggleBtn.setAttribute('aria-expanded', 'true');
 
     // Đảm bảo có conversation (tạo mới nếu chưa có)
-    ensureConversation().then(() => {
-        // Load danh sách conversation
-        loadConversations();
+    await ensureConversation();
 
+    // Load danh sách conversation
+    loadConversations();
+
+    // Nếu có currentConversationId (khôi phục từ session) và chưa load history
+    // cho conversation này trên trang hiện tại thì load lịch sử
+    if (currentConversationId && loadedHistoryForConversationId !== currentConversationId) {
+        await loadConversationHistory(currentConversationId);
+        loadedHistoryForConversationId = currentConversationId;
+    } else if (!hasSentValidMessage) {
         // Hiển thị suggestion nếu chưa gửi message hợp lệ
-        if (!hasSentValidMessage) {
-            showSuggestions();
-        }
-    });
+        showSuggestions();
+    }
 }
 
 function closeAIChat() {
@@ -149,6 +156,8 @@ async function ensureConversation() {
             saveConversationId();
             hasSentValidMessage = false;
             saveHasSentFlag();
+            // Conversation mới - không cần load history
+            loadedHistoryForConversationId = currentConversationId;
         }
     } catch (error) {
         console.error('[AIChat] Không thể tạo conversation:', error);
@@ -268,6 +277,7 @@ function selectConversation(conversationId) {
 
     // Load và render lịch sử của conversation được chọn
     loadConversationHistory(conversationId);
+    loadedHistoryForConversationId = conversationId;
 }
 
 async function createNewConversation() {
@@ -276,6 +286,8 @@ async function createNewConversation() {
         if (response.success && response.data && response.data.conversation_id) {
             currentConversationId = response.data.conversation_id;
             saveConversationId();
+            // Conversation mới - không cần load history
+            loadedHistoryForConversationId = currentConversationId;
 
             // Xóa message cũ và hiển thị suggestion
             clearMessages();
