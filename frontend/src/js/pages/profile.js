@@ -23,7 +23,6 @@ const headerEmail = $('headerEmail');
 
 // Avatar upload
 const changeAvatarBtn = $('changeAvatarBtn');
-const changeAvatarTextBtn = $('changeAvatarTextBtn');
 const editAvatarBtn = $('editAvatarBtn');
 const avatarInput = $('avatarInput');
 const avatarMessage = $('avatarMessage');
@@ -210,9 +209,8 @@ function handleAvatarFileSelected(e) {
         avatarPlaceholder.style.display = 'none';
         infoAvatar.src = ev.target.result;
 
-        // Show action buttons, hide change button
+        // Show action buttons
         avatarActions.style.display = 'flex';
-        changeAvatarTextBtn.style.display = 'none';
     };
     reader.readAsDataURL(file);
 }
@@ -232,7 +230,6 @@ function cancelAvatarPreview() {
 
     // Restore buttons
     avatarActions.style.display = 'none';
-    changeAvatarTextBtn.style.display = '';
 
     // Reset input
     avatarInput.value = '';
@@ -249,7 +246,6 @@ function resetAvatarPreview() {
     avatarPlaceholder.style.display = 'none';
     infoAvatar.src = url;
     avatarActions.style.display = 'none';
-    changeAvatarTextBtn.style.display = '';
 }
 
 // ============================================================
@@ -307,7 +303,6 @@ async function uploadAvatar() {
             selectedAvatarFile = null;
             originalAvatarUrl = null;
             avatarActions.style.display = 'none';
-            changeAvatarTextBtn.style.display = '';
             avatarInput.value = '';
 
             // Show success message
@@ -593,7 +588,6 @@ function logout() {
 function bindEvents() {
     // Avatar upload: trigger file picker
     changeAvatarBtn.addEventListener('click', openAvatarPicker);
-    changeAvatarTextBtn.addEventListener('click', openAvatarPicker);
     editAvatarBtn.addEventListener('click', openAvatarPicker);
 
     // Avatar: file selected → validate + preview
