@@ -1,6 +1,6 @@
 <!-- ============================================================
      Header Component - WordMate
-     Contains: Logo, Avatar, Streak
+     Contains: Logo, Avatar, Streak, Admin Button
      ============================================================ -->
 <header class="wm-header">
     <div class="header-container">
@@ -11,8 +11,14 @@
             </a>
         </div>
 
-        <!-- Right Section: Avatar + Streak -->
+        <!-- Right Section: Admin Button + Avatar + Streak -->
         <div class="header-right">
+            <!-- Admin Button (only visible for role="admin") -->
+            <a href="../admin/admin.html" class="header-admin-btn" id="header-admin-btn">
+                <i class="fa-solid fa-shield-halved"></i>
+                <span>Quản lý</span>
+            </a>
+
             <!-- Streak Display -->
             <div class="header-streak" id="header-streak">
                 <div class="streak-badge">

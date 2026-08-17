@@ -1,5 +1,5 @@
 // Get DOM elements
-let avatarButton, dropdownMenu, dropdownUserName, dropdownUserEmail, headerAvatarImg, streakCount;
+let avatarButton, dropdownMenu, dropdownUserName, dropdownUserEmail, headerAvatarImg, streakCount, adminBtn;
 
 function getDOMElements() {
     avatarButton = document.getElementById("avatar-button");
@@ -8,6 +8,7 @@ function getDOMElements() {
     dropdownUserEmail = document.getElementById("dropdown-user-email");
     headerAvatarImg = document.getElementById("header-avatar-img");
     streakCount = document.querySelector(".streak-count");
+    adminBtn = document.getElementById("header-admin-btn");
 }
 
 // ============================================================
@@ -50,11 +51,30 @@ function loadUserData() {
             if (headerAvatarImg && user.avatar) {
                 headerAvatarImg.src = user.avatar;
             }
+            
+            // Show/hide admin button based on role
+            if (adminBtn) {
+                if (user.role === 'admin') {
+                    adminBtn.style.display = 'inline-flex';
+                    console.log('[Header] Admin button shown (role: admin)');
+                } else {
+                    adminBtn.style.display = 'none';
+                    console.log('[Header] Admin button hidden (role: ' + (user.role || 'unknown') + ')');
+                }
+            }
         } catch (error) {
             console.error('[Header] Error parsing user data:', error);
+            // Hide admin button on parse error
+            if (adminBtn) {
+                adminBtn.style.display = 'none';
+            }
         }
     } else {
         console.warn('[Header] No user data in localStorage');
+        // Hide admin button if no user data
+        if (adminBtn) {
+            adminBtn.style.display = 'none';
+        }
     }
 }
 
