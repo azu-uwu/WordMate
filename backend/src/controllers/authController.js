@@ -152,7 +152,10 @@ const login = async (req, res) => {
                 token,
                 user: {
                     id: user.id,
+                    username: user.username,
+                    fullname: user.fullname,
                     email: user.email,
+                    avatar: user.avatar,
                     role: user.role,
                     roadmap_id: user.roadmap_id,
                     streak

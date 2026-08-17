@@ -16,6 +16,45 @@ function getDOMElements() {
 // ============================================================
 
 /**
+ * Build a generated avatar URL from user's fullname.
+ * Used as fallback when the user has no uploaded avatar.
+ */
+function buildAvatarUrl(name) {
+    const encoded = encodeURIComponent(name || 'User');
+    return `https://ui-avatars.com/api/?name=${encoded}&background=FFC300&color=1E293B&size=100`;
+}
+
+/**
+ * Load and display the user's avatar.
+ * Uses the uploaded avatar if available (resolving /uploads/ paths via getMediaUrl),
+ * otherwise falls back to a generated avatar from the user's fullname.
+ */
+async function loadAvatar(user) {
+    if (!headerAvatarImg) return;
+
+    let avatarUrl = null;
+
+    if (user.avatar) {
+        try {
+            const apiModule = await import('../../services/api.js');
+            const { getMediaUrl } = apiModule;
+            avatarUrl = getMediaUrl(user.avatar);
+        } catch (err) {
+            console.warn('[Header] Failed to resolve media URL, using raw avatar path:', err);
+            avatarUrl = user.avatar;
+        }
+    }
+
+    // Fallback: generate an avatar from the user's fullname
+    if (!avatarUrl) {
+        avatarUrl = buildAvatarUrl(user.fullname);
+    }
+
+    headerAvatarImg.src = avatarUrl;
+    headerAvatarImg.alt = user.fullname ? `Avatar của ${user.fullname}` : 'Avatar';
+}
+
+/**
  * Load and display user information in the header dropdown.
  * Gets user data from localStorage and updates the UI.
  */
@@ -47,10 +86,8 @@ function loadUserData() {
                 dropdownUserEmail.textContent = user.email;
             }
             
-            // Update avatar image if available
-            if (headerAvatarImg && user.avatar) {
-                headerAvatarImg.src = user.avatar;
-            }
+            // Update avatar image (with fallback)
+            loadAvatar(user);
             
             // Show/hide admin button based on role
             if (adminBtn) {
@@ -86,14 +123,43 @@ function loadUserData() {
  * Load the user's current streak from GET /api/profile.
  * Updates the streak count in the header.
  * Frontend only reads and displays the value - no streak calculation.
+ * Also refreshes the stored user (fullname/avatar) from the backend so
+ * the avatar renders correctly even for users who logged in before
+ * the backend returned those fields.
  */
 async function loadStreak() {
     try {
         const apiModule = await import('../../services/api.js');
         const api = apiModule.default;
         const response = await api.get('/profile');
-        if (response.success && streakCount) {
-            streakCount.textContent = response.data.streak != null ? response.data.streak : 0;
+        if (response.success) {
+            // Update streak count
+            if (streakCount) {
+                streakCount.textContent = response.data.streak != null ? response.data.streak : 0;
+            }
+
+            // Refresh user info (name/email/avatar) from backend
+            const userStr = localStorage.getItem('user');
+            if (userStr) {
+                try {
+                    const localUser = JSON.parse(userStr);
+                    const mergedUser = { ...localUser, ...response.data };
+                    localStorage.setItem('user', JSON.stringify(mergedUser));
+
+                    // Update displayed name/email if missing
+                    if (dropdownUserName && mergedUser.fullname) {
+                        dropdownUserName.textContent = mergedUser.fullname;
+                    }
+                    if (dropdownUserEmail && mergedUser.email) {
+                        dropdownUserEmail.textContent = mergedUser.email;
+                    }
+
+                    // Re-render avatar with up-to-date data
+                    loadAvatar(mergedUser);
+                } catch (err) {
+                    console.warn('[Header] Failed to merge profile data:', err);
+                }
+            }
         }
     } catch (error) {
         console.error('[Header] Failed to load streak:', error);
