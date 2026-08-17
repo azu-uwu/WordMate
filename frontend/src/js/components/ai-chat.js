@@ -31,6 +31,7 @@ let currentConversationId = null;
 let isSending = false;
 let hasSentValidMessage = false;
 let conversations = [];
+let historyRequestSeq = 0;
 
 // ============================================================
 // DOM ELEMENTS
@@ -197,18 +198,76 @@ function renderConversations() {
     });
 }
 
+/**
+ * Tải lịch sử và render toàn bộ message của một conversation.
+ * Có thể tái sử dụng khi khôi phục conversation khi chuyển trang MPA.
+ *
+ * @param {number} conversationId - ID conversation cần tải lịch sử
+ * @returns {Promise<void>}
+ */
+async function loadConversationHistory(conversationId) {
+    // Tăng sequence để loại bỏ response cũ khi user chuyển conversation nhanh
+    const requestSeq = ++historyRequestSeq;
+
+    // Xóa message của conversation đang hiển thị trước khi load
+    clearMessages();
+
+    try {
+        const response = await api.get(`/ai/conversations/${conversationId}/messages`);
+
+        // Bỏ qua response cũ nếu user đã chuyển sang conversation khác
+        if (requestSeq !== historyRequestSeq) return;
+
+        if (!response.success) {
+            throw new Error(response.message || 'Không thể tải lịch sử hội thoại.');
+        }
+
+        const messages = Array.isArray(response.data) ? response.data : [];
+
+        if (messages.length > 0) {
+            // Conversation đã có lịch sử - render toàn bộ message theo thứ tự cũ → mới
+            renderMessages(messages);
+            hasSentValidMessage = true;
+        } else {
+            // Conversation chưa có message - hiển thị suggestion để bắt đầu hội thoại
+            hasSentValidMessage = false;
+            showSuggestions();
+        }
+        saveHasSentFlag();
+    } catch (error) {
+        // Bỏ qua lỗi của response cũ nếu user đã chuyển sang conversation khác
+        if (requestSeq !== historyRequestSeq) return;
+
+        console.error('[AIChat] Không thể tải lịch sử hội thoại:', error);
+        showError('Không thể tải lịch sử hội thoại. Vui lòng thử lại.');
+    }
+}
+
+/**
+ * Render danh sách message vào messagesContainer theo đúng thứ tự cũ → mới.
+ *
+ * @param {Array<{role: string, content: string}>} messages - Danh sách message của conversation
+ */
+function renderMessages(messages) {
+    if (!messagesContainer) return;
+
+    messages.forEach((msg) => {
+        const role = msg.role === 'user' ? 'user' : 'assistant';
+        addMessage(msg.content, role);
+    });
+}
+
 function selectConversation(conversationId) {
+    if (conversationId === currentConversationId) return;
+
     currentConversationId = conversationId;
     saveConversationId();
 
-    // Cập nhật trạng thái active
+    // Cập nhật trạng thái active trên bubble
     renderConversations();
 
-    // Không có API lấy message history - xóa message và hiển thị suggestion
-    clearMessages();
-    hasSentValidMessage = false;
-    saveHasSentFlag();
-    showSuggestions();
+    // Load và render lịch sử của conversation được chọn
+    loadConversationHistory(conversationId);
 }
 
 async function createNewConversation() {
