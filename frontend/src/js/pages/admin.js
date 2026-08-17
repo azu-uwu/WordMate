@@ -177,19 +177,19 @@ let pendingDelete = null;           // { type: 'roadmap'|'topic'|'vocabulary'|'c
 
 const SECTION_META = {
     'roadmaps': {
-        title: 'Roadmaps',
+        title: 'Lộ trình',
         subtitle: 'Quản lý lộ trình học tập trong hệ thống'
     },
     'topics': {
-        title: 'Topics',
+        title: 'Chủ đề',
         subtitle: 'Quản lý chủ đề học tập trong hệ thống'
     },
     'vocabularies': {
-        title: 'Vocabularies',
+        title: 'Từ vựng',
         subtitle: 'Quản lý từ vựng trong hệ thống'
     },
     'custom-questions': {
-        title: 'Custom Questions',
+        title: 'Câu hỏi tùy chỉnh',
         subtitle: 'Quản lý câu hỏi tùy chỉnh trong hệ thống'
     }
 };
@@ -439,7 +439,7 @@ function setupRoadmapsTable() {
                         return '<div class="admin-thumb admin-thumb-empty"><i class="fa-solid fa-map"></i></div>';
                     }
                     const url = getMediaUrl(data);
-                    return `<div class="admin-thumb"><img src="${url}" alt="Ảnh Roadmap" loading="lazy"></div>`;
+                    return `<div class="admin-thumb"><img src="${url}" alt="Ảnh lộ trình" loading="lazy"></div>`;
                 }
             },
             { data: 'name', render: (data) => `<strong>${esc(data || '')}</strong>` },
@@ -531,7 +531,7 @@ function setupTopicsDatatable() {
                         return '<div class="admin-thumb admin-thumb-empty"><i class="fa-solid fa-folder-tree"></i></div>';
                     }
                     const url = getMediaUrl(data);
-                    return `<div class="admin-thumb"><img src="${url}" alt="Ảnh Topic" loading="lazy"></div>`;
+                    return `<div class="admin-thumb"><img src="${url}" alt="Ảnh chủ đề" loading="lazy"></div>`;
                 }
             },
             { data: 'name', render: (data) => `<strong>${esc(data || '')}</strong>` },
@@ -855,7 +855,7 @@ async function loadRoadmaps() {
         populateImportRoadmapSelect();
         populateCustomQuestionsRoadmapFilter();
     } catch (error) {
-        showToast(error.message || 'Không tải được danh sách Roadmap.', 'error');
+        showToast(error.message || 'Không tải được danh sách lộ trình.', 'error');
     } finally {
         if (loadingEl) loadingEl.classList.add('d-none');
     }
@@ -875,7 +875,7 @@ async function loadTopics() {
         topicsDataTable.rows.add(topicsDTData);
         topicsDataTable.draw();
     } catch (error) {
-        showToast(error.message || 'Không tải được danh sách Topic.', 'error');
+        showToast(error.message || 'Không tải được danh sách chủ đề.', 'error');
     } finally {
         if (loadingEl) loadingEl.classList.add('d-none');
     }
@@ -885,7 +885,7 @@ function populateTopicsRoadmapFilter() {
     if (!topicsRoadmapFilter) return;
 
     const current = topicsRoadmapFilter.value;
-    topicsRoadmapFilter.innerHTML = '<option value="">Tất cả Roadmap</option>';
+    topicsRoadmapFilter.innerHTML = '<option value="">Tất cả lộ trình</option>';
     roadmaps.forEach((roadmap) => {
         const option = document.createElement('option');
         option.value = roadmap.id;
@@ -905,7 +905,7 @@ function populateTopicRoadmapModalSelect() {
     if (!topicRoadmapIdInput) return;
 
     const current = topicRoadmapIdInput.value;
-    topicRoadmapIdInput.innerHTML = '<option value="">-- Chọn Roadmap --</option>';
+    topicRoadmapIdInput.innerHTML = '<option value="">-- Chọn lộ trình --</option>';
     roadmaps.forEach((roadmap) => {
         const option = document.createElement('option');
         option.value = roadmap.id;
@@ -970,7 +970,7 @@ function populateVocabRoadmapFilter() {
     if (!vocabRoadmapFilter) return;
 
     const current = vocabRoadmapFilter.value;
-    vocabRoadmapFilter.innerHTML = '<option value="">Tất cả Roadmap</option>';
+    vocabRoadmapFilter.innerHTML = '<option value="">Tất cả lộ trình</option>';
     roadmaps.forEach((roadmap) => {
         const option = document.createElement('option');
         option.value = roadmap.id;
@@ -992,7 +992,7 @@ function populateVocabTopicFilter() {
 
     const roadmapId = vocabRoadmapFilter.value;
     const current = vocabTopicFilter.value;
-    vocabTopicFilter.innerHTML = '<option value="">Tất cả Topic</option>';
+    vocabTopicFilter.innerHTML = '<option value="">Tất cả chủ đề</option>';
 
     const filtered = roadmapId
         ? topicsCache.filter((t) => String(t.roadmap_id) === String(roadmapId))
@@ -1017,7 +1017,7 @@ function populateVocabRoadmapSelect() {
     if (!vocabRoadmapIdInput) return;
 
     const current = vocabRoadmapIdInput.value;
-    vocabRoadmapIdInput.innerHTML = '<option value="">-- Chọn Roadmap --</option>';
+    vocabRoadmapIdInput.innerHTML = '<option value="">-- Chọn lộ trình --</option>';
     roadmaps.forEach((roadmap) => {
         const option = document.createElement('option');
         option.value = roadmap.id;
@@ -1032,7 +1032,7 @@ function populateVocabTopicSelect() {
 
     const roadmapId = vocabRoadmapIdInput.value;
     const current = vocabTopicIdInput.value;
-    vocabTopicIdInput.innerHTML = '<option value="">-- Chọn Topic --</option>';
+    vocabTopicIdInput.innerHTML = '<option value="">-- Chọn chủ đề --</option>';
 
     const filtered = roadmapId
         ? topicsCache.filter((t) => String(t.roadmap_id) === String(roadmapId))
@@ -1051,7 +1051,7 @@ function populateImportRoadmapSelect() {
     if (!importRoadmapIdInput) return;
 
     const current = importRoadmapIdInput.value;
-    importRoadmapIdInput.innerHTML = '<option value="">-- Chọn Roadmap --</option>';
+    importRoadmapIdInput.innerHTML = '<option value="">-- Chọn lộ trình --</option>';
     roadmaps.forEach((roadmap) => {
         const option = document.createElement('option');
         option.value = roadmap.id;
@@ -1066,7 +1066,7 @@ function populateImportTopicSelect() {
 
     const roadmapId = importRoadmapIdInput.value;
     const current = importTopicIdInput.value;
-    importTopicIdInput.innerHTML = '<option value="">-- Chọn Topic --</option>';
+    importTopicIdInput.innerHTML = '<option value="">-- Chọn chủ đề --</option>';
 
     const filtered = roadmapId
         ? topicsCache.filter((t) => String(t.roadmap_id) === String(roadmapId))
@@ -1141,7 +1141,7 @@ function populateCustomQuestionsRoadmapFilter() {
     if (!customQuestionsRoadmapFilter) return;
 
     const current = customQuestionsRoadmapFilter.value;
-    customQuestionsRoadmapFilter.innerHTML = '<option value="">Tất cả Roadmaps</option>';
+    customQuestionsRoadmapFilter.innerHTML = '<option value="">Tất cả lộ trình</option>';
     roadmaps.forEach((roadmap) => {
         const option = document.createElement('option');
         option.value = roadmap.id;
@@ -1164,7 +1164,7 @@ function populateCustomQuestionsTopicFilter() {
 
     const roadmapId = customQuestionsRoadmapFilter.value;
     const current = customQuestionsTopicFilter.value;
-    customQuestionsTopicFilter.innerHTML = '<option value="">Tất cả Topics</option>';
+    customQuestionsTopicFilter.innerHTML = '<option value="">Tất cả chủ đề</option>';
 
     const filtered = roadmapId
         ? topicsCache.filter((t) => String(t.roadmap_id) === String(roadmapId))
@@ -1243,7 +1243,7 @@ function openRoadmapModal(item = null) {
 
     const modalTitle = document.getElementById('roadmapModalLabel');
     if (item) {
-        modalTitle.textContent = 'Sửa Roadmap';
+        modalTitle.textContent = 'Sửa lộ trình';
         roadmapIdInput.value = item.id;
         roadmapNameInput.value = item.name || '';
         roadmapDescriptionInput.value = item.description || '';
@@ -1259,7 +1259,7 @@ function openRoadmapModal(item = null) {
             roadmapImagePlaceholder.classList.add('d-none');
         }
     } else {
-        modalTitle.textContent = 'Thêm Roadmap';
+        modalTitle.textContent = 'Thêm lộ trình';
     }
 
     const modal = bootstrap.Modal.getOrCreateInstance(roadmapModalEl);
@@ -1341,7 +1341,7 @@ async function handleSaveRoadmap() {
         const modal = bootstrap.Modal.getInstance(roadmapModalEl);
         if (modal) modal.hide();
 
-        showToast(id ? 'Cập nhật Roadmap thành công.' : 'Tạo Roadmap thành công.', 'success');
+        showToast(id ? 'Cập nhật lộ trình thành công.' : 'Tạo lộ trình thành công.', 'success');
         await loadRoadmaps();
         await loadTopics();
     } catch (error) {
@@ -1380,7 +1380,7 @@ function openTopicModal(item = null) {
 
     const modalTitle = document.getElementById('topicModalLabel');
     if (item) {
-        modalTitle.textContent = 'Sửa Topic';
+        modalTitle.textContent = 'Sửa chủ đề';
         topicIdInput.value = item.id;
         topicNameInput.value = item.name || '';
         topicDescriptionInput.value = item.description || '';
@@ -1397,7 +1397,7 @@ function openTopicModal(item = null) {
             topicImagePlaceholder.classList.add('d-none');
         }
     } else {
-        modalTitle.textContent = 'Thêm Topic';
+        modalTitle.textContent = 'Thêm chủ đề';
         // Preselect roadmap theo filter đang chọn (nếu có)
         if (topicsRoadmapFilter.value) {
             topicRoadmapIdInput.value = topicsRoadmapFilter.value;
@@ -1490,7 +1490,7 @@ async function handleSaveTopic() {
         const modal = bootstrap.Modal.getInstance(topicModalEl);
         if (modal) modal.hide();
 
-        showToast(id ? 'Cập nhật Topic thành công.' : 'Tạo Topic thành công.', 'success');
+        showToast(id ? 'Cập nhật chủ đề thành công.' : 'Tạo chủ đề thành công.', 'success');
         await loadTopics();
     } catch (error) {
         showFormError(topicFormError, error.message || 'Có lỗi xảy ra. Vui lòng thử lại.');
@@ -1941,7 +1941,7 @@ function filterCqVocabularyOptions() {
     if (!cqVocabularyIdInput) return;
 
     const selected = cqVocabularyIdInput.value;
-    cqVocabularyIdInput.innerHTML = '<option value="">-- Chọn Từ Vựng --</option>';
+    cqVocabularyIdInput.innerHTML = '<option value="">-- Chọn từ vựng --</option>';
 
     // Chưa chọn Topic → disabled, chỉ hiển thị option mặc định
     if (!cqTopicIdInput.value) {
@@ -1977,7 +1977,7 @@ function populateCqRoadmapSelect() {
     if (!cqRoadmapIdInput) return;
 
     const current = cqRoadmapIdInput.value;
-    cqRoadmapIdInput.innerHTML = '<option value="">-- Chọn Roadmap --</option>';
+    cqRoadmapIdInput.innerHTML = '<option value="">-- Chọn lộ trình --</option>';
     roadmaps.forEach((roadmap) => {
         const option = document.createElement('option');
         option.value = roadmap.id;
@@ -1992,7 +1992,7 @@ function populateCqTopicSelect() {
 
     const roadmapId = cqRoadmapIdInput.value;
     const current = cqTopicIdInput.value;
-    cqTopicIdInput.innerHTML = '<option value="">-- Chọn Topic --</option>';
+    cqTopicIdInput.innerHTML = '<option value="">-- Chọn chủ đề --</option>';
 
     const filtered = roadmapId
         ? topicsCache.filter((t) => String(t.roadmap_id) === String(roadmapId))
@@ -2198,10 +2198,10 @@ function openConfirmDeleteModal(type, item) {
 
     if (type === 'roadmap') {
         confirmDeleteText.textContent =
-            `Bạn có chắc chắn muốn xóa Roadmap "${item.name || ''}"? Roadmap có chứa Topic/Vocabulary liên quan thì sẽ không thể xóa.`;
+            `Bạn có chắc chắn muốn xóa lộ trình "${item.name || ''}"? Lộ trình có chứa chủ đề/từ vựng liên quan thì sẽ không thể xóa.`;
     } else if (type === 'topic') {
         confirmDeleteText.textContent =
-            `Bạn có chắc chắn muốn xóa Topic "${item.name || ''}"?`;
+            `Bạn có chắc chắn muốn xóa chủ đề "${item.name || ''}"?`;
     } else if (type === 'custom_question') {
         const q = item.question ? `"${truncateText(item.question, 60)}"` : `#${item.id}`;
         confirmDeleteText.textContent =
@@ -2225,12 +2225,12 @@ async function handleConfirmDelete() {
         const { type, id } = pendingDelete;
         if (type === 'roadmap') {
             await api.del(`/admin/roadmaps/${id}`);
-            showToast('Xóa Roadmap thành công.', 'success');
+            showToast('Xóa lộ trình thành công.', 'success');
             // Refresh cả Topics vì Topic có thể trỏ tới Roadmap đã bị xóa
             await Promise.all([loadRoadmaps(), loadTopics()]);
         } else if (type === 'topic') {
             await api.del(`/admin/topics/${id}`);
-            showToast('Xóa Topic thành công.', 'success');
+            showToast('Xóa chủ đề thành công.', 'success');
             await loadTopics();
         } else if (type === 'custom_question') {
             await api.del(`/admin/custom-questions/${id}`);
