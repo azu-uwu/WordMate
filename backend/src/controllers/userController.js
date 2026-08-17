@@ -66,10 +66,16 @@ const updateProfile = async (req, res) => {
             });
         }
 
-        // Update profile with new fullname and existing avatar
+        // Xác định avatar: giữ nguyên nếu không có file upload, cập nhật nếu có
+        let avatar = user.avatar;
+        if (req.file) {
+            avatar = `/uploads/images/${req.file.filename}`;
+        }
+
+        // Update profile with new fullname and avatar (giữ nguyên nếu không upload file mới)
         await User.updateProfile(userId, {
             fullname: fullname.trim(),
-            avatar: user.avatar
+            avatar
         });
 
         return res.status(200).json({
