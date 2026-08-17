@@ -5,234 +5,370 @@ const aiModel = require("../models/aiModel");
  */
 
 /**
- * Kiểm tra xem một câu hỏi/tin nhắn của người dùng có nằm ngoài phạm vi hỗ trợ học tiếng Anh/WordMate hay không.
- *
- * @param {string} message - Tin nhắn của người dùng
- * @returns {boolean} true nếu câu hỏi ngoài phạm vi, ngược lại false
+ * Từ khóa thể hiện intent học tiếng Anh/từ vựng/ngữ pháp (trong phạm vi).
+ * Lưu ý: KHÔNG dùng các từ quá chung như "what", "why", "how", "can", "explain"
+ * vì chúng không xác định được intent học tiếng Anh và dễ gây từ chối nhầm.
  */
-const isOutOfScope = (message) => {
-    if (!message || typeof message !== "string") return true;
-    const msg = message.toLowerCase().trim();
+const englishLearningKeywords = [
+    "tiếng anh",
+    "english",
+    "grammar",
+    "ngữ pháp",
+    "từ vựng",
+    "vocabulary",
+    "vocab",
+    "wordmate",
+    "word",
+    "meaning",
+    "mean",
+    "nghĩa là gì",
+    "nghĩa của",
+    "nghĩa",
+    "dịch",
+    "translate",
+    "translation",
+    "pronounce",
+    "pronunciation",
+    "phát âm",
+    "example",
+    "ví dụ",
+    "câu ví dụ",
+    "noun",
+    "verb",
+    "adjective",
+    "adverb",
+    "pronoun",
+    "preposition",
+    "thì",
+    "tense",
+    "present simple",
+    "past simple",
+    "future simple",
+    "ielts",
+    "toeic",
+    "toefl",
+    "study",
+    "learn",
+    "học",
+    "luyện nghe",
+    "luyện nói",
+    "luyện đọc",
+    "luyện viết",
+    "speaking",
+    "listening",
+    "reading",
+    "writing",
+    "chủ đề",
+    "topic",
+    "roadmap",
+    "lộ trình",
+    "quiz",
+    "câu hỏi",
+    "trắc nghiệm",
+    "kiểm tra",
+    "bài tập",
+    "sentence",
+    "phrase",
+    "idiom",
+    "phrasal verb",
+    "slang",
+    "collocation",
+    "synonym",
+    "antonym",
+    "đồng nghĩa",
+    "trái nghĩa",
+];
 
-    // 1. Cho phép các câu hỏi chào hỏi hoặc thăm hỏi ngắn
-    const greetings = [
-        "hello",
-        "hi",
-        "hey",
-        "greetings",
-        "xin chào",
-        "chào bạn",
-        "chào",
-        "halo",
-        "helo",
-        "howdy",
-        "ola",
-        "bonjour",
-        "bạn khỏe không",
-        "bạn là ai",
-        "tên là gì",
-        "who are you",
-        "what is your name",
-        "how are you",
-    ];
-    if (greetings.some((g) => msg === g || msg.startsWith(g + " ") || msg.endsWith(" " + g))) {
-        return false;
-    }
+/**
+ * Từ/cụm từ chào hỏi, thăm hỏi ngắn được phép.
+ */
+const greetings = [
+    "hello",
+    "hi",
+    "hey",
+    "greetings",
+    "xin chào",
+    "chào bạn",
+    "chào",
+    "halo",
+    "helo",
+    "howdy",
+    "ola",
+    "bonjour",
+    "bạn khỏe không",
+    "bạn là ai",
+    "tên là gì",
+    "who are you",
+    "what is your name",
+    "how are you",
+];
 
-    // 2. Định nghĩa các từ khóa tiếng Anh/học tập (trong phạm vi)
-    const englishKeywords = [
-        "tiếng anh",
-        "english",
-        "grammar",
-        "ngữ pháp",
-        "từ vựng",
-        "vocabulary",
-        "vocab",
-        "wordmate",
-        "word",
-        "pronounce",
-        "pronunciation",
-        "phát âm",
-        "meaning",
-        "nghĩa là gì",
-        "nghĩa của",
-        "dịch",
-        "translate",
-        "translation",
-        "example",
-        "ví dụ",
-        "câu ví dụ",
-        "noun",
-        "verb",
-        "adjective",
-        "adverb",
-        "pronoun",
-        "preposition",
-        "thì",
-        "tense",
-        "present simple",
-        "past simple",
-        "future simple",
-        "ielts",
-        "toeic",
-        "toefl",
-        "study",
-        "learn",
-        "học",
-        "luyện nghe",
-        "luyện nói",
-        "luyện đọc",
-        "luyện viết",
-        "speaking",
-        "listening",
-        "reading",
-        "writing",
-        "chủ đề",
-        "topic",
-        "roadmap",
-        "lộ trình",
-        "quiz",
-        "câu hỏi",
-        "trắc nghiệm",
-        "kiểm tra",
-        "test",
-        "bài tập",
-        "sentence",
-        "phrase",
-        "idiom",
-        "phrasal verb",
-        "slang",
-        "collocation",
-        "synonym",
-        "antonym",
-        "đồng nghĩa",
-        "trái nghĩa",
-    ];
+/**
+ * Từ khóa thuộc các lĩnh vực RÕ RÀNG ngoài phạm vi học tiếng Anh/WordMate.
+ * Chỉ reject khi câu hỏi chứa các từ khóa cụ thể này.
+ */
+const outOfScopeKeywords = [
+    // Lập trình / coding
+    "lập trình",
+    "coding",
+    "programming",
+    "write code",
+    "viết code",
+    "debug",
+    "python",
+    "javascript",
+    "typescript",
+    "java",
+    "c++",
+    "c#",
+    "php",
+    "ruby",
+    "rust",
+    "html",
+    "css",
+    "sql",
+    "react",
+    "nodejs",
+    "node.js",
+    "api",
+    "database",
+    // Nấu ăn / công thức nấu ăn
+    "nấu ăn",
+    "cooking",
+    "recipe",
+    "cách nấu",
+    "món ăn",
+    "làm bánh",
+    // Thời tiết
+    "thời tiết",
+    "weather",
+    "dự báo",
+    "nhiệt độ",
+    // Thể thao
+    "bóng đá",
+    "football",
+    "soccer",
+    "tennis",
+    "basketball",
+    "cầu lông",
+    "thể thao",
+    // Toán học
+    "toán",
+    "math",
+    "equation",
+    "phương trình",
+    "calculus",
+    "algebra",
+    "geometry",
+    // Khoa học tự nhiên
+    "vật lý",
+    "physics",
+    "hóa học",
+    "chemistry",
+    "sinh học",
+    "biology",
+    "khoa học",
+    "science",
+    // Chính trị / kinh tế / tài chính
+    "chính trị",
+    "politics",
+    "kinh tế",
+    "economy",
+    "tài chính",
+    "finance",
+    "cổ phiếu",
+    "stock",
+    "chứng khoán",
+    "crypto",
+    "bitcoin",
+    // Địa lý / lịch sử / xã hội
+    "thủ đô",
+    "capital",
+    "quốc gia",
+    "địa lý",
+    "geography",
+    "lịch sử",
+    "history",
+    // Tin tức / giải trí
+    "tin tức",
+    "news",
+    "bản tin",
+    "phim",
+    "movie",
+    "cinema",
+    "âm nhạc",
+    "music",
+    "bài hát",
+    "song",
+    "game",
+    "trò chơi",
+];
 
-    const hasEnglishKeyword = englishKeywords.some((keyword) => msg.includes(keyword));
-    if (hasEnglishKeyword) {
-        return false;
-    }
+/**
+ * Các mẫu câu hỏi kiến thức tổng quát RÕ RÀNG ngoài phạm vi học tiếng Anh.
+ * Đây là các pattern cụ thể, KHÔNG dùng các từ chung như "what", "why", "how", "can".
+ */
+const outOfScopePatterns = [
+    // Câu hỏi sinh học/đời sống động vật (không phải câu hỏi từ vựng)
+    /why do (cats|dogs|animals|humans|plants|birds|fish|insects) (have|need|eat)/,
+    /how many (legs|wings|eyes|bones|teeth|fingers) (does|do) (a|an|the)/,
+    // Câu hỏi kiến thức tổng quát rõ ràng
+    /why is the sky/,
+    /what is the (capital|population) of/,
+    /how (tall|far|long|big|fast) (is|are|does|do)/,
+];
 
-    // 3. Định nghĩa các từ khóa ngoài phạm vi (như lập trình, toán học, thời tiết, nấu ăn, chính trị...)
-    const outOfScopeKeywords = [
-        "lập trình",
-        "coding",
-        "programming",
-        "write code",
-        "viết code",
-        "python",
-        "javascript",
-        "html",
-        "css",
-        "c++",
-        "java",
-        "sql",
-        "database",
-        "nấu ăn",
-        "cooking",
-        "recipe",
-        "món ăn",
-        "thời tiết",
-        "weather",
-        "bóng đá",
-        "football",
-        "soccer",
-        "toán",
-        "math",
-        "equation",
-        "phương trình",
-        "vật lý",
-        "hóa học",
-        "physics",
-        "chemistry",
-        "sinh học",
-        "biology",
-        "chính trị",
-        "politics",
-        "kinh tế",
-        "economy",
-        "finance",
-        "tài chính",
-        "cổ phiếu",
-        "stock",
-        "crypto",
-        "bitcoin",
-        "phim",
-        "movie",
-        "cinema",
-        "bài hát",
-        "song",
-        "music",
-        "âm nhạc",
-        "game",
-        "trò chơi",
-    ];
+/**
+ * Kiểm tra xem câu hỏi có chứa từ khóa thể hiện intent học tiếng Anh/WordMate hay không.
+ */
+const hasEnglishLearningIntent = (msg) =>
+    englishLearningKeywords.some((keyword) => msg.includes(keyword));
 
-    const hasOutOfScopeKeyword = outOfScopeKeywords.some((keyword) => msg.includes(keyword));
-    if (hasOutOfScopeKeyword) {
-        return true;
-    }
+/**
+ * Kiểm tra lời chào hỏi/thăm hỏi ngắn.
+ */
+const isGreeting = (msg) => {
+    const normalized = msg.replace(/[?!.]+$/g, "").trim();
+    return greetings.some(
+        (g) => normalized === g || normalized.startsWith(g + " ") || normalized.endsWith(" " + g)
+    );
+};
 
-    // 4. Các câu hỏi tiếng Việt chung không liên quan đến học tiếng Anh
-    const generalVnQuestions = [
-        "thủ đô",
-        "quốc gia",
-        "đất nước",
-        "bao nhiêu tuổi",
-        "thời tiết",
-        "hôm nay",
-        "ngày mai",
-        "làm bánh",
-        "tin tức",
-        "news",
-        "bản tin",
-        "lịch sử",
-        "địa lý",
-        "khoa học",
-        "văn học",
-    ];
-    if (generalVnQuestions.some((kw) => msg.includes(kw))) {
-        return true;
-    }
+/**
+ * Kiểm tra context học tập hiện tại có thông tin học tập và câu hỏi có tham chiếu
+ * tới nội dung đang học hay không.
+ */
+const hasLearningContext = (context, msg) => {
+    if (!context || typeof context !== "object") return false;
 
-    // 5. Kiểm tra các từ tiếng Anh thông dụng để hỗ trợ giao tiếp tiếng Anh cơ bản (coi là học tiếng Anh giao tiếp)
-    const commonEnglishWords = [
-        "the",
-        "is",
-        "are",
-        "you",
-        "what",
-        "how",
-        "why",
-        "who",
-        "can",
-        "do",
-        "does",
-        "have",
-        "has",
-        "it",
+    const hasLearningValue = (value) =>
+        value !== undefined && value !== null && value !== "" &&
+        !(typeof value === "object" && !Array.isArray(value) && Object.keys(value).length === 0);
+
+    const hasContextInfo =
+        hasLearningValue(context.vocabulary_id) ||
+        hasLearningValue(context.topic_id) ||
+        hasLearningValue(context.quiz) ||
+        hasLearningValue(context.page) ||
+        ["vocabulary", "vocab", "topic", "lesson", "word", "exercise", "grammar"]
+            .some((key) => hasLearningValue(context[key]));
+
+    if (!hasContextInfo) return false;
+
+    const referenceWords = [
         "this",
         "that",
-        "with",
-        "for",
-        "on",
-        "in",
-        "at",
-        "about",
-        "to",
-        "me",
-        "my",
-        "your",
+        "it",
+        "another",
+        "remember",
+        "nhớ",
+        "từ này",
+        "từ đó",
+        "câu này",
+        "câu đó",
+        "bài này",
+        "bài đó",
+        "chủ đề này",
+        "chủ đề đó",
+        "nó",
     ];
-    const msgWords = msg.split(/\s+/);
-    const hasEnglishWords = msgWords.some((w) => commonEnglishWords.includes(w));
-    if (hasEnglishWords) {
-        return false;
-    }
 
-    // Mặc định, nếu không có biểu hiện rõ ràng nào là hỏi về tiếng Anh hoặc chào hỏi, thì coi là ngoài phạm vi
-    return true;
+    return referenceWords.some((w) => msg.includes(w));
+};
+
+/**
+ * Kiểm tra history conversation có nội dung học tiếng Anh và câu hỏi có tham chiếu
+ * tới nội dung đang trao đổi trong history hay không.
+ */
+const hasLearningHistory = (historyMessages, msg) => {
+    if (!Array.isArray(historyMessages) || historyMessages.length === 0) return false;
+
+    const historyText = historyMessages
+        .filter((m) => m && m.content && typeof m.content === "string")
+        .map((m) => m.content.toLowerCase())
+        .join(" ")
+        .trim();
+
+    if (!historyText) return false;
+
+    const historyHasLearningContent = englishLearningKeywords.some((keyword) =>
+        historyText.includes(keyword)
+    );
+    if (!historyHasLearningContent) return false;
+
+    const referenceWords = [
+        "this",
+        "that",
+        "it",
+        "another",
+        "more",
+        "again",
+        "remember",
+        "nhớ",
+        "từ này",
+        "từ đó",
+        "câu này",
+        "câu đó",
+        "bài này",
+        "bài đó",
+        "chủ đề này",
+        "chủ đề đó",
+        "nó",
+        "tiếp",
+        "nữa",
+    ];
+
+    return referenceWords.some((w) => msg.includes(w));
+};
+
+/**
+ * Kiểm tra câu hỏi có RÕ RÀNG thuộc lĩnh vực ngoài phạm vi hay không.
+ */
+const isClearlyOutOfScope = (msg) => {
+    if (outOfScopeKeywords.some((keyword) => msg.includes(keyword))) return true;
+    if (outOfScopePatterns.some((pattern) => pattern.test(msg))) return true;
+    return false;
+};
+
+/**
+ * Kiểm tra xem một câu hỏi/tin nhắn của người dùng có nằm ngoài phạm vi hỗ trợ học tiếng Anh/WordMate hay không.
+ *
+ * Logic 3 tầng:
+ * - Tầng 1: Context học tập hiện tại (vocabulary/topic/quiz/page) và History có nội dung học tiếng Anh,
+ *           kết hợp với câu hỏi có tham chiếu tới nội dung đang học → hợp lệ (không reject).
+ * - Tầng 2: Chỉ reject khi câu hỏi RÕ RÀNG ngoài phạm vi (lập trình, nấu ăn, thời tiết, thể thao,
+ *           kiến thức tổng quát...). Không dùng các từ chung như "what", "why", "how", "can", "explain".
+ * - Tầng 3: Không chắc chắn → không reject, cho phép gọi Gemini. System prompt yêu cầu Gemini chỉ hỗ trợ
+ *           học tiếng Anh/WordMate và từ chối thân thiện nếu câu hỏi ngoài phạm vi.
+ *
+ * @param {string} message - Tin nhắn của người dùng
+ * @param {object} [options] - Tùy chọn
+ * @param {object} [options.context] - Ngữ cảnh học tập hiện tại từ Frontend
+ * @param {object[]} [options.historyMessages] - Lịch sử hội thoại gần nhất
+ * @returns {boolean} true nếu câu hỏi ngoài phạm vi, ngược lại false
+ */
+const isOutOfScope = (message, { context, historyMessages } = {}) => {
+    if (!message || typeof message !== "string") return true;
+    const msg = message.toLowerCase().trim();
+    if (!msg) return true;
+
+    // Câu hỏi có intent học tiếng Anh/từ vựng/ngữ pháp rõ ràng → hợp lệ
+    if (hasEnglishLearningIntent(msg)) return false;
+
+    // Lời chào hỏi/thăm hỏi ngắn → hợp lệ
+    if (isGreeting(msg)) return false;
+
+    // Tầng 1 — Context học tập hiện tại: câu hỏi có tham chiếu tới nội dung đang học
+    if (hasLearningContext(context, msg)) return false;
+
+    // Tầng 1 — History: câu hỏi có tham chiếu tới nội dung đang trao đổi trong history
+    if (hasLearningHistory(historyMessages, msg)) return false;
+
+    // Tầng 2 — Chặn các trường hợp rõ ràng ngoài phạm vi
+    if (isClearlyOutOfScope(msg)) return true;
+
+    // Tầng 3 — Không chắc chắn → không reject, để Gemini quyết định (Gemini sẽ từ chối nếu ngoài phạm vi)
+    return false;
 };
 
 /**
@@ -272,18 +408,8 @@ const chat = async ({ userId, message, conversationId, context }) => {
         }
     }
 
-    // 3. Kiểm tra câu hỏi ngoài phạm vi trước khi gọi Gemini
-    if (isOutOfScope(message)) {
-        return {
-            conversation_id: currentConversationId,
-            reply: "Xin lỗi, tôi là trợ lý học tập WordMate AI. Tôi chỉ có thể hỗ trợ các nội dung liên quan đến học tiếng Anh, từ vựng, ngữ pháp, các câu ví dụ và thông tin bài học/quiz trên ứng dụng WordMate. Bạn có muốn chọn một trong các câu hỏi gợi ý bên dưới để tiếp tục không?",
-            role: "assistant",
-            outOfScope: true,
-            showSuggestions: true,
-        };
-    }
-
-    // 4. Lấy tối đa 10 tin nhắn gần nhất làm lịch sử hội thoại
+    // 3. Lấy tối đa 10 tin nhắn gần nhất làm lịch sử hội thoại
+    //    (lấy TRƯỚC khi kiểm tra out-of-scope để tầng 1 có thể dùng history)
     let historyMessages = [];
     try {
         historyMessages = await aiModel.getMessagesByConversation(currentConversationId, 10);
@@ -294,9 +420,23 @@ const chat = async ({ userId, message, conversationId, context }) => {
         throw error;
     }
 
+    // 4. Kiểm tra câu hỏi ngoài phạm vi trước khi gọi Gemini
+    //    Nếu out-of-scope: không gọi Gemini, không lưu message, trả về gợi ý.
+    if (isOutOfScope(message, { context, historyMessages })) {
+        return {
+            conversation_id: currentConversationId,
+            outOfScope: true,
+            showSuggestions: true,
+            reply: "Xin lỗi, mình chỉ có thể hỗ trợ các câu hỏi liên quan đến việc học tiếng Anh trong WordMate.",
+            role: "assistant",
+        };
+    }
+
     // 5. Xây dựng Prompt tổng hợp
     const systemPrompt = `Bạn là WordMate AI, một trợ lý hỗ trợ học tiếng Anh chuyên nghiệp tích hợp trong ứng dụng WordMate.
 Nhiệm vụ của bạn là hỗ trợ người dùng học tiếng Anh hiệu quả: giải thích từ vựng, ngữ pháp, cung cấp câu ví dụ, giải thích các câu hỏi/quiz và nội dung đang học.
+Bạn CHỈ được phép hỗ trợ các nội dung liên quan đến: học tiếng Anh, từ vựng, ngữ pháp, câu ví dụ, và nội dung WordMate (topic/vocabulary/quiz mà người dùng đang học).
+Nếu người dùng hỏi nội dung hoàn toàn không liên quan (ví dụ: lập trình, nấu ăn, thời tiết, thể thao, tin tức, sức khỏe, giải trí...), hãy TỪ CHỐI một cách thân thiện bằng tiếng Việt, giải thích rằng bạn chỉ hỗ trợ việc học tiếng Anh trong WordMate, và KHÔNG trả lời nội dung ngoài phạm vi.
 Hãy phản hồi bằng tiếng Việt thân thiện, rõ ràng, ngắn gọn và dễ hiểu, xen kẽ tiếng Anh khi giải thích từ vựng/ví dụ.`;
 
     let contextPrompt = "";
@@ -436,4 +576,5 @@ WordMate AI:`;
 
 module.exports = {
     chat,
+    isOutOfScope,
 };
