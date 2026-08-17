@@ -23,13 +23,6 @@ const STORAGE_KEYS = {
 
 const MAX_CONVERSATIONS = 5;
 
-const INITIAL_SUGGESTIONS = [
-    'Giải thích từ "improve" giúp mình nhé.',
-    'Cho mình ví dụ về thì hiện tại đơn.',
-    'Từ đồng nghĩa với "happy" là gì?',
-    'Luyện phát âm từ "vocabulary" như thế nào?',
-];
-
 // ============================================================
 // STATE
 // ============================================================
@@ -271,8 +264,258 @@ function scrollToBottom() {
 }
 
 // ============================================================
+// PAGE DETECTION & CONTEXT
+// ============================================================
+
+/**
+ * Xác định trang hiện tại của MPA dựa trên URL path.
+ * @returns {string|null} Tên trang: 'learn' | 'quiz' | 'dashboard' | 'notebook' | 'profile' | null
+ */
+function getCurrentPage() {
+    const path = window.location.pathname || '';
+    const pageMap = [
+        { name: 'learn', pattern: '/learn/' },
+        { name: 'quiz', pattern: '/quiz/' },
+        { name: 'dashboard', pattern: '/dashboard/' },
+        { name: 'notebook', pattern: '/notebook/' },
+        { name: 'profile', pattern: '/profile/' },
+    ];
+    const match = pageMap.find((p) => path.includes(p.pattern));
+    return match ? match.name : null;
+}
+
+/**
+ * Lấy topic_id hợp lệ từ query param 'topic_id' trên URL.
+ * @returns {number|null}
+ */
+function getTopicIdFromUrl() {
+    const raw = new URLSearchParams(window.location.search).get('topic_id');
+    if (raw === null || raw === '') return null;
+    const id = Number(raw);
+    return Number.isInteger(id) && id > 0 ? id : null;
+}
+
+/**
+ * Lấy từ vựng đang học hiện tại từ flashcard (Learn).
+ * @returns {string|null}
+ */
+function getLearnCurrentWord() {
+    const el = document.querySelector('.flashcard-word');
+    const word = el ? el.textContent.trim() : '';
+    // Bỏ qua placeholder mặc định "word" trong learn.html
+    return word && word !== 'word' ? word : null;
+}
+
+/**
+ * Lấy thông tin câu hỏi quiz đang hiển thị từ DOM (Quiz).
+ * Chỉ đọc dữ liệu thật: state câu hỏi đang hiển thị VÀ nội dung không phải placeholder.
+ * @returns {Object|null}
+ */
+function getQuizQuestionContext() {
+    const questionState = document.getElementById('quiz-question-state');
+    if (!questionState || questionState.hidden) return null;
+
+    const questionEl = questionState.querySelector('.quiz-question:not([hidden])');
+    if (!questionEl) return null;
+
+    const textEl = questionEl.querySelector('.quiz-question-text');
+    const badgeEl = questionEl.querySelector('.quiz-question-type-badge');
+    const options = Array.from(questionEl.querySelectorAll('.quiz-option-text'))
+        .map((o) => o.textContent.trim())
+        .filter(Boolean);
+
+    const question = textEl ? textEl.textContent.trim() : '';
+
+    // Template placeholder ({{question}} / {{option_1}}) chưa có dữ liệu thật → không gửi
+    const hasPlaceholder = question.includes('{{') || options.some((o) => o.includes('{{'));
+    if (hasPlaceholder) return null;
+
+    return {
+        question,
+        question_type: questionEl.dataset.questionType || '',
+        options,
+        badge: badgeEl ? badgeEl.textContent.trim() : '',
+    };
+}
+
+/**
+ * Lấy topic_id của chủ đề Dashboard mà user đang thao tác (đang focus).
+ * @returns {number|null}
+ */
+function getDashboardTopicId() {
+    const active = document.querySelector('.topic-card:focus');
+    if (active && active.dataset.topicId) {
+        const id = Number(active.dataset.topicId);
+        if (Number.isInteger(id) && id > 0) return id;
+    }
+    return null;
+}
+
+/**
+ * Lấy bộ lọc/tìm kiếm hiện tại của Notebook từ DOM (không bắt buộc vocabulary_id).
+ * @returns {Object} { topicId, search }
+ */
+function getNotebookContext() {
+    let topicId = null;
+    const activeChip = document.querySelector('.notebook-filter-chip.is-active');
+    if (activeChip && activeChip.dataset.topicId) {
+        const id = Number(activeChip.dataset.topicId);
+        if (Number.isInteger(id) && id > 0) topicId = id;
+    }
+
+    const searchEl = document.querySelector('.notebook-search-input');
+    const search = searchEl ? searchEl.value.trim() : '';
+
+    return { topicId, search };
+}
+
+/**
+ * Xây dựng context thực tế gửi tới Backend theo trang hiện tại.
+ * Được gọi lại mỗi lần gửi message để phản ánh đúng trang/state mới nhất.
+ * @returns {Object}
+ */
+function buildContext() {
+    const page = getCurrentPage();
+    const context = {};
+    if (page) context.page = page;
+
+    switch (page) {
+        case 'learn': {
+            const topicId = getTopicIdFromUrl();
+            if (topicId) context.topic_id = topicId;
+
+            // vocabulary_id không có sẵn trong DOM Learn,
+            // dùng từ đang học trên flashcard làm dữ liệu ngữ cảnh cụ thể.
+            const word = getLearnCurrentWord();
+            if (word) context.word = word;
+            break;
+        }
+        case 'quiz': {
+            const quiz = getQuizQuestionContext();
+            if (quiz && (quiz.question || quiz.options.length > 0)) {
+                context.quiz = quiz;
+            }
+            break;
+        }
+        case 'dashboard': {
+            const topicId = getDashboardTopicId();
+            if (topicId) context.topic_id = topicId;
+            break;
+        }
+        case 'notebook': {
+            const { topicId, search } = getNotebookContext();
+            if (topicId) context.topic_id = topicId;
+            if (search) context.search = search;
+            break;
+        }
+        case 'profile':
+        default:
+            // Không thêm dữ liệu cụ thể, chỉ gửi page chung.
+            break;
+    }
+
+    return context;
+}
+
+// ============================================================
 // SUGGESTIONS
 // ============================================================
+
+/**
+ * Chọn danh sách câu hỏi gợi ý phù hợp với context/trang hiện tại.
+ * Ưu tiên nội dung cụ thể (từ đang học / topic đang dùng) trước suggestion chung.
+ * @returns {string[]}
+ */
+function buildSuggestions() {
+    const page = getCurrentPage();
+
+    if (page === 'learn') {
+        const word = getLearnCurrentWord();
+        const topicId = getTopicIdFromUrl();
+
+        // Có từ vựng đang học → ưu tiên suggestion liên quan đến từ đó
+        if (word) {
+            return [
+                `Giải thích nghĩa và cách dùng từ "${word}".`,
+                `Cho mình thêm một câu ví dụ với từ "${word}".`,
+                `Từ "${word}" có từ đồng nghĩa nào?`,
+                `Làm thế nào để nhớ từ "${word}"?`,
+            ];
+        }
+
+        // Có topic hiện tại → suggestion liên quan đến chủ đề
+        if (topicId) {
+            return [
+                'Những từ quan trọng trong chủ đề này là gì?',
+                'Giải thích nghĩa của các từ vựng trong chủ đề này.',
+                'Cho mình một câu ví dụ với một từ trong chủ đề này.',
+                'Giúp mình học chủ đề này hiệu quả hơn.',
+            ];
+        }
+
+        return [
+            'Giải thích một từ vựng tiếng Anh cho mình.',
+            'Cho mình ví dụ về thì hiện tại đơn.',
+            'Từ đồng nghĩa và trái nghĩa là gì?',
+            'Luyện phát âm tiếng Anh như thế nào?',
+        ];
+    }
+
+    if (page === 'quiz') {
+        return [
+            'Giải thích câu hỏi này.',
+            'Giải thích đáp án đúng.',
+            'Giải thích từ vựng trong câu hỏi.',
+            'Cho mình biết vì sao các đáp án khác sai.',
+        ];
+    }
+
+    if (page === 'dashboard') {
+        const topicId = getDashboardTopicId();
+
+        if (topicId) {
+            return [
+                'Giới thiệu chủ đề này.',
+                'Những từ quan trọng trong chủ đề này là gì?',
+                'Giúp mình học chủ đề này hiệu quả hơn.',
+                'Cho mình mẹo ghi nhớ từ vựng của chủ đề này.',
+            ];
+        }
+
+        return [
+            'Giới thiệu lộ trình học tiếng Anh của mình.',
+            'Làm sao để học từ vựng hiệu quả?',
+            'Gợi ý cho mình cách luyện ngữ pháp.',
+            'Mẹo ghi nhớ từ vựng lâu là gì?',
+        ];
+    }
+
+    if (page === 'notebook') {
+        return [
+            'Giải thích một từ vựng cho mình.',
+            'Cho mình ví dụ với một từ trong sổ tay.',
+            'Phân biệt hai từ tiếng Anh.',
+            'Giải thích ngữ pháp tiếng Anh.',
+        ];
+    }
+
+    if (page === 'profile') {
+        return [
+            'Gợi ý cho mình cách học tiếng Anh hiệu quả.',
+            'Làm sao để mở rộng vốn từ vựng?',
+            'Mẹo cải thiện ngữ pháp tiếng Anh là gì?',
+            'Cho mình lộ trình học từ vựng phù hợp.',
+        ];
+    }
+
+    // Trang không xác định → suggestion chung
+    return [
+        'Giải thích một từ vựng tiếng Anh cho mình.',
+        'Cho mình ví dụ về một thì tiếng Anh.',
+        'Từ đồng nghĩa với một từ mình đang học là gì?',
+        'Luyện phát âm tiếng Anh như thế nào?',
+    ];
+}
 
 function showSuggestions() {
     hideSuggestions();
@@ -288,7 +531,7 @@ function showSuggestions() {
     label.style.cssText = 'font-size:0.8125rem;color:var(--wm-text-muted);margin:0 0 0.25rem;';
     suggestionsDiv.appendChild(label);
 
-    INITIAL_SUGGESTIONS.forEach(text => {
+    buildSuggestions().forEach(text => {
         const btn = document.createElement('button');
         btn.type = 'button';
         btn.className = 'ai-chat__suggestion';
@@ -391,7 +634,7 @@ async function sendMessage() {
         const response = await api.post('/ai/chat', {
             message,
             conversation_id: currentConversationId,
-            context: {}
+            context: buildContext()
         });
 
         if (response.success && response.data) {
