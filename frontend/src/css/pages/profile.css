@@ -103,6 +103,146 @@ body {
     margin: 0 auto 1rem;
 }
 
+/* ----- Avatar Edit Overlay (camera icon on avatar) ----- */
+.avatar-edit-overlay {
+    position: absolute;
+    bottom: 4px;
+    right: 4px;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: var(--wm-primary);
+    color: #1E293B;
+    border: 2px solid #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    font-size: 0.8rem;
+    padding: 0;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+    transition: background var(--wm-transition-base), transform var(--wm-transition-fast);
+}
+
+.avatar-edit-overlay:hover {
+    background: var(--wm-primary-dark);
+    transform: scale(1.05);
+}
+
+/* ----- Change Avatar Text Button ----- */
+.btn-change-avatar {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0.4rem 1rem;
+    font-size: 0.85rem;
+    font-weight: 600;
+    font-family: var(--wm-font-family);
+    color: #1E293B;
+    background: rgba(255, 255, 255, 0.85);
+    border: 1.5px solid rgba(255, 255, 255, 0.9);
+    border-radius: 999px;
+    cursor: pointer;
+    transition: background var(--wm-transition-base), box-shadow var(--wm-transition-base);
+    margin-bottom: 1rem;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.btn-change-avatar:hover {
+    background: #fff;
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.12);
+}
+
+.btn-change-avatar i {
+    color: var(--wm-primary-dark);
+}
+
+/* ----- Avatar Message ----- */
+.avatar-message {
+    padding: 0.5rem 1rem;
+    border-radius: var(--wm-radius-sm);
+    font-size: 0.85rem;
+    font-family: var(--wm-font-family);
+    margin-bottom: 0.75rem;
+    display: none;
+    width: fit-content;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.avatar-message.avatar-success {
+    display: block;
+    background: rgba(16, 185, 129, 0.15);
+    color: #065F46;
+    border: 1px solid rgba(16, 185, 129, 0.3);
+}
+
+.avatar-message.avatar-error {
+    display: block;
+    background: rgba(244, 63, 94, 0.12);
+    color: #9F1239;
+    border: 1px solid rgba(244, 63, 94, 0.3);
+}
+
+/* ----- Avatar Action Buttons (Save / Cancel) ----- */
+.avatar-actions {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+}
+
+.btn-avatar-save {
+    padding: 0.4rem 1.25rem;
+    font-size: 0.85rem;
+    font-weight: 600;
+    font-family: var(--wm-font-family);
+    border-radius: var(--wm-radius-sm);
+    background: var(--wm-primary);
+    color: #1E293B;
+    border: none;
+    cursor: pointer;
+    transition: background var(--wm-transition-base);
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+}
+
+.btn-avatar-save:hover:not(:disabled) {
+    background: var(--wm-primary-dark);
+}
+
+.btn-avatar-save:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+.btn-avatar-cancel {
+    padding: 0.4rem 1.25rem;
+    font-size: 0.85rem;
+    font-weight: 600;
+    font-family: var(--wm-font-family);
+    border-radius: var(--wm-radius-sm);
+    background: rgba(255, 255, 255, 0.85);
+    color: var(--wm-text-secondary);
+    border: 1px solid rgba(255, 255, 255, 0.9);
+    cursor: pointer;
+    transition: background var(--wm-transition-base);
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+}
+
+.btn-avatar-cancel:hover:not(:disabled) {
+    background: #f1f5f9;
+}
+
+.btn-avatar-cancel:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
 .profile-name {
     font-size: 1.5rem;
     font-weight: 700;

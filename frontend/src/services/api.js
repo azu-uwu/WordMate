@@ -61,10 +61,13 @@ function getMediaUrl(path) {
 async function request(endpoint, options = {}) {
   const url = `${BASE_URL}${endpoint}`;
 
-  const headers = {
-    'Content-Type': 'application/json',
-    ...options.headers
-  };
+  const headers = { ...options.headers };
+
+  // Only set Content-Type to application/json for non-FormData bodies.
+  // FormData needs the browser to auto-generate the multipart boundary.
+  if (!(options.body instanceof FormData)) {
+    headers['Content-Type'] = 'application/json';
+  }
 
   const token = getToken();
   if (token) {
@@ -126,10 +129,11 @@ function get(endpoint, options = {}) {
  * @returns {Promise<object>}
  */
 function post(endpoint, body, options = {}) {
+  const isFormData = body instanceof FormData;
   return request(endpoint, {
     ...options,
     method: 'POST',
-    body: JSON.stringify(body)
+    body: isFormData ? body : JSON.stringify(body)
   });
 }
 
@@ -141,10 +145,11 @@ function post(endpoint, body, options = {}) {
  * @returns {Promise<object>}
  */
 function put(endpoint, body, options = {}) {
+  const isFormData = body instanceof FormData;
   return request(endpoint, {
     ...options,
     method: 'PUT',
-    body: JSON.stringify(body)
+    body: isFormData ? body : JSON.stringify(body)
   });
 }
 

@@ -48,7 +48,32 @@
                 <div class="profile-avatar-wrapper">
                     <img id="avatarImg" class="profile-avatar" src="https://ui-avatars.com/api/?name=User&background=FFC300&color=1E293B&size=100" alt="Avatar" style="display: none;">
                     <div id="avatarPlaceholder" class="profile-avatar-placeholder">U</div>
+                    <button id="changeAvatarBtn" class="avatar-edit-overlay" type="button" title="Đổi ảnh đại diện">
+                        <i class="fa-solid fa-camera"></i>
+                    </button>
                 </div>
+
+                <!-- Hidden file input for avatar upload -->
+                <input type="file" id="avatarInput" accept="image/jpeg,image/png" style="display: none;">
+
+                <!-- Avatar message (validation errors, upload status) -->
+                <div id="avatarMessage" class="avatar-message" role="alert"></div>
+
+                <!-- Avatar action buttons (shown after selecting a file) -->
+                <div id="avatarActions" class="avatar-actions" style="display: none;">
+                    <button class="btn-avatar-save" id="saveAvatarBtn" type="button">
+                        <i class="fa-solid fa-check"></i> Lưu ảnh
+                    </button>
+                    <button class="btn-avatar-cancel" id="cancelAvatarBtn" type="button">
+                        <i class="fa-solid fa-times"></i> Hủy
+                    </button>
+                </div>
+
+                <!-- Change avatar button (hidden while previewing) -->
+                <button class="btn-change-avatar" id="changeAvatarTextBtn" type="button">
+                    <i class="fa-solid fa-camera"></i> Đổi ảnh
+                </button>
+
                 <h1 id="headerFullname" class="profile-name">—</h1>
                 <p id="headerEmail" class="profile-email">—</p>
             </div>
@@ -78,6 +103,9 @@
                         <span class="info-value">
                             <img id="infoAvatar" class="rounded-circle" src="https://ui-avatars.com/api/?name=User&background=FFC300&color=1E293B&size=40" alt="Avatar" width="40" height="40" style="object-fit: cover; border: 2px solid #e2e8f0;">
                         </span>
+                        <button class="edit-btn-inline" id="editAvatarBtn" title="Đổi ảnh đại diện">
+                            <i class="fa-solid fa-camera"></i>
+                        </button>
                     </div>
 
                     <div class="info-row">

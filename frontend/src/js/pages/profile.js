@@ -3,7 +3,7 @@
  * Handles user profile display, editing, password change, roadmap, and logout.
  * Uses ES6, async/await, Fetch API via api.js service.
  */
-import api from '../../services/api.js';
+import api, { getMediaUrl } from '../../services/api.js';
 import * as authService from '../../services/authService.js';
 import { loadAllComponents } from '../../js/components/nav.js';
 
@@ -20,6 +20,16 @@ const avatarImg = $('avatarImg');
 const avatarPlaceholder = $('avatarPlaceholder');
 const headerFullname = $('headerFullname');
 const headerEmail = $('headerEmail');
+
+// Avatar upload
+const changeAvatarBtn = $('changeAvatarBtn');
+const changeAvatarTextBtn = $('changeAvatarTextBtn');
+const editAvatarBtn = $('editAvatarBtn');
+const avatarInput = $('avatarInput');
+const avatarMessage = $('avatarMessage');
+const avatarActions = $('avatarActions');
+const saveAvatarBtn = $('saveAvatarBtn');
+const cancelAvatarBtn = $('cancelAvatarBtn');
 
 // Personal Info
 const displayStreak = $('displayStreak');
@@ -56,6 +66,8 @@ const logoutBtn = $('logoutBtn');
 // State
 // ============================================================
 let currentUser = null; // Holds the full profile data from API
+let selectedAvatarFile = null; // File selected for avatar upload
+let originalAvatarUrl = null; // Avatar URL before preview (for cancel)
 
 // ============================================================
 // Utility: Show / Hide loading
@@ -111,6 +123,219 @@ function buildAvatarUrl(name) {
 }
 
 // ============================================================
+// Avatar: Get current avatar display URL
+// ============================================================
+function getCurrentAvatarUrl() {
+    if (currentUser && currentUser.avatar) {
+        return getMediaUrl(currentUser.avatar);
+    }
+    return buildAvatarUrl(currentUser ? currentUser.fullname : 'User');
+}
+
+// ============================================================
+// Avatar: Show message in avatar area
+// ============================================================
+function showAvatarMessage(message, type = 'error') {
+    avatarMessage.textContent = message;
+    avatarMessage.className = `avatar-message avatar-${type}`;
+    avatarMessage.style.display = 'block';
+}
+
+function hideAvatarMessage() {
+    avatarMessage.textContent = '';
+    avatarMessage.className = 'avatar-message';
+    avatarMessage.style.display = 'none';
+}
+
+// ============================================================
+// Avatar: Open file picker
+// ============================================================
+function openAvatarPicker() {
+    // Reset input value so selecting the same file again still triggers change
+    avatarInput.value = '';
+    avatarInput.click();
+}
+
+// ============================================================
+// Avatar: Validate selected file
+// ============================================================
+function validateAvatarFile(file) {
+    // Check file exists
+    if (!file) {
+        return 'Vui lòng chọn một file ảnh.';
+    }
+
+    // Check file type (JPG/JPEG/PNG)
+    const allowedTypes = ['image/jpeg', 'image/png'];
+    if (!allowedTypes.includes(file.type)) {
+        return 'Định dạng ảnh không hợp lệ. Chỉ chấp nhận JPG, JPEG hoặc PNG.';
+    }
+
+    // Check file size (max 5MB = 5 * 1024 * 1024 bytes)
+    const MAX_SIZE = 5 * 1024 * 1024;
+    if (file.size > MAX_SIZE) {
+        return 'Kích thước ảnh tối đa là 5MB.';
+    }
+
+    return null;
+}
+
+// ============================================================
+// Avatar: Handle file selected from picker
+// ============================================================
+function handleAvatarFileSelected(e) {
+    const file = e.target.files && e.target.files[0];
+    if (!file) return;
+
+    // Validate file
+    const errorMsg = validateAvatarFile(file);
+    if (errorMsg) {
+        // Reject invalid file: no request, show error
+        selectedAvatarFile = null;
+        resetAvatarPreview();
+        showAvatarMessage(errorMsg, 'error');
+        return;
+    }
+
+    // Valid file: store and show preview
+    selectedAvatarFile = file;
+    hideAvatarMessage();
+
+    // Show preview using FileReader
+    const reader = new FileReader();
+    reader.onload = (ev) => {
+        originalAvatarUrl = getCurrentAvatarUrl(); // Save current avatar for cancel
+        avatarImg.src = ev.target.result;
+        avatarImg.style.display = '';
+        avatarPlaceholder.style.display = 'none';
+        infoAvatar.src = ev.target.result;
+
+        // Show action buttons, hide change button
+        avatarActions.style.display = 'flex';
+        changeAvatarTextBtn.style.display = 'none';
+    };
+    reader.readAsDataURL(file);
+}
+
+// ============================================================
+// Avatar: Cancel preview → restore original avatar
+// ============================================================
+function cancelAvatarPreview() {
+    selectedAvatarFile = null;
+    hideAvatarMessage();
+
+    // Restore original avatar
+    avatarImg.src = originalAvatarUrl || getCurrentAvatarUrl();
+    avatarImg.style.display = '';
+    avatarPlaceholder.style.display = 'none';
+    infoAvatar.src = avatarImg.src;
+
+    // Restore buttons
+    avatarActions.style.display = 'none';
+    changeAvatarTextBtn.style.display = '';
+
+    // Reset input
+    avatarInput.value = '';
+}
+
+// ============================================================
+// Avatar: Reset preview to current saved avatar
+// (Used when validation fails or after successful upload)
+// ============================================================
+function resetAvatarPreview() {
+    const url = getCurrentAvatarUrl();
+    avatarImg.src = url;
+    avatarImg.style.display = '';
+    avatarPlaceholder.style.display = 'none';
+    infoAvatar.src = url;
+    avatarActions.style.display = 'none';
+    changeAvatarTextBtn.style.display = '';
+}
+
+// ============================================================
+// Avatar: Upload avatar to backend
+// ============================================================
+async function uploadAvatar() {
+    if (!selectedAvatarFile) return;
+
+    // Build FormData with fullname + avatar
+    const formData = new FormData();
+    formData.append('fullname', currentUser.fullname || '');
+    formData.append('avatar', selectedAvatarFile);
+
+    // Disable save button while uploading
+    saveAvatarBtn.disabled = true;
+    cancelAvatarBtn.disabled = true;
+
+    try {
+        const response = await api.put('/profile', formData);
+        if (response.success) {
+            // Backend may return updated user data directly (response.data),
+            // or may only return success — in that case re-fetch the profile.
+            let newUser = response.data;
+            if (!newUser || !newUser.avatar) {
+                const profileResp = await api.get('/profile');
+                if (profileResp.success) {
+                    newUser = profileResp.data;
+                }
+            }
+            if (!newUser) {
+                resetAvatarPreview();
+                showAvatarMessage('Không thể cập nhật ảnh đại diện.', 'error');
+                return;
+            }
+
+            // Update UI with new avatar
+            const newAvatarUrl = getMediaUrl(newUser.avatar);
+            avatarImg.src = newAvatarUrl;
+            avatarImg.style.display = '';
+            avatarPlaceholder.style.display = 'none';
+            infoAvatar.src = newAvatarUrl;
+
+            // Update currentUser
+            currentUser = newUser;
+
+            // Update localStorage.user
+            const localUser = authService.getCurrentUser();
+            if (localUser) {
+                localUser.avatar = newUser.avatar;
+                localUser.fullname = newUser.fullname || localUser.fullname;
+                localStorage.setItem('user', JSON.stringify(localUser));
+            }
+
+            // Reset state
+            selectedAvatarFile = null;
+            originalAvatarUrl = null;
+            avatarActions.style.display = 'none';
+            changeAvatarTextBtn.style.display = '';
+            avatarInput.value = '';
+
+            // Show success message
+            showAvatarMessage('Cập nhật ảnh đại diện thành công!', 'success');
+
+            // Refresh header so new avatar appears immediately
+            if (typeof window.refreshHeaderStreak === 'function') {
+                window.refreshHeaderStreak();
+            }
+        } else {
+            resetAvatarPreview();
+            showAvatarMessage(response.message || 'Không thể cập nhật ảnh đại diện.', 'error');
+        }
+    } catch (err) {
+        console.error('uploadAvatar error:', err);
+        resetAvatarPreview();
+        if (err.data && err.data.message) {
+            showAvatarMessage(err.data.message, 'error');
+        } else {
+            showAvatarMessage(err.message || 'Lỗi khi tải ảnh lên.', 'error');
+        }
+    } finally {
+        saveAvatarBtn.disabled = false;
+        cancelAvatarBtn.disabled = false;
+    }
+}
+
+// ============================================================
 // Render Profile Data
 // ============================================================
 function renderProfile(user) {
@@ -119,7 +344,8 @@ function renderProfile(user) {
     headerEmail.textContent = user.email || '—';
 
     // Avatar: use avatar from API if available, else generate from name
-    const avatarUrl = user.avatar || buildAvatarUrl(user.fullname);
+    // Resolve /uploads/ paths to full backend URLs via getMediaUrl
+    const avatarUrl = user.avatar ? getMediaUrl(user.avatar) : buildAvatarUrl(user.fullname);
     avatarImg.src = avatarUrl;
     avatarImg.style.display = '';
     avatarPlaceholder.style.display = 'none';
@@ -365,6 +591,18 @@ function logout() {
 // Bind Events
 // ============================================================
 function bindEvents() {
+    // Avatar upload: trigger file picker
+    changeAvatarBtn.addEventListener('click', openAvatarPicker);
+    changeAvatarTextBtn.addEventListener('click', openAvatarPicker);
+    editAvatarBtn.addEventListener('click', openAvatarPicker);
+
+    // Avatar: file selected → validate + preview
+    avatarInput.addEventListener('change', handleAvatarFileSelected);
+
+    // Avatar: save / cancel
+    saveAvatarBtn.addEventListener('click', uploadAvatar);
+    cancelAvatarBtn.addEventListener('click', cancelAvatarPreview);
+
     // Edit fullname toggle
     editFullnameBtn.addEventListener('click', () => showEditForm(true));
     cancelFullnameBtn.addEventListener('click', () => showEditForm(false));
