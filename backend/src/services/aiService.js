@@ -337,7 +337,13 @@ WordMate AI:`;
         throw error;
     }
 
-    const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
+    const model = process.env.GEMINI_MODEL;
+    if (!model) {
+        const error = new Error("Dịch vụ AI chưa được cấu hình model Gemini. Vui lòng thiết lập GEMINI_MODEL trong .env");
+        error.status = 500;
+        throw error;
+    }
+    const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
 
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), 15000); // 15 giây timeout
