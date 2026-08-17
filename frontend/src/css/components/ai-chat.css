@@ -52,7 +52,8 @@
 
 .ai-chat {
     position: fixed;
-    bottom: 1.5rem;
+    /* Offset above the fixed bottom-nav (nav height ~4.5rem + 1rem breathing room) */
+    bottom: 5.5rem;
     right: 1.5rem;
     z-index: 999;
     font-family: var(--wm-font-family);
@@ -86,7 +87,8 @@
 
 .ai-chat__popup {
     position: fixed;
-    bottom: 5.5rem;
+    /* Sits above the toggle button: toggle offset (5.5rem) + toggle height (3.5rem) + gap */
+    bottom: 9.5rem;
     right: 1.5rem;
     width: 23rem;
     max-width: calc(100vw - 2rem);
@@ -335,7 +337,8 @@
 @media (max-width: 768px) {
     .ai-chat__popup {
         width: 21rem;
-        bottom: 5rem;
+        /* Toggle: 5.5rem offset + 3rem height + gap */
+        bottom: 9rem;
         right: 1rem;
         max-height: 28rem;
     }
@@ -359,7 +362,8 @@
     .ai-chat__popup {
         width: calc(100vw - 1.5rem);
         right: 0.75rem;
-        bottom: 4.75rem;
+        /* Toggle: 5.5rem offset + 2.75rem height + gap */
+        bottom: 8.75rem;
     }
 
     .ai-chat__toggle {
