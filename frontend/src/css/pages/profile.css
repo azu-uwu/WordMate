@@ -103,6 +103,15 @@ body {
     margin: 0 auto 1rem;
 }
 
+/* ----- Info Avatar (small avatar in info row) ----- */
+#infoAvatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50% !important;
+    object-fit: cover;
+    flex-shrink: 0;
+}
+
 /* ----- Avatar Edit Overlay (camera icon on avatar) ----- */
 .avatar-edit-overlay {
     position: absolute;
