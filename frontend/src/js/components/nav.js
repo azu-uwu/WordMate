@@ -10,13 +10,17 @@
 // Import bottom-nav.js to call initBottomNav after loading
 import { initBottomNav } from './bottom-nav.js';
 
+// Import ai-chat.js to call initAIChat after loading
+import { initAIChat } from './ai-chat.js';
+
 /**
  * Component configuration
  * Map component HTML files to their target placeholder IDs
  */
 const COMPONENT_CONFIG = {
     'header.html': '#header',
-    'bottom-nav.html': '#bottom-nav'
+    'bottom-nav.html': '#bottom-nav',
+    'ai-chat.html': '#ai-chat-placeholder'
 };
 
 // Track loaded components to prevent duplicate loading
@@ -86,6 +90,21 @@ async function initHeader() {
 }
 
 /**
+ * Initialize AI Chat after loading ai-chat.html
+ * @returns {Promise<void>}
+ */
+async function initAIChatComponent() {
+    try {
+        // Initialize AI Chat (ai-chat.js is already imported as ES module)
+        initAIChat();
+        
+        console.log('[ComponentLoader] AI Chat initialized');
+    } catch (error) {
+        console.error('[ComponentLoader] Failed to initialize AI Chat:', error);
+    }
+}
+
+/**
  * Load a single component HTML file and inject it into the specified placeholder
  * 
  * @param {string} componentPath - Path to the component HTML file (relative to frontend/src/components/)
@@ -134,6 +153,8 @@ async function loadComponent(componentPath, placeholderId) {
             await initHeader();
         } else if (componentPath === 'bottom-nav.html') {
             await initBottomNav();
+        } else if (componentPath === 'ai-chat.html') {
+            await initAIChatComponent();
         }
         
     } catch (error) {
@@ -169,7 +190,8 @@ async function loadAllComponents() {
 async function loadComponentByName(componentName) {
     const componentMap = {
         'header': 'header.html',
-        'bottom-nav': 'bottom-nav.html'
+        'bottom-nav': 'bottom-nav.html',
+        'ai-chat': 'ai-chat.html'
     };
     
     const componentFile = componentMap[componentName];
