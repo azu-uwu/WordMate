@@ -49,6 +49,17 @@ app.get("/", (req, res) => {
     res.send("WordMate Backend Running");
 });
 
+// test biến mtruong env
+console.log(
+    "GEMINI_API_KEY:",
+    process.env.GEMINI_API_KEY ? "OK" : "MISSING"
+);
+
+console.log(
+    "GEMINI_MODEL:",
+    process.env.GEMINI_MODEL || "MISSING"
+);
+
 // Kiểm tra kết nối MySQL
 app.get("/test-db", async (req, res) => {
     try {
