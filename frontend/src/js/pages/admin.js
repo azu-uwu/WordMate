@@ -106,6 +106,7 @@ const vocabularySaveSpinner = document.getElementById('vocabularySaveSpinner');
 const vocabularySaveBtnText = document.getElementById('vocabularySaveBtnText');
 
 // Vocabulary filter
+const vocabRoadmapFilter = document.getElementById('vocabRoadmapFilter');
 const vocabTopicFilter = document.getElementById('vocabTopicFilter');
 
 // Import Vocabulary form elements
@@ -849,6 +850,7 @@ async function loadRoadmaps() {
 
         populateTopicsRoadmapFilter();
         populateTopicRoadmapModalSelect();
+        populateVocabRoadmapFilter();
         populateVocabRoadmapSelect();
         populateImportRoadmapSelect();
         populateCustomQuestionsRoadmapFilter();
@@ -930,11 +932,11 @@ async function loadVocabularies() {
     const loadingEl = document.getElementById('vocabulariesTableLoading');
     if (loadingEl) loadingEl.classList.remove('d-none');
 
-    const topicId = vocabTopicFilter.value;
-    const query = topicId ? `?topic_id=${encodeURIComponent(topicId)}` : '';
     try {
-        const res = await api.get(`/admin/vocabularies${query}`);
-        vocabulariesDTData = Array.isArray(res.data) ? res.data : [];
+        // Lấy toàn bộ Vocabularies rồi lọc client-side theo cascade Roadmap → Topic
+        const res = await api.get('/admin/vocabularies');
+        const allVocabularies = Array.isArray(res.data) ? res.data : [];
+        vocabulariesDTData = filterVocabularies(allVocabularies);
 
         vocabulariesDataTable.clear();
         vocabulariesDataTable.rows.add(vocabulariesDTData);
@@ -946,12 +948,57 @@ async function loadVocabularies() {
     }
 }
 
+/**
+ * Lọc Vocabularies theo bộ lọc cascade Roadmap → Topic.
+ * Không chọn filter nào → hiển thị tất cả.
+ */
+function filterVocabularies(vocabularies) {
+    const roadmapId = vocabRoadmapFilter.value;
+    const topicId = vocabTopicFilter.value;
+
+    return vocabularies.filter((v) => {
+        const topic = topicsCache.find((t) => Number(t.id) === Number(v.topic_id));
+
+        const roadmapMatch = !roadmapId || (topic && String(topic.roadmap_id) === String(roadmapId));
+        const topicMatch = !topicId || String(v.topic_id) === String(topicId);
+
+        return roadmapMatch && topicMatch;
+    });
+}
+
+function populateVocabRoadmapFilter() {
+    if (!vocabRoadmapFilter) return;
+
+    const current = vocabRoadmapFilter.value;
+    vocabRoadmapFilter.innerHTML = '<option value="">Tất cả Roadmap</option>';
+    roadmaps.forEach((roadmap) => {
+        const option = document.createElement('option');
+        option.value = roadmap.id;
+        option.textContent = roadmap.name;
+        vocabRoadmapFilter.appendChild(option);
+    });
+    vocabRoadmapFilter.value = current;
+
+    // Nếu roadmap đã bị xóa → reset filter về tất cả
+    if (current && !roadmaps.some((r) => String(r.id) === current)) {
+        vocabRoadmapFilter.value = '';
+        populateVocabTopicFilter();
+        loadVocabularies();
+    }
+}
+
 function populateVocabTopicFilter() {
     if (!vocabTopicFilter) return;
 
+    const roadmapId = vocabRoadmapFilter.value;
     const current = vocabTopicFilter.value;
     vocabTopicFilter.innerHTML = '<option value="">Tất cả Topic</option>';
-    topicsCache.forEach((topic) => {
+
+    const filtered = roadmapId
+        ? topicsCache.filter((t) => String(t.roadmap_id) === String(roadmapId))
+        : topicsCache;
+
+    filtered.forEach((topic) => {
         const option = document.createElement('option');
         option.value = topic.id;
         option.textContent = topic.name;
@@ -960,7 +1007,7 @@ function populateVocabTopicFilter() {
     vocabTopicFilter.value = current;
 
     // Nếu topic đã bị xóa → reset filter về tất cả
-    if (current && !topicsCache.some((t) => String(t.id) === current)) {
+    if (current && !filtered.some((t) => String(t.id) === current)) {
         vocabTopicFilter.value = '';
         loadVocabularies();
     }
@@ -1595,6 +1642,9 @@ function openVocabularyModal(item = null) {
                 populateVocabTopicSelect();
                 vocabTopicIdInput.value = topic.id || '';
             }
+        } else if (vocabRoadmapFilter.value) {
+            vocabRoadmapIdInput.value = vocabRoadmapFilter.value;
+            populateVocabTopicSelect();
         }
     }
 
@@ -2282,6 +2332,15 @@ function bindEvents() {
         });
     }
 
+    // Filter cascade (Vocabulary): Roadmap → Topic
+    if (vocabRoadmapFilter) {
+        vocabRoadmapFilter.addEventListener('change', () => {
+            vocabTopicFilter.value = '';
+            populateVocabTopicFilter();
+            loadVocabularies();
+        });
+    }
+
     // Filter theo Topic (Vocabulary)
     if (vocabTopicFilter) {
         vocabTopicFilter.addEventListener('change', () => loadVocabularies());
@@ -2417,6 +2476,7 @@ async function initAdmin() {
         await loadAllTopicsForCache();
         await loadAllVocabulariesForCache();
         // Sau khi có cache, populate các select Vocabulary/Import
+        populateVocabRoadmapFilter();
         populateVocabTopicFilter();
         populateCustomQuestionsRoadmapFilter();
         populateCustomQuestionsTopicFilter();
