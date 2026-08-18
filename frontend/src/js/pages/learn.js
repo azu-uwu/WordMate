@@ -261,9 +261,11 @@ function renderFlashcard(vocabulary) {
 
     // Audio
     if (vocabulary.audio) {
+        flashcardAudioBtn.hidden = false;
         flashcardAudioBtn.disabled = false;
         flashcardAudioBtn.dataset.audioUrl = api.getMediaUrl(vocabulary.audio);
     } else {
+        flashcardAudioBtn.hidden = true;
         flashcardAudioBtn.disabled = true;
         flashcardAudioBtn.removeAttribute('data-audio-url');
     }
