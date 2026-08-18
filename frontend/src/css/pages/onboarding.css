@@ -545,6 +545,11 @@
    11. UTILITIES
    ============================================================ */
 
+/* Utility class to hide elements (used by JS to toggle loading/error states) */
+.d-none {
+    display: none !important;
+}
+
 html {
     scroll-behavior: smooth;
     -webkit-text-size-adjust: 100%;

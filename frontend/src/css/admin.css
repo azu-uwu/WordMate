@@ -1,6 +1,6 @@
 /* ============================================================
    admin.css — WordMate Admin Dashboard Styles
-   Dark theme (Slate/Dark) built on Bootstrap 5
+   Light theme (Light Gray/White) built on Bootstrap 5
    ============================================================ */
 
 /* ============================================================
@@ -8,26 +8,26 @@
    ============================================================ */
 
 :root {
-    /* Dark palette — Slate */
-    --admin-bg-page: #0F172A;
-    --admin-bg-sidebar: #1E293B;
-    --admin-bg-card: #1E293B;
-    --admin-bg-hover: #334155;
-    --admin-bg-active: #3B4A63;
+    /* Light palette — Light Gray/White */
+    --admin-bg-page: #F8FAFC;
+    --admin-bg-sidebar: #FFFFFF;
+    --admin-bg-card: #FFFFFF;
+    --admin-bg-hover: #F1F5F9;
+    --admin-bg-active: #E2E8F0;
 
     /* Primary accent — Warm Gold (keep WordMate brand) */
     --admin-primary: #FFC300;
     --admin-primary-dark: #E6B000;
-    --admin-primary-soft: rgba(255, 195, 0, 0.12);
+    --admin-primary-soft: rgba(255, 195, 0, 0.15);
 
     /* Text colors */
-    --admin-text-primary: #F1F5F9;
-    --admin-text-secondary: #94A3B8;
-    --admin-text-muted: #64748B;
+    --admin-text-primary: #0F172A;
+    --admin-text-secondary: #475569;
+    --admin-text-muted: #94A3B8;
 
     /* Borders */
-    --admin-border: #334155;
-    --admin-border-light: #475569;
+    --admin-border: #E2E8F0;
+    --admin-border-light: #CBD5E1;
 
     /* Semantic colors */
     --admin-success: #10B981;
@@ -44,9 +44,9 @@
     /* Radius & Shadow */
     --admin-radius-sm: 8px;
     --admin-radius-md: 12px;
-    --admin-shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.3);
-    --admin-shadow-md: 0 4px 16px rgba(0, 0, 0, 0.25);
-    --admin-shadow-glow: 0 0 0 4px rgba(255, 195, 0, 0.15);
+    --admin-shadow-sm: 0 1px 3px rgba(15, 23, 42, 0.08);
+    --admin-shadow-md: 0 4px 16px rgba(15, 23, 42, 0.1);
+    --admin-shadow-glow: 0 0 0 4px rgba(255, 195, 0, 0.2);
 
     /* Transitions */
     --admin-transition-fast: 150ms ease;
@@ -208,7 +208,7 @@
 
 .admin-nav-link.active {
     background-color: var(--admin-primary-soft);
-    color: var(--admin-primary);
+    color: #B8860B;
     font-weight: 600;
     box-shadow: inset 3px 0 0 var(--admin-primary);
 }
@@ -263,7 +263,7 @@
 }
 
 .admin-logout-btn:hover {
-    background-color: rgba(244, 63, 94, 0.12);
+    background-color: rgba(244, 63, 94, 0.08);
     color: var(--admin-danger);
 }
 
@@ -334,7 +334,7 @@
 }
 
 .admin-sidebar-canvas .btn-close {
-    filter: invert(1) grayscale(1) brightness(0.8);
+    filter: none;
 }
 
 .admin-sidebar-canvas-body {
@@ -755,7 +755,7 @@
 }
 
 /* ============================================================
-   17. DATATABLES — dark theme
+   17. DATATABLES — light theme
    ============================================================ */
 
 .admin-datatable {
@@ -783,7 +783,7 @@
 }
 
 .admin-datatable tbody tr:hover td {
-    background-color: rgba(51, 65, 85, 0.35);
+    background-color: rgba(241, 245, 249, 0.8);
 }
 
 .admin-datatable .admin-col-index {
@@ -897,27 +897,27 @@
 }
 
 .admin-badge-success {
-    background-color: rgba(16, 185, 129, 0.15);
-    color: #34D399;
+    background-color: rgba(16, 185, 129, 0.12);
+    color: #059669;
     font-weight: 600;
     font-size: 0.75rem;
     padding: 0.4em 0.65em;
-    border: 1px solid rgba(16, 185, 129, 0.35);
+    border: 1px solid rgba(16, 185, 129, 0.3);
     border-radius: 999px;
 }
 
 .admin-badge-muted {
-    background-color: rgba(100, 116, 139, 0.15);
-    color: #94A3B8;
+    background-color: rgba(100, 116, 139, 0.1);
+    color: #64748B;
     font-weight: 600;
     font-size: 0.75rem;
     padding: 0.4em 0.65em;
-    border: 1px solid rgba(100, 116, 139, 0.35);
+    border: 1px solid rgba(100, 116, 139, 0.25);
     border-radius: 999px;
 }
 
 /* ============================================================
-   19. MODAL — dark theme
+   19. MODAL — light theme
    ============================================================ */
 
 .admin-modal-content {
@@ -937,7 +937,7 @@
 }
 
 .admin-modal-content .btn-close {
-    filter: invert(1) grayscale(1) brightness(0.8);
+    filter: none;
 }
 
 .admin-modal-content .modal-footer {
@@ -996,9 +996,9 @@
 
 /* Error alert */
 .admin-modal-content .alert-danger {
-    background-color: rgba(244, 63, 94, 0.12);
-    border: 1px solid rgba(244, 63, 94, 0.35);
-    color: #FDA4AF;
+    background-color: rgba(244, 63, 94, 0.08);
+    border: 1px solid rgba(244, 63, 94, 0.3);
+    color: #E11D48;
     border-radius: var(--admin-radius-sm);
 }
 
@@ -1076,7 +1076,7 @@
     height: 64px;
     margin-inline: auto;
     border-radius: 50%;
-    background-color: rgba(244, 63, 94, 0.12);
+    background-color: rgba(244, 63, 94, 0.08);
     color: var(--admin-danger);
     font-size: 1.75rem;
 }
@@ -1161,7 +1161,7 @@
 
 .admin-dropdown-menu .dropdown-item:active {
     background-color: var(--admin-primary-soft);
-    color: var(--admin-primary);
+    color: #B8860B;
 }
 
 /* ============================================================
@@ -1194,7 +1194,7 @@
 }
 
 .admin-audio-has {
-    color: #34D399 !important;
+    color: #059669 !important;
 }
 
 .admin-audio-play {
@@ -1234,9 +1234,9 @@
 }
 
 .admin-modal-content .alert-success {
-    background-color: rgba(16, 185, 129, 0.12);
-    border: 1px solid rgba(16, 185, 129, 0.35);
-    color: #34D399;
+    background-color: rgba(16, 185, 129, 0.08);
+    border: 1px solid rgba(16, 185, 129, 0.3);
+    color: #059669;
     border-radius: var(--admin-radius-sm);
 }
 
@@ -1279,6 +1279,48 @@
     .admin-image-uploader-controls {
         align-items: center;
     }
+}
+
+/* ============================================================
+   27. TABLE DATA BADGES — thân thiện với nền sáng (light)
+   ------------------------------------------------------------
+   Override Bootstrap utility classes (bg-*-subtle, text-light)
+   vốn có nền quá nhạt + chữ trắng → bị chìm khi nhìn trên nền
+   sáng. Chỉ áp dụng cho các cột dữ liệu cụ thể trong bảng admin.
+   ============================================================ */
+
+/* === Thứ tự — bảng Roadmap & Topic === */
+#roadmapsTable .badge.bg-secondary-subtle.text-light,
+#topicsTable .badge.bg-secondary-subtle.text-light {
+    background-color: rgba(255, 195, 0, 0.18) !important;
+    color: #92400E !important;
+    border: 1px solid rgba(255, 195, 0, 0.5);
+    font-weight: 700;
+    font-size: 0.75rem;
+    padding: 0.4em 0.65em;
+    border-radius: 999px;
+}
+
+/* === Loại từ — bảng Vocabulary === */
+#vocabulariesTable .badge.bg-secondary-subtle.text-light {
+    background-color: rgba(99, 102, 241, 0.12) !important;
+    color: #4338CA !important;
+    border: 1px solid rgba(99, 102, 241, 0.35);
+    font-weight: 700;
+    font-size: 0.75rem;
+    padding: 0.4em 0.65em;
+    border-radius: 999px;
+}
+
+/* === Đáp án đúng — bảng Custom Questions === */
+#customQuestionsTable .badge.bg-primary-subtle.text-light {
+    background-color: rgba(16, 185, 129, 0.14) !important;
+    color: #047857 !important;
+    border: 1px solid rgba(16, 185, 129, 0.4);
+    font-weight: 700;
+    font-size: 0.75rem;
+    padding: 0.4em 0.65em;
+    border-radius: 999px;
 }
 
 /* ============================================================
