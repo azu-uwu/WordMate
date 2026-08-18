@@ -4,8 +4,12 @@
  * handles HTTP errors, and parses JSON responses.
  */
 
-const BASE_URL = 'http://localhost:5000/api';
-const MEDIA_BASE_URL = 'http://localhost:5000';
+// const BASE_URL = 'http://localhost:5000/api';
+// const MEDIA_BASE_URL = 'http://localhost:5000';
+
+// phục vụ deploy lên netify, sẽ sửa lại sau
+const BASE_URL = 'https://wordmate-production.up.railway.app/api';
+const MEDIA_BASE_URL = 'https://wordmate-production.up.railway.app';
 
 /**
  * Get the stored JWT token from localStorage.
