@@ -174,11 +174,15 @@ CREATE TABLE quiz_attempts (
 -- Chi tiết từng câu trả lời trong một Quiz.
 -- Quan hệ: Quiz_Attempts 1 ---- n Quiz_Answers
 --          Vocabularies   1 ---- n Quiz_Answers
+--          Quiz_Questions 1 ---- n Quiz_Answers
+-- question_id dùng để xác định chính xác câu hỏi mà user đã trả lời,
+-- đặc biệt khi cùng một vocabulary có cả câu hỏi Auto và Custom.
 -- ============================================================
 CREATE TABLE quiz_answers (
     id              BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
     quiz_attempt_id BIGINT UNSIGNED NOT NULL,
     vocabulary_id   BIGINT UNSIGNED NOT NULL,
+    question_id     BIGINT UNSIGNED NULL,
     user_answer     VARCHAR(255)    NOT NULL,
     correct_answer  VARCHAR(255)    NOT NULL,
     is_correct      TINYINT(1)      NOT NULL DEFAULT 0,
@@ -186,6 +190,7 @@ CREATE TABLE quiz_answers (
 
     INDEX idx_quiz_answers_quiz_attempt_id (quiz_attempt_id),
     INDEX idx_quiz_answers_vocabulary_id   (vocabulary_id),
+    INDEX idx_quiz_answers_question_id     (question_id),
 
     CONSTRAINT fk_quiz_answers_attempt
         FOREIGN KEY (quiz_attempt_id) REFERENCES quiz_attempts (id)
@@ -193,7 +198,11 @@ CREATE TABLE quiz_answers (
 
     CONSTRAINT fk_quiz_answers_vocabulary
         FOREIGN KEY (vocabulary_id) REFERENCES vocabularies (id)
-        ON DELETE CASCADE ON UPDATE CASCADE
+        ON DELETE CASCADE ON UPDATE CASCADE,
+
+    CONSTRAINT fk_quiz_answers_question
+        FOREIGN KEY (question_id) REFERENCES quiz_questions (id)
+        ON DELETE SET NULL ON UPDATE CASCADE
 ) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_unicode_ci;
 
 -- ============================================================
@@ -242,21 +251,34 @@ CREATE TABLE ai_messages (
 -- Quan hệ:
 --   quiz_attempts 1 ---- n quiz_questions
 --   vocabularies  1 ---- n quiz_questions
+--   quiz_custom_questions 1 ---- n quiz_questions (nếu là CUSTOM)
 -- ============================================================
-
 CREATE TABLE quiz_questions (
-    id              BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-    quiz_attempt_id BIGINT UNSIGNED NOT NULL,
-    vocabulary_id   BIGINT UNSIGNED NOT NULL,
-    question_type   ENUM(
+    id                  BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    quiz_attempt_id     BIGINT UNSIGNED NOT NULL,
+    vocabulary_id       BIGINT UNSIGNED NOT NULL,
+    custom_question_id  BIGINT UNSIGNED NULL,
+
+    question_type ENUM(
         'WORD_TO_MEANING',
         'MEANING_TO_WORD',
-        'FILL_IN_BLANK'
+        'FILL_IN_BLANK',
+        'CUSTOM'
     ) NOT NULL,
-    question_order  INT NOT NULL,
 
-    INDEX idx_quiz_questions_attempt (quiz_attempt_id),
-    INDEX idx_quiz_questions_vocabulary (vocabulary_id),
+    question_order INT NOT NULL,
+
+    INDEX idx_quiz_questions_attempt (
+        quiz_attempt_id
+    ),
+
+    INDEX idx_quiz_questions_vocabulary (
+        vocabulary_id
+    ),
+
+    INDEX idx_quiz_questions_custom_question (
+        custom_question_id
+    ),
 
     CONSTRAINT fk_quiz_questions_attempt
         FOREIGN KEY (quiz_attempt_id)
@@ -268,39 +290,17 @@ CREATE TABLE quiz_questions (
         FOREIGN KEY (vocabulary_id)
         REFERENCES vocabularies (id)
         ON DELETE CASCADE
+        ON UPDATE CASCADE,
+
+    CONSTRAINT fk_quiz_questions_custom
+        FOREIGN KEY (custom_question_id)
+        REFERENCES quiz_custom_questions (id)
+        ON DELETE SET NULL
         ON UPDATE CASCADE
+
 ) ENGINE = InnoDB
   DEFAULT CHARSET = utf8mb4
   COLLATE = utf8mb4_unicode_ci;
-
---   thêm lk với bảng custom
-ALTER TABLE quiz_questions
-ADD COLUMN custom_question_id BIGINT UNSIGNED NULL,
-ADD CONSTRAINT fk_quiz_questions_custom
-    FOREIGN KEY (custom_question_id)
-    REFERENCES quiz_custom_questions(id)
-    ON DELETE SET NULL
-    ON UPDATE CASCADE,
-ADD INDEX idx_quiz_questions_custom_question (custom_question_id);
-
---   thêm type CUSTOM cho câu hỏi tùy chỉnh
-ALTER TABLE quiz_questions
-MODIFY COLUMN question_type ENUM(
-    'WORD_TO_MEANING',
-    'MEANING_TO_WORD',
-    'FILL_IN_BLANK',
-    'CUSTOM'
-) NOT NULL;
-
---   thêm lk với quiz_questions để phân biệt câu hỏi đã trả lời (Auto/Custom cùng vocabulary)
-ALTER TABLE quiz_answers
-ADD COLUMN question_id BIGINT UNSIGNED NULL,
-ADD CONSTRAINT fk_quiz_answers_question
-    FOREIGN KEY (question_id)
-    REFERENCES quiz_questions(id)
-    ON DELETE SET NULL
-    ON UPDATE CASCADE,
-ADD INDEX idx_quiz_answers_question_id (question_id);
 
 -- ============================================================
 -- 11. quiz_custom_questions (bổ sung admin có thể thêm câu hỏi custom cho từng từ)
