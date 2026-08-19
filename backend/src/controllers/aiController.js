@@ -12,8 +12,6 @@ const aiService = require("../services/aiService");
 const createConversation = async (req, res) => {
     try {
         const userId = req.user.id;
-
-        // Gọi Model để tạo conversation mới
         const result = await AI.createConversation(userId);
 
         return res.status(201).json({
@@ -44,8 +42,6 @@ const createConversation = async (req, res) => {
 const getConversations = async (req, res) => {
     try {
         const userId = req.user.id;
-
-        // Gọi Model để lấy tối đa 5 conversation gần nhất của user
         const conversations = await AI.getConversationsByUser(userId, 5);
 
         return res.status(200).json({
@@ -75,7 +71,6 @@ const getConversationMessages = async (req, res) => {
         const userId = req.user.id;
         const conversationId = Number(req.params.conversationId);
 
-        // Kiểm tra conversation có tồn tại hay không
         const conversation = await AI.getConversationById(conversationId);
         if (!conversation) {
             return res.status(404).json({
@@ -84,7 +79,6 @@ const getConversationMessages = async (req, res) => {
             });
         }
 
-        // Kiểm tra conversation có thuộc user hiện tại hay không
         if (conversation.user_id !== userId) {
             return res.status(403).json({
                 success: false,
@@ -92,7 +86,6 @@ const getConversationMessages = async (req, res) => {
             });
         }
 
-        // Lấy danh sách message theo thứ tự thời gian từ cũ đến mới
         const messages = await AI.getMessagesByConversation(conversationId);
 
         return res.status(200).json({

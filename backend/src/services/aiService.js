@@ -204,15 +204,10 @@ const outOfScopeKeywords = [
     "trò chơi",
 ];
 
-/**
- * Các mẫu câu hỏi kiến thức tổng quát RÕ RÀNG ngoài phạm vi học tiếng Anh.
- * Đây là các pattern cụ thể, KHÔNG dùng các từ chung như "what", "why", "how", "can".
- */
+
 const outOfScopePatterns = [
-    // Câu hỏi sinh học/đời sống động vật (không phải câu hỏi từ vựng)
     /why do (cats|dogs|animals|humans|plants|birds|fish|insects) (have|need|eat)/,
     /how many (legs|wings|eyes|bones|teeth|fingers) (does|do) (a|an|the)/,
-    // Câu hỏi kiến thức tổng quát rõ ràng
     /why is the sky/,
     /what is the (capital|population) of/,
     /how (tall|far|long|big|fast) (is|are|does|do)/,
@@ -432,7 +427,7 @@ const chat = async ({ userId, message, conversationId, context }) => {
         };
     }
 
-    // 5. Xây dựng Prompt tổng hợp
+    // 5. System prompt
     const systemPrompt = `Bạn là WordMate AI, một trợ lý hỗ trợ học tiếng Anh chuyên nghiệp tích hợp trong ứng dụng WordMate.
 Nhiệm vụ của bạn là hỗ trợ người dùng học tiếng Anh hiệu quả: giải thích từ vựng, ngữ pháp, cung cấp câu ví dụ, giải thích các câu hỏi/quiz và nội dung đang học.
 Bạn CHỈ được phép hỗ trợ các nội dung liên quan đến: học tiếng Anh, từ vựng, ngữ pháp, câu ví dụ, và nội dung WordMate (topic/vocabulary/quiz mà người dùng đang học).

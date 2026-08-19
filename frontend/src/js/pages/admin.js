@@ -2246,7 +2246,7 @@ function openConfirmDeleteModal(type, item) {
 
     if (type === 'roadmap') {
         confirmDeleteText.textContent =
-            `Bạn có chắc chắn muốn xóa lộ trình "${item.name || ''}"? Lộ trình có chứa chủ đề/từ vựng liên quan thì sẽ không thể xóa.`;
+            `Bạn có chắc chắn muốn xóa lộ trình "${item.name || ''}"? Toàn bộ chủ đề và từ vựng liên quan sẽ bị xóa nếu bạn xóa lộ trình này. Hành động không thể hoàn tác.`;
     } else if (type === 'topic') {
         confirmDeleteText.textContent =
             `Bạn có chắc chắn muốn xóa chủ đề "${item.name || ''}"?`;
