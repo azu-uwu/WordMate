@@ -155,6 +155,11 @@ const customQuestionsRoadmapFilter = document.getElementById('customQuestionsRoa
 const customQuestionsTopicFilter = document.getElementById('customQuestionsTopicFilter');
 const customQuestionsVocabularyFilter = document.getElementById('customQuestionsVocabularyFilter');
 
+// Bulk delete Custom Question
+const btnBulkDeleteCustomQuestion = document.getElementById('btnBulkDeleteCustomQuestion');
+const btnBulkDeleteCustomQuestionText = document.getElementById('btnBulkDeleteCustomQuestionText');
+const customQuestionsSelectAll = document.getElementById('customQuestionsSelectAll');
+
 // ============================================================
 // STATE
 // ============================================================
@@ -181,6 +186,9 @@ let pendingDelete = null;           // { type: 'roadmap'|'topic'|'vocabulary'|'c
 let selectedVocabularyIds = new Set(); // Set chứa các vocabulary.id đang được chọn để bulk delete
 let isBulkDeleting = false;         // cờ chống gửi duplicate request khi đang xóa hàng loạt
 let isVocabSelectionMode = false;   // cờ bật/tắt chế độ chọn checkbox xóa hàng loạt
+let selectedCustomQuestionIds = new Set(); // Set chứa các custom_question.id đang được chọn để bulk delete
+let isCustomQuestionBulkDeleting = false;  // cờ chống gửi duplicate request khi đang xóa hàng loạt Custom Question
+let isCustomQuestionSelectionMode = false; // cờ bật/tắt chế độ chọn checkbox xóa hàng loạt Custom Question
 
 // ============================================================
 // SECTION METADATA
@@ -778,6 +786,17 @@ function setupCustomQuestionsTable() {
         columns: [
             {
                 data: null,
+                orderable: false,
+                searchable: false,
+                className: 'admin-col-checkbox',
+                render: (data) => {
+                    const id = esc(data.id);
+                    return `<input type="checkbox" class="form-check-input admin-checkbox-row"
+                                   data-id="${id}" aria-label="Chọn câu hỏi">`;
+                }
+            },
+            {
+                data: null,
                 className: 'admin-col-index',
                 // STT được đánh lại trong sự kiện 'draw' bên dưới, không dùng meta.row.
                 render: () => ''
@@ -829,9 +848,9 @@ function setupCustomQuestionsTable() {
         lengthMenu: [5, 10, 25, 50],
         columnDefs: [
             { targets: '_all', className: 'align-middle' },
-            { targets: [0, 5], orderable: false }
+            { targets: [0, 1, 6], orderable: false }
         ],
-        order: [[1, 'asc']],
+        order: [[2, 'asc']],
         initComplete: function () {
             $('#customQuestionsTable_filter input').addClass('form-control form-control-sm');
             $('#customQuestionsTable_filter label').addClass('admin-datatable-search');
@@ -2252,6 +2271,10 @@ async function handleConfirmDelete() {
         await executeBulkDeleteVocabulary();
         return;
     }
+    if (pendingDelete.type === 'bulk_custom_question') {
+        await executeBulkDeleteCustomQuestion();
+        return;
+    }
 
     confirmDeleteBtn.disabled = true;
     confirmDeleteSpinner.classList.remove('d-none');
@@ -2489,6 +2512,274 @@ async function executeBulkDeleteVocabulary() {
 }
 
 // ============================================================
+// BULK DELETE CUSTOM QUESTION
+// ============================================================
+
+/**
+ * Cập nhật trạng thái nút "Xóa" dựa trên số lượng Custom Question được chọn.
+ */
+function updateBulkDeleteCustomQuestionButton() {
+    if (!btnBulkDeleteCustomQuestion) return;
+
+    const customQuestionTable = document.getElementById('customQuestionsTable');
+    const count = selectedCustomQuestionIds.size;
+
+    // Chưa bật chế độ chọn
+    if (!isCustomQuestionSelectionMode) {
+        btnBulkDeleteCustomQuestion.disabled = false;
+        btnBulkDeleteCustomQuestion.classList.add('admin-btn-bulk-delete-faded');
+
+        if (customQuestionTable) {
+            customQuestionTable.classList.add('admin-no-selection');
+        }
+
+        if (btnBulkDeleteCustomQuestionText) {
+            btnBulkDeleteCustomQuestionText.textContent = 'Xóa';
+        }
+
+        return;
+    }
+
+    // Đã bật chế độ chọn
+    if (customQuestionTable) {
+        customQuestionTable.classList.remove('admin-no-selection');
+    }
+
+    btnBulkDeleteCustomQuestion.disabled = isCustomQuestionBulkDeleting;
+    btnBulkDeleteCustomQuestion.classList.remove('admin-btn-bulk-delete-faded');
+
+    if (btnBulkDeleteCustomQuestionText) {
+        btnBulkDeleteCustomQuestionText.textContent = `Xóa (${count})`;
+    }
+
+    // Chưa chọn câu hỏi nào
+    if (
+        count === 0 &&
+        btnBulkDeleteCustomQuestion.disabled === false
+    ) {
+        btnBulkDeleteCustomQuestion.classList.add('admin-btn-bulk-delete-faded');
+
+        if (btnBulkDeleteCustomQuestionText) {
+            btnBulkDeleteCustomQuestionText.textContent = 'Xóa';
+        }
+
+        return;
+    }
+
+    // Có chọn câu hỏi
+    btnBulkDeleteCustomQuestion.disabled = isCustomQuestionBulkDeleting;
+    btnBulkDeleteCustomQuestion.classList.remove('admin-btn-bulk-delete-faded');
+
+    if (btnBulkDeleteCustomQuestionText) {
+        btnBulkDeleteCustomQuestionText.textContent = `Xóa (${count})`;
+    }
+}
+
+/**
+ * Đồng bộ Select All với các checkbox Custom Question đang hiển thị.
+ */
+function syncCustomQuestionSelectAllCheckbox() {
+    if (!customQuestionsSelectAll) return;
+
+    const rowCheckboxes = document.querySelectorAll(
+        '#customQuestionsTable tbody .admin-checkbox-row'
+    );
+
+    const visibleIds = Array.from(rowCheckboxes).map(
+        (cb) => Number(cb.dataset.id)
+    );
+
+    if (visibleIds.length === 0) {
+        customQuestionsSelectAll.checked = false;
+        customQuestionsSelectAll.indeterminate = false;
+        return;
+    }
+
+    const allChecked = visibleIds.every(
+        (id) => selectedCustomQuestionIds.has(id)
+    );
+
+    const someChecked = visibleIds.some(
+        (id) => selectedCustomQuestionIds.has(id)
+    );
+
+    customQuestionsSelectAll.checked = allChecked;
+    customQuestionsSelectAll.indeterminate = someChecked && !allChecked;
+}
+
+/**
+ * Xử lý checkbox Select All của Custom Question.
+ */
+function handleCustomQuestionSelectAllChange() {
+    if (!customQuestionsSelectAll) return;
+
+    const isChecked = customQuestionsSelectAll.checked;
+
+    const rowCheckboxes = document.querySelectorAll(
+        '#customQuestionsTable tbody .admin-checkbox-row'
+    );
+
+    rowCheckboxes.forEach((cb) => {
+        const id = Number(cb.dataset.id);
+
+        cb.checked = isChecked;
+
+        if (isChecked) {
+            selectedCustomQuestionIds.add(id);
+        } else {
+            selectedCustomQuestionIds.delete(id);
+        }
+    });
+
+    customQuestionsSelectAll.indeterminate = false;
+
+    updateBulkDeleteCustomQuestionButton();
+}
+
+/**
+ * Xử lý checkbox từng Custom Question.
+ */
+function handleCustomQuestionCheckboxChange(e) {
+    const cb = e.currentTarget;
+    const id = Number(cb.dataset.id);
+
+    if (cb.checked) {
+        selectedCustomQuestionIds.add(id);
+    } else {
+        selectedCustomQuestionIds.delete(id);
+    }
+
+    syncCustomQuestionSelectAllCheckbox();
+    updateBulkDeleteCustomQuestionButton();
+}
+
+/**
+ * Reset toàn bộ selection Custom Question.
+ */
+function resetCustomQuestionSelection() {
+    selectedCustomQuestionIds.clear();
+
+    if (customQuestionsSelectAll) {
+        customQuestionsSelectAll.checked = false;
+        customQuestionsSelectAll.indeterminate = false;
+    }
+
+    document
+        .querySelectorAll('#customQuestionsTable tbody .admin-checkbox-row')
+        .forEach((cb) => {
+            cb.checked = false;
+        });
+
+    updateBulkDeleteCustomQuestionButton();
+}
+
+/**
+ * Xử lý nút Xóa hàng loạt Custom Question.
+ */
+function handleBulkDeleteCustomQuestion() {
+    if (isCustomQuestionBulkDeleting) return;
+
+    // Chưa bật selection mode
+    if (!isCustomQuestionSelectionMode) {
+        isCustomQuestionSelectionMode = true;
+
+        updateBulkDeleteCustomQuestionButton();
+
+        showToast(
+            'Chọn câu hỏi cần xóa, sau đó bấm Xóa lần nữa để xác nhận.',
+            'info'
+        );
+
+        return;
+    }
+
+    // Đang selection mode nhưng chưa chọn
+    if (selectedCustomQuestionIds.size === 0) {
+        isCustomQuestionSelectionMode = false;
+
+        updateBulkDeleteCustomQuestionButton();
+
+        return;
+    }
+
+    const count = selectedCustomQuestionIds.size;
+
+    confirmDeleteText.textContent =
+        `Bạn có chắc chắn muốn xóa ${count} câu hỏi đã chọn? Hành động không thể hoàn tác.`;
+
+    pendingDelete = {
+        type: 'bulk_custom_question'
+    };
+
+    const modal = bootstrap.Modal.getOrCreateInstance(
+        confirmDeleteModalEl
+    );
+
+    modal.show();
+}
+
+/**
+ * Gọi API xóa hàng loạt Custom Question.
+ */
+async function executeBulkDeleteCustomQuestion() {
+    if (isCustomQuestionBulkDeleting) return;
+    if (selectedCustomQuestionIds.size === 0) return;
+
+    isCustomQuestionBulkDeleting = true;
+
+    confirmDeleteBtn.disabled = true;
+    confirmDeleteSpinner.classList.remove('d-none');
+
+    try {
+        const ids = Array.from(selectedCustomQuestionIds);
+
+        await api.del(
+            '/admin/custom-questions/bulk',
+            {
+                body: JSON.stringify({ ids })
+            }
+        );
+
+        showToast(
+            `Xóa ${ids.length} câu hỏi thành công.`,
+            'success'
+        );
+
+        resetCustomQuestionSelection();
+
+        // Thoát selection mode sau khi xóa
+        isCustomQuestionSelectionMode = false;
+
+        updateBulkDeleteCustomQuestionButton();
+
+        // Reload DataTable
+        await loadCustomQuestions();
+
+        const modal = bootstrap.Modal.getInstance(
+            confirmDeleteModalEl
+        );
+
+        if (modal) modal.hide();
+
+        pendingDelete = null;
+
+    } catch (error) {
+        showToast(
+            error.message ||
+            'Xóa câu hỏi thất bại. Vui lòng thử lại.',
+            'error'
+        );
+    } finally {
+        isCustomQuestionBulkDeleting = false;
+
+        confirmDeleteBtn.disabled = false;
+        confirmDeleteSpinner.classList.add('d-none');
+
+        updateBulkDeleteCustomQuestionButton();
+    }
+}
+
+// ============================================================
 // FORM UI HELPERS
 // ============================================================
 
@@ -2652,6 +2943,28 @@ function bindEvents() {
     // Checkbox từng row trong bảng Vocabulary
     $('#vocabulariesTable tbody').on('change', '.admin-checkbox-row', handleRowCheckboxChange);
 
+    // Bulk delete Custom Question
+    if (btnBulkDeleteCustomQuestion) {
+        btnBulkDeleteCustomQuestion.addEventListener(
+            'click',
+            handleBulkDeleteCustomQuestion
+        );
+    }
+
+    if (customQuestionsSelectAll) {
+        customQuestionsSelectAll.addEventListener(
+            'change',
+            handleCustomQuestionSelectAllChange
+        );
+    }
+
+    // Checkbox từng row trong bảng Custom Question
+    $('#customQuestionsTable tbody').on(
+        'change',
+        '.admin-checkbox-row',
+        handleCustomQuestionCheckboxChange
+    );
+    
     // Xóa trạng thái invalid khi đang nhập
     if (roadmapNameInput) {
         roadmapNameInput.addEventListener('input', () => roadmapNameInput.classList.remove('is-invalid'));
@@ -2715,6 +3028,7 @@ async function initAdmin() {
 
     // Ẩn checkbox chọn xóa mặc định — chỉ hiện khi bấm nút Xóa
     updateBulkDeleteButton();
+    updateBulkDeleteCustomQuestionButton();
 
     try {
         await loadRoadmaps();

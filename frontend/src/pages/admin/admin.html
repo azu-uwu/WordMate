@@ -375,6 +375,11 @@
                                 <option value="">Tất cả từ vựng</option>
                             </select>
                         </div>
+                        <button type="button" class="btn btn-outline-danger admin-btn-bulk-delete"
+                                id="btnBulkDeleteCustomQuestion">
+                            <i class="fa-solid fa-trash-can"></i>
+                            <span id="btnBulkDeleteCustomQuestionText">Xóa</span>
+                        </button>
                         <button type="button" class="btn btn-primary admin-btn-primary" id="btnAddCustomQuestion">
                             <i class="fa-solid fa-plus"></i>
                             <span>Thêm câu hỏi</span>
@@ -388,9 +393,13 @@
                         <span>Đang tải dữ liệu...</span>
                     </div>
                     <div class="table-responsive">
-                        <table id="customQuestionsTable" class="table table-hover admin-datatable w-100">
+                        <table id="customQuestionsTable" class="table table-hover admin-datatable w-100 admin-no-selection">
                             <thead>
                                 <tr>
+                                    <th scope="col" class="admin-col-checkbox">
+                                        <input type="checkbox" class="form-check-input admin-checkbox-select-all"
+                                               id="customQuestionsSelectAll" aria-label="Chọn tất cả câu hỏi">
+                                    </th>
                                     <th scope="col" class="admin-col-index">#</th>
                                     <th scope="col">Câu hỏi</th>
                                     <th scope="col">Từ vựng</th>

@@ -1292,7 +1292,9 @@
 
 /* Ẩn cột checkbox chọn xóa khi chưa bật chế độ chọn */
 #vocabulariesTable.admin-no-selection th.admin-col-checkbox,
-#vocabulariesTable.admin-no-selection td.admin-col-checkbox {
+#vocabulariesTable.admin-no-selection td.admin-col-checkbox,
+#customQuestionsTable.admin-no-selection th.admin-col-checkbox,
+#customQuestionsTable.admin-no-selection td.admin-col-checkbox {
     display: none;
 }
 
