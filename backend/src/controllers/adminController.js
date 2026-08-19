@@ -1012,6 +1012,85 @@ const deleteVocabulary = async (req, res) => {
 };
 
 /**
+ * Xóa nhiều Vocabulary cùng lúc
+ * DELETE /api/admin/vocabularies/bulk
+ * Body: { ids: [1, 2, 3] }
+ */
+const deleteMultipleVocabularies = async (req, res) => {
+    try {
+        const { ids } = req.body;
+
+        // Validate ids là array
+        if (ids === undefined || ids === null || !Array.isArray(ids)) {
+            return res.status(400).json({
+                success: false,
+                message: "ids phải là một mảng"
+            });
+        }
+
+        // Validate array không rỗng
+        if (ids.length === 0) {
+            return res.status(400).json({
+                success: false,
+                message: "ids không được rỗng"
+            });
+        }
+
+        // Validate tất cả phần tử là số nguyên dương
+        for (const id of ids) {
+            if (!Number.isInteger(id) || id <= 0) {
+                return res.status(400).json({
+                    success: false,
+                    message: "Vocabulary ID không hợp lệ"
+                });
+            }
+        }
+
+        // Loại bỏ ID trùng lặp
+        const uniqueIds = [...new Set(ids)];
+
+        // Kiểm tra tất cả Vocabulary tồn tại
+        const existingVocabularies = await Vocabulary.findByIdsForAdmin(uniqueIds);
+        if (existingVocabularies.length !== uniqueIds.length) {
+            return res.status(404).json({
+                success: false,
+                message: "Một hoặc nhiều Vocabulary không tồn tại"
+            });
+        }
+
+        // Gọi Model để xóa nhiều Vocabulary cùng lúc
+        const result = await Vocabulary.removeMany(uniqueIds);
+
+        if (result.affectedRows === 0) {
+            return res.status(404).json({
+                success: false,
+                message: "Vocabulary không tồn tại"
+            });
+        }
+
+        return res.status(200).json({
+            success: true,
+            message: "Xóa các từ vựng thành công",
+            deletedCount: result.affectedRows
+        });
+    } catch (err) {
+        // Nếu có lỗi ràng buộc khóa ngoại
+        if (err.code === "ER_ROW_IS_REFERENCED_2" || err.code === "ER_ROW_IS_REFERENCED") {
+            return res.status(400).json({
+                success: false,
+                message: "Không thể xóa Vocabulary vì đang có dữ liệu liên quan"
+            });
+        }
+
+        console.error(err);
+        return res.status(500).json({
+            success: false,
+            message: "Lỗi máy chủ"
+        });
+    }
+};
+
+/**
  * Import Vocabulary hàng loạt từ file CSV
  * POST /api/admin/vocabularies/import
  * Multipart/form-data: topic_id (text), file (CSV)
@@ -1880,6 +1959,7 @@ module.exports = {
     createVocabulary,
     updateVocabulary,
     deleteVocabulary,
+    deleteMultipleVocabularies,
     importVocabularies,
     uploadRoadmapImage,
     uploadTopicImage,

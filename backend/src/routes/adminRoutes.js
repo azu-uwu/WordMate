@@ -64,6 +64,7 @@ router.post("/topics/:id/image", uploadImage.single("image"), handleUploadError,
 router.get("/vocabularies", adminController.getAllVocabularies);
 router.post("/vocabularies", adminController.createVocabulary);
 router.put("/vocabularies/:id", adminController.updateVocabulary);
+router.delete("/vocabularies/bulk", adminController.deleteMultipleVocabularies);
 router.delete("/vocabularies/:id", adminController.deleteVocabulary);
 
 // Import Vocabulary hàng loạt từ file CSV

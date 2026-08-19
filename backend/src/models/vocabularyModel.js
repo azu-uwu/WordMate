@@ -187,6 +187,24 @@ const updateAudio = async (id, audioPath) => {
 };
 
 /**
+ * Lấy nhiều Vocabulary theo danh sách ID cho Admin
+ * @param {Array<number>} ids - Mảng các ID Vocabulary
+ * @returns {Array} Danh sách Vocabulary
+ */
+const findByIdsForAdmin = async (ids) => {
+    if (!ids || ids.length === 0) {
+        return [];
+    }
+
+    const placeholders = ids.map(() => "?").join(", ");
+    const [rows] = await pool.execute(
+        `SELECT * FROM vocabularies WHERE id IN (${placeholders})`,
+        ids
+    );
+    return rows;
+};
+
+/**
  * Xóa Vocabulary theo id
  * @param {number} id - ID Vocabulary
  * @returns {object} Kết quả delete
@@ -199,16 +217,36 @@ const remove = async (id) => {
     return result;
 };
 
+/**
+ * Xóa nhiều Vocabulary cùng lúc
+ * @param {Array<number>} ids - Mảng các ID Vocabulary
+ * @returns {object} Kết quả delete
+ */
+const removeMany = async (ids) => {
+    if (!ids || ids.length === 0) {
+        return { affectedRows: 0 };
+    }
+
+    const placeholders = ids.map(() => "?").join(", ");
+    const [result] = await pool.execute(
+        `DELETE FROM vocabularies WHERE id IN (${placeholders})`,
+        ids
+    );
+    return result;
+};
+
 module.exports = {
     getByTopicId,
     findById,
     getAllForAdmin,
     findByIdForAdmin,
+    findByIdsForAdmin,
     findByTopicAndWord,
     create,
     createMany,
     update,
     updateImage,
     updateAudio,
-    remove
+    remove,
+    removeMany
 };
