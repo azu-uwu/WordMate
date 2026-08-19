@@ -86,6 +86,7 @@ router.get("/custom-questions", adminController.getAllCustomQuestions);
 router.get("/custom-questions/:id", adminController.getCustomQuestionById);
 router.post("/custom-questions", adminController.createCustomQuestion);
 router.put("/custom-questions/:id", adminController.updateCustomQuestion);
+router.delete("/custom-questions/bulk", adminController.bulkDeleteCustomQuestions);
 router.delete("/custom-questions/:id", adminController.deleteCustomQuestion);
 
 // Hỗ trợ lọc: GET /custom-questions?vocabulary_id=:vocabularyId

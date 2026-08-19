@@ -120,6 +120,24 @@ const update = async (id, { vocabulary_id, question, option_a, option_b, option_
 };
 
 /**
+ * Lấy nhiều Custom Question theo danh sách ID cho Admin
+ * @param {Array<number>} ids - Mảng các ID Custom Question
+ * @returns {Array} Danh sách Custom Question
+ */
+const findByIdsForAdmin = async (ids) => {
+    if (!ids || ids.length === 0) {
+        return [];
+    }
+
+    const placeholders = ids.map(() => "?").join(", ");
+    const [rows] = await pool.execute(
+        `SELECT * FROM quiz_custom_questions WHERE id IN (${placeholders})`,
+        ids
+    );
+    return rows;
+};
+
+/**
  * Xóa Custom Question theo id
  * @param {number} id - ID Custom Question
  * @returns {object} Kết quả delete
@@ -132,12 +150,32 @@ const remove = async (id) => {
     return result;
 };
 
+/**
+ * Xóa nhiều Custom Question cùng lúc
+ * @param {Array<number>} ids - Mảng các ID Custom Question
+ * @returns {object} Kết quả delete
+ */
+const removeMany = async (ids) => {
+    if (!ids || ids.length === 0) {
+        return { affectedRows: 0 };
+    }
+
+    const placeholders = ids.map(() => "?").join(", ");
+    const [result] = await pool.execute(
+        `DELETE FROM quiz_custom_questions WHERE id IN (${placeholders})`,
+        ids
+    );
+    return result;
+};
+
 module.exports = {
     getActiveByVocabularyIds,
     findById,
     getAllForAdmin,
     findByIdForAdmin,
+    findByIdsForAdmin,
     create,
     update,
-    remove
+    remove,
+    removeMany
 };

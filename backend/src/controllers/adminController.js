@@ -1946,6 +1946,87 @@ const deleteCustomQuestion = async (req, res) => {
     }
 };
 
+/**
+ * Xóa nhiều Custom Question cùng lúc
+ * DELETE /api/admin/custom-questions/bulk
+ * Body: { ids: [1, 2, 3] }
+ */
+const bulkDeleteCustomQuestions = async (req, res) => {
+    try {
+        const { ids } = req.body;
+
+        // Validate ids là array
+        if (ids === undefined || ids === null || !Array.isArray(ids)) {
+            return res.status(400).json({
+                success: false,
+                message: "ids phải là một mảng"
+            });
+        }
+
+        // Validate array không rỗng
+        if (ids.length === 0) {
+            return res.status(400).json({
+                success: false,
+                message: "ids không được rỗng"
+            });
+        }
+
+        // Chuyển các ID về Number, loại bỏ ID không hợp lệ và ID trùng
+        const validIds = [...new Set(
+            ids
+                .map((id) => Number(id))
+                .filter((id) => Number.isInteger(id) && id > 0)
+        )];
+
+        // Nếu sau validation không còn ID hợp lệ
+        if (validIds.length === 0) {
+            return res.status(400).json({
+                success: false,
+                message: "Custom Question ID không hợp lệ"
+            });
+        }
+
+        // Kiểm tra tất cả Custom Question tồn tại
+        const existingCustomQuestions = await CustomQuestion.findByIdsForAdmin(validIds);
+        if (existingCustomQuestions.length !== validIds.length) {
+            return res.status(404).json({
+                success: false,
+                message: "Một hoặc nhiều Custom Question không tồn tại"
+            });
+        }
+
+        // Gọi Model để xóa nhiều Custom Question cùng lúc
+        const result = await CustomQuestion.removeMany(validIds);
+
+        if (result.affectedRows === 0) {
+            return res.status(404).json({
+                success: false,
+                message: "Custom Question không tồn tại"
+            });
+        }
+
+        return res.status(200).json({
+            success: true,
+            message: "Xóa các câu hỏi tùy chỉnh thành công",
+            deletedCount: result.affectedRows
+        });
+    } catch (err) {
+        // Nếu có lỗi ràng buộc khóa ngoại
+        if (err.code === "ER_ROW_IS_REFERENCED_2" || err.code === "ER_ROW_IS_REFERENCED") {
+            return res.status(400).json({
+                success: false,
+                message: "Không thể xóa Custom Question vì đang có dữ liệu liên quan"
+            });
+        }
+
+        console.error(err);
+        return res.status(500).json({
+            success: false,
+            message: "Lỗi máy chủ"
+        });
+    }
+};
+
 module.exports = {
     getAllRoadmaps,
     createRoadmap,
@@ -1969,5 +2050,6 @@ module.exports = {
     getCustomQuestionById,
     createCustomQuestion,
     updateCustomQuestion,
-    deleteCustomQuestion
+    deleteCustomQuestion,
+    bulkDeleteCustomQuestions
 };
