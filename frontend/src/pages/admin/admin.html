@@ -290,6 +290,11 @@
                                 <option value="">Tất cả chủ đề</option>
                             </select>
                         </div>
+                        <button type="button" class="btn btn-outline-danger admin-btn-bulk-delete"
+                                id="btnBulkDeleteVocabulary">
+                            <i class="fa-solid fa-trash-can"></i>
+                            <span id="btnBulkDeleteVocabularyText">Xóa</span>
+                        </button>
                         <div class="btn-group">
                             <button type="button" class="btn btn-primary admin-btn-primary dropdown-toggle"
                                     data-bs-toggle="dropdown" aria-expanded="false" id="btnAddVocabulary">
@@ -321,6 +326,10 @@
                         <table id="vocabulariesTable" class="table table-hover admin-datatable w-100">
                             <thead>
                                 <tr>
+                                    <th scope="col" class="admin-col-checkbox">
+                                        <input type="checkbox" class="form-check-input admin-checkbox-select-all"
+                                               id="vocabSelectAll" aria-label="Chọn tất cả từ vựng">
+                                    </th>
                                     <th scope="col" class="admin-col-index">#</th>
                                     <th scope="col">Từ vựng</th>
                                     <th scope="col">Phiên âm</th>

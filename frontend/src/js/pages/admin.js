@@ -112,6 +112,11 @@ const vocabularySaveBtnText = document.getElementById('vocabularySaveBtnText');
 const vocabRoadmapFilter = document.getElementById('vocabRoadmapFilter');
 const vocabTopicFilter = document.getElementById('vocabTopicFilter');
 
+// Bulk delete Vocabulary
+const btnBulkDeleteVocabulary = document.getElementById('btnBulkDeleteVocabulary');
+const btnBulkDeleteVocabularyText = document.getElementById('btnBulkDeleteVocabularyText');
+const vocabSelectAll = document.getElementById('vocabSelectAll');
+
 // Import Vocabulary form elements
 const importVocabularyModalEl = document.getElementById('importVocabularyModal');
 const importVocabularyForm = document.getElementById('importVocabularyForm');
@@ -173,6 +178,9 @@ let customQuestionsDataTable = null; // DataTable Custom Question
 let customQuestionsDTData = [];     // data Custom Questions hiện tại trong bảng
 let vocabulariesCache = [];         // cache tất cả Vocabularies (để hiển thị word + populate select)
 let pendingDelete = null;           // { type: 'roadmap'|'topic'|'vocabulary'|'custom_question', id, name }
+let selectedVocabularyIds = new Set(); // Set chứa các vocabulary.id đang được chọn để bulk delete
+let isBulkDeleting = false;         // cờ chống gửi duplicate request khi đang xóa hàng loạt
+let isVocabSelectionMode = false;   // cờ bật/tắt chế độ chọn checkbox xóa hàng loạt
 
 // ============================================================
 // SECTION METADATA
@@ -360,6 +368,13 @@ function activateSection(sectionKey) {
     }
     if (pageSubtitle) {
         pageSubtitle.textContent = SECTION_META[sectionKey].subtitle;
+    }
+
+    // Tắt chế độ chọn xóa khi rời khỏi section Từ vựng
+    if (sectionKey !== 'vocabularies' && isVocabSelectionMode) {
+        isVocabSelectionMode = false;
+        resetVocabularySelection();
+        updateBulkDeleteButton();
     }
 
     window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -620,6 +635,17 @@ function setupVocabulariesTable() {
         columns: [
             {
                 data: null,
+                orderable: false,
+                searchable: false,
+                className: 'admin-col-checkbox',
+                render: (data) => {
+                    const id = esc(data.id);
+                    return `<input type="checkbox" class="form-check-input admin-checkbox-row"
+                                   data-id="${id}" aria-label="Chọn từ vựng">`;
+                }
+            },
+            {
+                data: null,
                 className: 'admin-col-index',
                 // STT được đánh lại trong sự kiện 'draw' bên dưới, không dùng meta.row.
                 render: () => ''
@@ -705,9 +731,9 @@ function setupVocabulariesTable() {
         lengthMenu: [5, 10, 25, 50],
         columnDefs: [
             { targets: '_all', className: 'align-middle' },
-            { targets: [0, 6, 7, 8], orderable: false }
+            { targets: [0, 1, 7, 8, 9], orderable: false }
         ],
-        order: [[1, 'asc']],
+        order: [[2, 'asc']],
         initComplete: function () {
             $('#vocabulariesTable_filter input').addClass('form-control form-control-sm');
             $('#vocabulariesTable_filter label').addClass('admin-datatable-search');
@@ -2221,6 +2247,12 @@ function openConfirmDeleteModal(type, item) {
 async function handleConfirmDelete() {
     if (!pendingDelete) return;
 
+    // Nếu là bulk delete → chuyển sang handler riêng
+    if (pendingDelete.type === 'bulk_vocabulary') {
+        await executeBulkDeleteVocabulary();
+        return;
+    }
+
     confirmDeleteBtn.disabled = true;
     confirmDeleteSpinner.classList.remove('d-none');
 
@@ -2251,6 +2283,206 @@ async function handleConfirmDelete() {
     } catch (error) {
         showToast(error.message || 'Xóa thất bại. Vui lòng thử lại.', 'error');
     } finally {
+        confirmDeleteBtn.disabled = false;
+        confirmDeleteSpinner.classList.add('d-none');
+    }
+}
+
+// ============================================================
+// BULK DELETE VOCABULARY
+// ============================================================
+
+/**
+ * Cập nhật trạng thái nút "Xóa đã chọn" dựa trên số lượng selection hiện tại.
+ */
+function updateBulkDeleteButton() {
+    if (!btnBulkDeleteVocabulary) return;
+
+    const vocabTable = document.getElementById('vocabulariesTable');
+    const count = selectedVocabularyIds.size;
+
+    // Chưa bật chế độ chọn → ẩn checkbox, nút Xóa mờ nhưng vẫn bấm được
+    if (!isVocabSelectionMode) {
+        btnBulkDeleteVocabulary.disabled = false;
+        btnBulkDeleteVocabulary.classList.add('admin-btn-bulk-delete-faded');
+        if (vocabTable) vocabTable.classList.add('admin-no-selection');
+        if (btnBulkDeleteVocabularyText) {
+            btnBulkDeleteVocabularyText.textContent = 'Xóa';
+        }
+        return;
+    }
+
+    // Đã bật chế độ chọn → hiện checkbox
+    if (vocabTable) vocabTable.classList.remove('admin-no-selection');
+
+    // Chưa chọn từ nào → nút vẫn mờ nhưng bấm được để thoát chế độ chọn
+    // Đã chọn từ → nút sáng, bấm để xác nhận xóa
+    btnBulkDeleteVocabulary.disabled = isBulkDeleting;
+    btnBulkDeleteVocabulary.classList.remove('admin-btn-bulk-delete-faded');
+
+    if (btnBulkDeleteVocabularyText) {
+        btnBulkDeleteVocabularyText.textContent = `Xóa (${count})`;
+    }
+
+    // Bấm nút Xóa khi chưa chọn gì → thoát chế độ chọn, ẩn checkbox
+    if (count === 0 && btnBulkDeleteVocabulary.disabled === false) {
+        btnBulkDeleteVocabulary.classList.add('admin-btn-bulk-delete-faded');
+        if (btnBulkDeleteVocabularyText) {
+            btnBulkDeleteVocabularyText.textContent = 'Xóa';
+        }
+        return;
+    }
+
+    // Có chọn từ → nút sáng
+    btnBulkDeleteVocabulary.disabled = isBulkDeleting;
+    btnBulkDeleteVocabulary.classList.remove('admin-btn-bulk-delete-faded');
+    if (btnBulkDeleteVocabularyText) {
+        btnBulkDeleteVocabularyText.textContent = `Xóa (${count})`;
+    }
+}
+
+/**
+ * Đồng bộ trạng thái checkbox "Select All" ở header với các checkbox row hiện tại.
+ * Chỉ áp dụng cho các row đang hiển thị trên page hiện tại.
+ */
+function syncSelectAllCheckbox() {
+    if (!vocabSelectAll) return;
+
+    const rowCheckboxes = document.querySelectorAll('#vocabulariesTable tbody .admin-checkbox-row');
+    const visibleIds = Array.from(rowCheckboxes).map((cb) => Number(cb.dataset.id));
+
+    // Nếu không có row nào hiển thị → bỏ chọn Select All
+    if (visibleIds.length === 0) {
+        vocabSelectAll.checked = false;
+        vocabSelectAll.indeterminate = false;
+        return;
+    }
+
+    const allChecked = visibleIds.every((id) => selectedVocabularyIds.has(id));
+    const someChecked = visibleIds.some((id) => selectedVocabularyIds.has(id));
+
+    vocabSelectAll.checked = allChecked;
+    vocabSelectAll.indeterminate = someChecked && !allChecked;
+}
+
+/**
+ * Xử lý khi click checkbox "Select All" ở header.
+ * Chọn/bỏ chọn tất cả Vocabulary đang hiển thị trên page hiện tại.
+ */
+function handleSelectAllChange() {
+    if (!vocabSelectAll) return;
+
+    const isChecked = vocabSelectAll.checked;
+    const rowCheckboxes = document.querySelectorAll('#vocabulariesTable tbody .admin-checkbox-row');
+
+    rowCheckboxes.forEach((cb) => {
+        const id = Number(cb.dataset.id);
+        cb.checked = isChecked;
+        if (isChecked) {
+            selectedVocabularyIds.add(id);
+        } else {
+            selectedVocabularyIds.delete(id);
+        }
+    });
+
+    vocabSelectAll.indeterminate = false;
+    updateBulkDeleteButton();
+}
+
+/**
+ * Xử lý khi click checkbox từng row.
+ */
+function handleRowCheckboxChange(e) {
+    const cb = e.currentTarget;
+    const id = Number(cb.dataset.id);
+
+    if (cb.checked) {
+        selectedVocabularyIds.add(id);
+    } else {
+        selectedVocabularyIds.delete(id);
+    }
+
+    syncSelectAllCheckbox();
+    updateBulkDeleteButton();
+}
+
+/**
+ * Reset toàn bộ selection + checkbox UI.
+ */
+function resetVocabularySelection() {
+    selectedVocabularyIds.clear();
+    if (vocabSelectAll) {
+        vocabSelectAll.checked = false;
+        vocabSelectAll.indeterminate = false;
+    }
+    document.querySelectorAll('#vocabulariesTable tbody .admin-checkbox-row').forEach((cb) => {
+        cb.checked = false;
+    });
+    updateBulkDeleteButton();
+}
+
+/**
+ * Hiển thị confirm modal và thực hiện bulk delete.
+ */
+function handleBulkDeleteVocabulary() {
+    if (isBulkDeleting) return;
+
+    // Chưa bật chế độ chọn → bật chế độ chọn, hiện checkbox
+    if (!isVocabSelectionMode) {
+        isVocabSelectionMode = true;
+        updateBulkDeleteButton();
+        showToast('Chọn từ vựng cần xóa, sau đó bấm Xóa lần nữa để xác nhận.', 'info');
+        return;
+    }
+
+    // Đang ở chế độ chọn nhưng chưa chọn gì → thoát chế độ chọn, ẩn checkbox
+    if (selectedVocabularyIds.size === 0) {
+        isVocabSelectionMode = false;
+        updateBulkDeleteButton();
+        return;
+    }
+
+    const count = selectedVocabularyIds.size;
+    confirmDeleteText.textContent = `Bạn có chắc chắn muốn xóa ${count} từ vựng đã chọn? Hành động không thể hoàn tác.`;
+
+    // Lưu callback xử lý vào pendingDelete để tái sử dụng confirm modal hiện tại
+    pendingDelete = { type: 'bulk_vocabulary' };
+
+    const modal = bootstrap.Modal.getOrCreateInstance(confirmDeleteModalEl);
+    modal.show();
+}
+
+/**
+ * Thực hiện gọi API bulk delete.
+ */
+async function executeBulkDeleteVocabulary() {
+    if (isBulkDeleting) return;
+    if (selectedVocabularyIds.size === 0) return;
+
+    isBulkDeleting = true;
+    confirmDeleteBtn.disabled = true;
+    confirmDeleteSpinner.classList.remove('d-none');
+
+    try {
+        const ids = Array.from(selectedVocabularyIds);
+        await api.del('/admin/vocabularies/bulk', { body: JSON.stringify({ ids }) });
+
+        showToast(`Xóa ${ids.length} từ vựng thành công.`, 'success');
+
+        // Reset selection trước khi reload DataTable
+        resetVocabularySelection();
+
+        // Reload DataTable + cache để cập nhật dữ liệu mới
+        await Promise.all([loadVocabularies(), loadAllVocabulariesForCache()]);
+
+        const modal = bootstrap.Modal.getInstance(confirmDeleteModalEl);
+        if (modal) modal.hide();
+        pendingDelete = null;
+    } catch (error) {
+        showToast(error.message || 'Xóa từ vựng thất bại. Vui lòng thử lại.', 'error');
+        // Giữ nguyên selection để Admin có thể thử lại
+    } finally {
+        isBulkDeleting = false;
         confirmDeleteBtn.disabled = false;
         confirmDeleteSpinner.classList.add('d-none');
     }
@@ -2413,6 +2645,13 @@ function bindEvents() {
 
     if (confirmDeleteBtn) confirmDeleteBtn.addEventListener('click', handleConfirmDelete);
 
+    // Bulk delete Vocabulary
+    if (btnBulkDeleteVocabulary) btnBulkDeleteVocabulary.addEventListener('click', handleBulkDeleteVocabulary);
+    if (vocabSelectAll) vocabSelectAll.addEventListener('change', handleSelectAllChange);
+
+    // Checkbox từng row trong bảng Vocabulary
+    $('#vocabulariesTable tbody').on('change', '.admin-checkbox-row', handleRowCheckboxChange);
+
     // Xóa trạng thái invalid khi đang nhập
     if (roadmapNameInput) {
         roadmapNameInput.addEventListener('input', () => roadmapNameInput.classList.remove('is-invalid'));
@@ -2473,6 +2712,9 @@ async function initAdmin() {
     setupCustomQuestionsTable();
 
     bindEvents();
+
+    // Ẩn checkbox chọn xóa mặc định — chỉ hiện khi bấm nút Xóa
+    updateBulkDeleteButton();
 
     try {
         await loadRoadmaps();

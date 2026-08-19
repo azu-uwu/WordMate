@@ -1282,7 +1282,60 @@
 }
 
 /* ============================================================
-   27. TABLE DATA BADGES — thân thiện với nền sáng (light)
+   27. BULK DELETE — checkbox column + button
+   ============================================================ */
+
+.admin-col-checkbox {
+    width: 48px;
+    text-align: center;
+}
+
+/* Ẩn cột checkbox chọn xóa khi chưa bật chế độ chọn */
+#vocabulariesTable.admin-no-selection th.admin-col-checkbox,
+#vocabulariesTable.admin-no-selection td.admin-col-checkbox {
+    display: none;
+}
+
+.admin-col-checkbox .form-check-input {
+    cursor: pointer;
+    margin: 0;
+}
+
+.admin-col-checkbox .form-check-input:focus {
+    box-shadow: 0 0 0 4px rgba(255, 195, 0, 0.2);
+    border-color: var(--admin-primary);
+}
+
+.admin-btn-bulk-delete {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-weight: 600;
+    transition: opacity 0.2s ease;
+}
+
+/* Nút xóa bị mờ khi chưa chọn từ nào */
+.admin-btn-bulk-delete-faded {
+    opacity: 0.55;
+}
+.admin-btn-bulk-delete-faded:hover {
+    opacity: 0.8;
+}
+.admin-btn-bulk-delete-faded:not(:disabled):hover {
+    opacity: 0.8;
+}
+.admin-btn-bulk-delete-faded:disabled {
+    opacity: 0.45;
+    cursor: not-allowed;
+}
+
+.admin-btn-bulk-delete:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+/* ============================================================
+   28. TABLE DATA BADGES — thân thiện với nền sáng (light)
    ------------------------------------------------------------
    Override Bootstrap utility classes (bg-*-subtle, text-light)
    vốn có nền quá nhạt + chữ trắng → bị chìm khi nhìn trên nền
@@ -1325,4 +1378,5 @@
 
 /* ============================================================
    END OF admin.css
-   ============================================================ */
+   ============================================================
+*/
