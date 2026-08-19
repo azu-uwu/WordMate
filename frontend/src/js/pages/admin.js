@@ -20,9 +20,9 @@ import api, { getMediaUrl } from '../../services/api.js';
 // CONSTANTS
 // ============================================================
 
-const API_BASE_URL = 'http://localhost:5000/api';
+// const API_BASE_URL = 'http://localhost:5000/api';
 // phục vụ cho netify, sửa lại sau khi comit
-// const API_BASE_URL = 'https://wordmate-production.up.railway.app/api';
+const API_BASE_URL = 'https://wordmate-production.up.railway.app/api';
 
 const MAX_IMAGE_SIZE = 5 * 1024 * 1024; // 5MB
 const ALLOWED_IMAGE_TYPES = ['image/jpeg', 'image/png'];
